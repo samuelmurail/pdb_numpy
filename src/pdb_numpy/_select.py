@@ -297,7 +297,7 @@ def select_atoms(self, selection):
     return self.select_index(indexes)
 
 
-def dist_under_index(self, sel_2, cutoff=10.0):
+def dist_under_index(self, sel_2, cutoff):
     """Select atoms from the PDB file based on distance."""
 
     # Compute distance matrix

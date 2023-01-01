@@ -34,12 +34,14 @@ class Coor:
             self.get_PDB(pdb_id)
 
     try:
-        from ._PDB import parse_pdb_lines, get_PDB
+        from ._PDB import parse_pdb_lines, get_PDB, write_pdb, get_pdb_string
         from ._select import select_atoms, simple_select_atoms, select_tokens, select_index, dist_under_index
+        from ._geom import cryst_convert
     except ImportError:
         print('ImportError: pdbnumpy is not installed, using local files')
-        from _PDB import parse_pdb_lines, get_PDB
+        from _PDB import parse_pdb_lines, get_PDB, write_pdb, get_pdb_string
         from _select import select_atoms, simple_select_atoms, select_tokens, select_index, dist_under_index
+        from _geom import cryst_convert
     
     def read_file(self, file_in):
         """Read a pdb file and return atom informations as a dictionnary

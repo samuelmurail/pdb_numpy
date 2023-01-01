@@ -32,10 +32,22 @@ def test_get_pdb(tmp_path):
     )
 
 
-def test_read_file(tmp_path):
+def test_read_write_pdb(tmp_path):
     """Test read_file function."""
     test = Coor(PDB_1Y0M)
     assert test.len == 648
+
+    test.write_pdb(os.path.join(tmp_path, "test.pdb"))
+    test2 = Coor(os.path.join(tmp_path, "test.pdb"))
+    assert test2.len == test.len
+    assert test2.crystal_pack.strip() == test.crystal_pack.strip()
+
+    for key in test.atom_dict:
+        # Atom index can differ
+        if key == "num_resnum_uniqresid":
+            assert (test.atom_dict[key][:,1:] == test2.atom_dict[key][:,1:]).all()
+        else:
+            assert (test.atom_dict[key] == test2.atom_dict[key]).all()
 
 
 def test_select_atoms(tmp_path):

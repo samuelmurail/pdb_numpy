@@ -35,8 +35,6 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
     num_resnum_uniqresid_list = []  # int 5 digits (+1 with Chimera)
     alter_chain_insert_elem_list = []  # 1 char
     name_resname_list = []  # 4 / 3 char (+1 with Chimera) = 4
-    #res_num_list = []  # int 4 digits
-    #uniq_resid_list = []  # Not from file
     xyz_list = []  # real (8.3)
     occ_beta_list = []  # real (6.2)
 
@@ -89,42 +87,115 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
         "field": np.array(field_list, dtype="|S1"),
         "num_resnum_uniqresid": np.array(num_resnum_uniqresid_list),
         "name_resname": np.array(name_resname_list, dtype="|S4"),
-        "alterloc_chain_insertres": np.array(
-            alter_chain_insert_elem_list, dtype="|S1"
-        ),
+        "alterloc_chain_insertres": np.array(alter_chain_insert_elem_list, dtype="|S1"),
         "xyz": np.array(xyz_list),
         "occ_beta": np.array(occ_beta_list),
     }
 
-def get_PDB(self, pdb_ID, out_file=None):
+
+def get_PDB(self, pdb_ID):
     """Get a pdb file from the PDB using its ID
     and return a Coor object.
 
     :param pdb_ID: Protein Data Bank structure ID
     :type pdb_ID: str
-    :param out_file: path of the pdb file to save
-    :type out_file: str, optional, default=None
-    :param check_file_out: flag to check or not if
-        file has already been created.
-        If the file is present then the command break.
-    :type check_file_out: bool, optional, default=True
 
     :Example:
     >>> show_log()
     >>> TEST_OUT = str(getfixture('tmpdir'))
     >>> prot_coor = Coor()
-    >>> prot_coor.get_PDB('3EAM', os.path.join(TEST_OUT, '3eam.pdb'))\
-    #doctest: +ELLIPSIS
-    Succeed to read file ...3eam.pdb ,  13505 atoms found
+    >>> prot_coor.get_PDB('3EAM')
     """
 
-    # Define output file:
-    if out_file is None:
-        out_file = "{}.pdb".format(pdb_ID)
-
     # Get the pdb file from the PDB:
-    with urllib.request.urlopen(f"http://files.rcsb.org/download/{pdb_ID}.pdb") as response:
-        pdb_lines = response.read().decode('utf-8').splitlines(True)
+    with urllib.request.urlopen(
+        f"http://files.rcsb.org/download/{pdb_ID}.pdb"
+    ) as response:
+        pdb_lines = response.read().decode("utf-8").splitlines(True)
 
     self.parse_pdb_lines(pdb_lines)
 
+
+def get_pdb_string(self):
+    """Return a coor object as a pdb string.
+
+    :Example:
+    >>> prot_coor = Coor()
+    >>> prot_coor.read_file(os.path.join(TEST_PATH, '1y0m.pdb'))\
+    #doctest: +ELLIPSIS
+    Succeed to read file ...1y0m.pdb ,  648 atoms found
+    >>> pdb_str = prot_coor.get_structure_string()
+    >>> print('Number of caracters: {}'.format(len(pdb_str)))
+    Number of caracters: 51264
+    """
+
+    field_dict = {b"A": "ATOM  ", b"H": "HETATM"}
+
+    str_out = ""
+
+    if self.crystal_pack is not None:
+        str_out += self.cryst_convert(format_out="pdb")
+
+    atom_index = 0
+    for i in range(self.len):
+        # Atom name should start a column 14, with the type of atom ex:
+        #   - with atom type 'C': ' CH3'
+        # for 2 letters atom type, it should start at coulumn 13 ex:
+        #   - with atom type 'FE': 'FE1'
+        name = self.atom_dict["name_resname"][i, 0].astype(np.str_)
+        if len(name) <= 3 and name[0] in ["C", "H", "O", "N", "S", "P"]:
+            name = " " + name
+
+        # Note : Here we use 4 letter residue name.
+        str_out += (
+            "{:6s}{:5d} {:4s}{:1s}{:4s}{:1s}{:4d}{:1s}"
+            "   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}"
+            "          {:2s}\n".format(
+                field_dict[self.atom_dict["field"][i]],
+                i + 1,
+                name,
+                self.atom_dict["alterloc_chain_insertres"][i, 0].astype(np.str_),
+                self.atom_dict["name_resname"][i, 1].astype(np.str_),
+                self.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_),
+                self.atom_dict["num_resnum_uniqresid"][i, 1],
+                self.atom_dict["alterloc_chain_insertres"][i, 2].astype(np.str_),
+                self.atom_dict["xyz"][i, 0],
+                self.atom_dict["xyz"][i, 1],
+                self.atom_dict["xyz"][i, 2],
+                self.atom_dict["occ_beta"][i, 0],
+                self.atom_dict["occ_beta"][i, 1],
+                self.atom_dict["alterloc_chain_insertres"][i, 3].astype(np.str_),
+            )
+        )
+
+    return str_out
+
+
+def write_pdb(self, pdb_out, check_file_out=True):
+    """Write a pdb file.
+    :param pdb_out: path of the pdb file to write
+    :type pdb_out: str
+    :param check_file_out: flag to check or not if
+        file has already been created.
+        If the file is present then the command break.
+    :type check_file_out: bool, optional, default=True
+    :Example:
+    >>> TEST_OUT = str(getfixture('tmpdir'))
+    >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))\
+    #doctest: +ELLIPSIS
+    Succeed to read file ...1y0m.pdb ,  648 atoms found
+    >>> prot_coor.write_pdb(os.path.join(TEST_OUT, 'tmp.pdb'))\
+    #doctest: +ELLIPSIS
+    Succeed to save file ...tmp.pdb
+    """
+
+    #if check_file_out and os_command.check_file_and_create_path(pdb_out):
+    #    logger.info("PDB file {} already exist, file not saved".format(
+    #        pdb_out))
+    #    return
+    
+    filout = open(pdb_out, 'w')
+    filout.write(self.get_pdb_string())
+    filout.close()
+    logger.info("Succeed to save file %s" % os.path.relpath(pdb_out))
+    return

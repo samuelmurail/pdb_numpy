@@ -123,8 +123,8 @@ def get_PDB(self, pdb_ID, out_file=None):
         out_file = "{}.pdb".format(pdb_ID)
 
     # Get the pdb file from the PDB:
-    urllib.request.urlretrieve(
-        "http://files.rcsb.org/download/{}.pdb".format(pdb_ID), out_file
-    )
+    with urllib.request.urlopen(f"http://files.rcsb.org/download/{pdb_ID}.pdb") as response:
+        pdb_lines = response.read().decode('utf-8').splitlines(True)
 
-    self.read_file(out_file)
+    self.parse_pdb_lines(pdb_lines)
+

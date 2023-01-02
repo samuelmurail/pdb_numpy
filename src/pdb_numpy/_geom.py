@@ -13,6 +13,41 @@ __maintainer__ = "Samuel Murail"
 __email__ = "samuel.murail@u-paris.fr"
 __status__ = "Beta"
 
+def angle_vec(vec_a, vec_b):
+    """ Compute angle between two vectors.
+    :param vec_a: vector
+    :type vec_a: list
+    :param vec_b: vector
+    :type vec_b: list
+    :return: angle in radian
+    :rtype: float
+    :Example:
+    >>> angle = Coor.angle_vec([1, 0, 0], [0, 1, 0])
+    >>> print('angle = {:.2f}'.format(np.degrees(angle)))
+    angle = 90.00
+    >>> angle = Coor.angle_vec([1, 0, 0], [1, 0, 0])
+    >>> print('angle = {:.2f}'.format(np.degrees(angle)))
+    angle = 0.00
+    >>> angle = Coor.angle_vec([1, 0, 0], [1, 1, 0])
+    >>> print('angle = {:.2f}'.format(np.degrees(angle)))
+    angle = 45.00
+    >>> angle = Coor.angle_vec([1, 0, 0], [-1, 0, 0])
+    >>> print('angle = {:.2f}'.format(np.degrees(angle)))
+    angle = 180.00
+    """
+
+    unit_vec_a = vec_a / np.linalg.norm(vec_a)
+    unit_vec_b = vec_b / np.linalg.norm(vec_b)
+
+    dot_product = np.dot(unit_vec_a, unit_vec_b)
+
+    angle = np.arccos(dot_product)
+
+    return(angle)
+
+
+
+
 def cryst_convert(self, format_out='pdb'):
     """
     PDB format:
@@ -71,9 +106,9 @@ def cryst_convert(self, format_out='pdb'):
             a = sum(v1**2)**0.5 * 10
             b = sum(v2**2)**0.5 * 10
             c = sum(v3**2)**0.5 * 10
-            alpha = np.rad2deg(Coor.angle_vec(v2, v3))
-            beta = np.rad2deg(Coor.angle_vec(v1, v3))
-            gamma = np.rad2deg(Coor.angle_vec(v1, v2))
+            alpha = np.rad2deg(angle_vec(v2, v3))
+            beta = np.rad2deg(angle_vec(v1, v3))
+            gamma = np.rad2deg(angle_vec(v1, v2))
             # Following is wrong, to check !!!
             sGroup = '1'
             z = 1
@@ -86,14 +121,14 @@ def cryst_convert(self, format_out='pdb'):
             beta = np.deg2rad(beta)
             gamma = np.deg2rad(gamma)
             v1 = [a / 10, 0., 0.]
-            v2 = [b * cos(gamma) / 10, b * sin(gamma) / 10, 0.]
-            v = (1.0 - cos(alpha)**2 - cos(beta)**2 - cos(gamma)**2 +
-                 2.0 * cos(alpha) * cos(beta) * cos(gamma))**0.5 *\
+            v2 = [b * np.cos(gamma) / 10, b * np.sin(gamma) / 10, 0.]
+            v = (1.0 - np.cos(alpha)**2 - np.cos(beta)**2 - np.cos(gamma)**2 +
+                 2.0 * np.cos(alpha) * np.cos(beta) * np.cos(gamma))**0.5 *\
                 a * b * c
-            v3 = [c * cos(beta) / 10,
-                  (c / sin(gamma)) * (cos(alpha) -
-                  cos(beta) * cos(gamma)) / 10,
-                  v / (a * b * sin(gamma)) / 10]
+            v3 = [c * np.cos(beta) / 10,
+                  (c / np.sin(gamma)) * (np.cos(alpha) -
+                  np.cos(beta) * np.cos(gamma)) / 10,
+                  v / (a * b * np.sin(gamma)) / 10]
         new_line = "{:10.5f}{:10.5f}{:10.5f}{:10.5f}{:10.5f}"\
                    "{:10.5f}{:10.5f}{:10.5f}{:10.5f}\n".format(
                         v1[0], v2[1], v3[2],

@@ -15,12 +15,19 @@ __status__ = "Beta"
 
 def angle_vec(vec_a, vec_b):
     """ Compute angle between two vectors.
-    :param vec_a: vector
-    :type vec_a: list
-    :param vec_b: vector
-    :type vec_b: list
-    :return: angle in radian
-    :rtype: float
+
+    Parameters
+    ----------
+    vec_a : numpy.ndarray
+        vector a
+    vec_b : numpy.ndarray
+        vector b
+    
+    Returns
+    -------
+    float
+        angle between vec_a and vec_b in radians
+
     :Example:
     >>> angle = Coor.angle_vec([1, 0, 0], [0, 1, 0])
     >>> print('angle = {:.2f}'.format(np.degrees(angle)))
@@ -48,27 +55,35 @@ def angle_vec(vec_a, vec_b):
 
 
 
-def cryst_convert(self, format_out='pdb'):
+def cryst_convert(crystal_pack, format_out='pdb'):
     """
     PDB format:
     https://www.wwpdb.org/documentation/file-format-content/format33/sect8.html
     Gro to pdb:
     https://mailman-1.sys.kth.se/pipermail/gromacs.org_gmx-users/2008-May/033944.html
     https://en.wikipedia.org/wiki/Fractional_coordinates
+
+    Parameters
+    ----------
+    crystal_pack : str
+        line of the pdb file containing the crystal information
+    format_out : str, optional
+        format of the output, by default 'pdb'
+    
+    Returns
+    -------
+    str
+        line of the pdb/gro file containing the crystal information
+    
     >>> prot_coor = Coor()
     >>> prot_coor.read_file(os.path.join(TEST_PATH, '1y0m.gro'))\
-    #doctest: +ELLIPSIS
-    Succeed to read file ...1y0m.gro ,  648 atoms found
     >>> prot_coor.cryst_convert(format_out='pdb')
     'CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P \
         1\\n'
-    >>> prot_coor = Coor()
-    >>> prot_coor.read_file(os.path.join(TEST_PATH, '1y0m.pdb'))\
-    #doctest: +ELLIPSIS
-    Succeed to read file ...1y0m.pdb ,  648 atoms found
 
     """
-    line = self.crystal_pack
+    line = crystal_pack
+
     if line.startswith("CRYST1"):
         format_in = 'pdb'
         a = float(line[6:15])

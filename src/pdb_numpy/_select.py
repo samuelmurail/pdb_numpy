@@ -38,6 +38,17 @@ def parse_parentheses(tokens):
     """Parse the selection string and return a list of tokens.
     The selection string is parsed into a list of tokens.
     All terms in parentheses are included in sub-lists.
+
+    Parameters
+    ----------
+    tokens : list
+        List of tokens
+
+    Returns
+    -------
+    list
+        a list of nested tokens if parentheses are found
+    
     """
 
     new_tokens = []
@@ -58,6 +69,16 @@ def parse_parentheses(tokens):
 def parse_keywords(tokens):
     """Parse the token list and return token list
     with keyword and value included in separate lists.
+
+    Parameters
+    ----------
+    tokens : list
+        List of tokens
+
+    Returns
+    -------
+    list
+        a list of nested tokens where each keyword is followed by its value(s)
     """
 
     new_tokens = []
@@ -65,9 +86,10 @@ def parse_keywords(tokens):
 
     for token in tokens:
         if token in KEYWORDS:
-            if len(local_sel) != 0:
-                #raise ValueError(f"Invalid selection string {token}")
+            if len(local_sel) != 0 and local_sel[0] == "within":
                 new_tokens.append(local_sel)
+            elif len(local_sel) != 0:
+                raise ValueError(f"Invalid selection string {token}")
             local_sel = [token]
         elif token in ["and", "or", "not"]:
             if len(local_sel) != 0:
@@ -93,6 +115,17 @@ def parse_within(tokens):
 
     Treat the "within" keyword. The following token is
     in included in the "within" list.
+
+    Parameters
+    ----------
+    tokens : list
+        List of tokens
+
+    Returns
+    -------
+    list
+        a list of nested tokens where 'within' is followed by its attributes
+        in a list
     """
 
     new_tokens = []
@@ -123,6 +156,16 @@ def parse_selection(selection):
     "resnum", "beta", "occupancy", "x", "y", "z".
     The operators are "==", "!=", ">", ">=", "<", "<=".
     The parentheses are "(", ")".
+
+    Parameters
+    ----------
+    tokens : str
+        String of selection
+
+    Returns
+    -------
+    list
+        a list of nested tokens
     """
 
     for char in ["(", ")", "<", ">", "!=", "=="]:
@@ -140,7 +183,18 @@ def parse_selection(selection):
 def is_simple_list(tokens):
     """Check if the token list is a simple list.
     A simple list is a list of tokens that does not contain
-    any nested lists."""
+    any nested lists.
+    
+    Parameters
+    ----------
+    tokens : list
+        List of tokens
+
+    Returns
+    -------
+    bool
+        True if the list is simple, False otherwise
+    """
 
     if not isinstance(tokens, list):
         return False
@@ -157,6 +211,22 @@ def simple_select_atoms(self, column, values, operator="=="):
     The keywords are "resname", "chain", "name", "altloc", "resid",
     "resnum", "beta", "occupancy", "x", "y", "z".
     The operators are "==", "!=", ">", ">=", "<", "<=", "isin".
+
+    Parameters
+    ----------
+    self : Coor
+        Coor object
+    column : str
+        Keyword for the selection
+    values : list
+        List of values for the selection
+    operator : str
+        Operator for the selection
+
+    Returns
+    -------
+    list
+        a list of boolean values for each atom in the PDB file
     """
 
 
@@ -222,12 +292,25 @@ def select_tokens(self, tokens):
     simple selection or nested selection.
     A simple selection contains only one keyword, operator, and values.
     A nested selection contains a list or sub-list of tokens.
+
+    Parameters
+    ----------
+    self : Coor
+        Coor object
+    tokens : list
+        List of nested tokens
+
+    Returns
+    -------
+    list
+        a list of boolean values for each atom in the PDB file    
     """
     bool_list = []
     logical = None
     new_bool_list = []
     not_flag = False
 
+    # Case for simple selection
     if is_simple_list(tokens):
         if tokens[1] in ["==", "!=", ">", ">=", "<", "<="]:
             return self.simple_select_atoms(
@@ -235,6 +318,7 @@ def select_tokens(self, tokens):
             )
         else:
             return self.simple_select_atoms(column=tokens[0], values=tokens[1:])
+    # Case for within selection
     elif tokens[0] == "within":
         if len(tokens) != 4:
             raise ValueError("within selection must have 3 arguments")
@@ -277,7 +361,20 @@ def select_tokens(self, tokens):
 
 
 def select_index(self, indexes):
-    """Select atoms from the PDB file based on the selection indexes."""
+    """Select atoms from the PDB file based on the selection indexes.
+    
+    Parameters
+    ----------
+    self : Coor
+        Coor object
+    indexes : list
+        List of indexes
+
+    Returns
+    -------
+    Coor
+        a new Coor object with the selected atoms
+    """
 
     new_coor = copy.deepcopy(self)
 
@@ -288,7 +385,20 @@ def select_index(self, indexes):
 
 
 def select_atoms(self, selection):
-    """Select atoms from the PDB file based on the selection string."""
+    """Select atoms from the PDB file based on the selection string.
+    
+    Parameters
+    ----------
+    self : Coor
+        Coor object
+    selection : str
+        Selection string
+
+    Returns
+    -------
+    Coor
+        a new Coor object with the selected atoms
+    """
 
     tokens = parse_selection(selection)
     sel_list = self.select_tokens(tokens)
@@ -298,7 +408,22 @@ def select_atoms(self, selection):
 
 
 def dist_under_index(self, sel_2, cutoff):
-    """Select atoms from the PDB file based on distance."""
+    """Select atoms from the PDB file based on distance.
+    
+    Parameters
+    ----------
+    self : Coor
+        Coor object for the first selection
+    sel_2 : Coor
+        Coor object for the second selection
+    cutoff : float
+        Cutoff distance for the selection
+
+    Returns
+    -------
+    List
+        list of boolean values for each atom in the PDB file
+    """
 
     # Compute distance matrix
     dist_mat = distance_matrix(self.xyz, sel_2.xyz)

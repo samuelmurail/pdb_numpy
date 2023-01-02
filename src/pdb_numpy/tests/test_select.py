@@ -15,6 +15,7 @@ from pdb_numpy import _select as select
 from .datafiles import PDB_1Y0M
 
 def test_parse_selection():
+    """Test parse_selection function."""
 
     selection = "name CA and resname ALA"
     selec = select.parse_selection(selection)
@@ -24,9 +25,13 @@ def test_parse_selection():
     selec = select.parse_selection(selection)
     assert selec == [[['name', 'CA'], 'and', ['resname', 'ALA']], 'or', [['name', 'C'], 'and', ['resname', 'GLY']]]
 
-    selection = "name CA and within 8.0 of not resname GLY"
+    selection = "name CA and within 8.0 of not resname GLY TRP"
     selec = select.parse_selection(selection)
-    assert selec == [['name', 'CA'], 'and', ['within', '8.0', 'of', ['not', ['resname', 'GLY']]]]
+    assert selec == [['name', 'CA'], 'and', ['within', '8.0', 'of', ['not', ['resname', 'GLY', 'TRP']]]]
+
+    selection = "name CA and x < 10 and y >= -10"
+    selec = select.parse_selection(selection)
+    assert selec == [['name', 'CA'], 'and', ['x', '<', '10'], 'and', ['y', '>=', '-10']]
 
 def test_select_atoms(tmp_path):
     """Test select_atoms function."""

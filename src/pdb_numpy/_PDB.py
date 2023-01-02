@@ -8,6 +8,9 @@ import urllib.request
 import logging
 import numpy as np
 
+from ._geom import cryst_convert
+
+
 # Autorship information
 __author__ = "Samuel Murail"
 __copyright__ = "Copyright 2022, RPBS"
@@ -23,7 +26,24 @@ logger = logging.getLogger(__name__)
 
 
 def parse_pdb_lines(self, pdb_lines, pqr_format=False):
-    """Parse the pdb lines and return atom informations as a dictionnary"""
+    """Parse the pdb lines and return atom informations as a dictionnary
+    
+    Parameters
+    ----------
+    self : Coor
+        Coor object
+    pdb_lines : list
+        list of pdb lines
+    pqr_format : bool, optional
+        if True, parse pqr format, by default False
+    
+    Returns
+    -------
+    None
+        self.atom_dict modified as a dictionnary with atom informations
+        self.crystal_pack modified as a string with crystal informations
+    
+    """
 
     atom_index = 0
     uniq_resid = -1
@@ -97,12 +117,20 @@ def get_PDB(self, pdb_ID):
     """Get a pdb file from the PDB using its ID
     and return a Coor object.
 
-    :param pdb_ID: Protein Data Bank structure ID
-    :type pdb_ID: str
-
+    Parameters
+    ----------
+    self : Coor
+        Coor object
+    pdb_ID : str
+        pdb ID
+    
+    Returns
+    -------
+    None
+        self.atom_dict modified as a dictionnary with atom informations
+        self.crystal_pack modified as a string with crystal informations
+    
     :Example:
-    >>> show_log()
-    >>> TEST_OUT = str(getfixture('tmpdir'))
     >>> prot_coor = Coor()
     >>> prot_coor.get_PDB('3EAM')
     """
@@ -119,6 +147,16 @@ def get_PDB(self, pdb_ID):
 def get_pdb_string(self):
     """Return a coor object as a pdb string.
 
+    Parameters
+    ----------
+    self : Coor
+        Coor object
+    
+    Returns
+    -------
+    str
+        Coor object as a pdb string
+    
     :Example:
     >>> prot_coor = Coor()
     >>> prot_coor.read_file(os.path.join(TEST_PATH, '1y0m.pdb'))\
@@ -134,7 +172,7 @@ def get_pdb_string(self):
     str_out = ""
 
     if self.crystal_pack is not None:
-        str_out += self.cryst_convert(format_out="pdb")
+        str_out += cryst_convert(self.crystal_pack, format_out="pdb")
 
     atom_index = 0
     for i in range(self.len):
@@ -173,20 +211,24 @@ def get_pdb_string(self):
 
 def write_pdb(self, pdb_out, check_file_out=True):
     """Write a pdb file.
-    :param pdb_out: path of the pdb file to write
-    :type pdb_out: str
-    :param check_file_out: flag to check or not if
-        file has already been created.
-        If the file is present then the command break.
-    :type check_file_out: bool, optional, default=True
+
+    Parameters
+    ----------
+    self : Coor
+        Coor object
+    pdb_out : str
+        path of the pdb file to write
+    check_file_out : bool, optional, default=True
+        flag to check or not if file has already been created.
+    
+    Returns
+    -------
+    None
+    
     :Example:
-    >>> TEST_OUT = str(getfixture('tmpdir'))
-    >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))\
-    #doctest: +ELLIPSIS
-    Succeed to read file ...1y0m.pdb ,  648 atoms found
-    >>> prot_coor.write_pdb(os.path.join(TEST_OUT, 'tmp.pdb'))\
-    #doctest: +ELLIPSIS
-    Succeed to save file ...tmp.pdb
+    >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))
+    >>> prot_coor.write_pdb(os.path.join(TEST_OUT, 'tmp.pdb'))
+    Succeed to save file tmp.pdb
     """
 
     #if check_file_out and os_command.check_file_and_create_path(pdb_out):

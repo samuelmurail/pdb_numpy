@@ -165,7 +165,7 @@ def get_pdb_string(self):
     #doctest: +ELLIPSIS
     Succeed to read file ...1y0m.pdb ,  648 atoms found
     >>> pdb_str = prot_coor.get_structure_string()
-    >>> print('Number of caracters: {}'.format(len(pdb_str)))
+    >>> print(f'Number of caracters: {len(pdb_str)}')
     Number of caracters: 51264
     """
 
@@ -233,13 +233,12 @@ def write_pdb(self, pdb_out, check_file_out=True):
     Succeed to save file tmp.pdb
     """
 
-    #if check_file_out and os_command.check_file_and_create_path(pdb_out):
-    #    logger.info("PDB file {} already exist, file not saved".format(
-    #        pdb_out))
-    #    return
+    if check_file_out and  os.path.exists(pdb_out):
+        logger.info(f"PDB file {pdb_out} already exist, file not saved")
+        return
     
     filout = open(pdb_out, 'w')
     filout.write(self.get_pdb_string())
     filout.close()
-    logger.info("Succeed to save file %s" % os.path.relpath(pdb_out))
+    logger.info(f"Succeed to save file {os.path.relpath(pdb_out)}")
     return

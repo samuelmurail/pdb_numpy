@@ -30,16 +30,16 @@ def angle_vec(vec_a, vec_b):
 
     :Example:
     >>> angle = Coor.angle_vec([1, 0, 0], [0, 1, 0])
-    >>> print('angle = {:.2f}'.format(np.degrees(angle)))
+    >>> print(f'angle = {np.degrees(angle):.2f}')
     angle = 90.00
     >>> angle = Coor.angle_vec([1, 0, 0], [1, 0, 0])
-    >>> print('angle = {:.2f}'.format(np.degrees(angle)))
+    >>> print(f'angle = {np.degrees(angle):.2f}')
     angle = 0.00
     >>> angle = Coor.angle_vec([1, 0, 0], [1, 1, 0])
-    >>> print('angle = {:.2f}'.format(np.degrees(angle)))
+    >>> print(f'angle = {np.degrees(angle):.2f}')
     angle = 45.00
     >>> angle = Coor.angle_vec([1, 0, 0], [-1, 0, 0])
-    >>> print('angle = {:.2f}'.format(np.degrees(angle)))
+    >>> print(f'angle = {np.degrees(angle):.2f}')
     angle = 180.00
     """
 

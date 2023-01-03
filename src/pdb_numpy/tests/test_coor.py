@@ -8,6 +8,7 @@ Tests for pdb_manip functions
 import os
 import pytest
 import numpy as np
+import logging
 
 from pdb_numpy import Coor
 from .datafiles import PDB_1Y0M
@@ -32,12 +33,19 @@ def test_get_pdb(tmp_path):
     )
 
 
-def test_read_write_pdb(tmp_path):
+def test_read_write_pdb(tmp_path, caplog):
     """Test read_file function."""
     test = Coor(PDB_1Y0M)
     assert test.len == 648
 
+    caplog.set_level(logging.INFO)
+    caplog.clear()
+
     test.write_pdb(os.path.join(tmp_path, "test.pdb"))
+    assert caplog.record_tuples[0][-1].startswith('Succeed to save file ')
+    assert caplog.record_tuples[0][-1].endswith('test.pdb')
+    caplog.set_level(logging.WARNING)
+
     test2 = Coor(os.path.join(tmp_path, "test.pdb"))
     assert test2.len == test.len
     assert test2.crystal_pack.strip() == test.crystal_pack.strip()
@@ -48,3 +56,12 @@ def test_read_write_pdb(tmp_path):
             assert (test.atom_dict[key][:,1:] == test2.atom_dict[key][:,1:]).all()
         else:
             assert (test.atom_dict[key] == test2.atom_dict[key]).all()
+
+    # Test if overwritting file is prevent
+    caplog.set_level(logging.INFO)
+    caplog.clear()
+
+    test2.write_pdb(os.path.join(tmp_path, "test.pdb"))
+
+    assert caplog.record_tuples[0][-1].startswith('PDB file ')
+    assert caplog.record_tuples[0][-1].endswith('test.pdb already exist, file not saved')

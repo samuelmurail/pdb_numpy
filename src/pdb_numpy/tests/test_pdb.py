@@ -11,7 +11,7 @@ import numpy as np
 import logging
 
 from pdb_numpy import Coor
-from .datafiles import PDB_1Y0M
+from .datafiles import PDB_1Y0M, PQR_1Y0M
 
 def test_get_pdb(tmp_path):
     """Test get_pdb function."""
@@ -65,3 +65,11 @@ def test_read_write_pdb(tmp_path, caplog):
 
     assert caplog.record_tuples[0][-1].startswith('PDB file ')
     assert caplog.record_tuples[0][-1].endswith('test.pdb already exist, file not saved')
+
+def test_read_write_pqr(tmp_path, caplog):
+    """Test read_file function."""
+    test = Coor(PQR_1Y0M)
+    assert test.len == 1362
+
+    test.write_pqr(os.path.join(tmp_path, "test_2.pqr"))
+    test.write_pdb(os.path.join(tmp_path, "test_2.pdb"))

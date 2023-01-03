@@ -383,6 +383,27 @@ def select_index(self, indexes):
 
     return new_coor
 
+def get_index_select(self, selection):
+    """Return index from the PDB file based on the selection string.
+    
+    Parameters
+    ----------
+    self : Coor
+        Coor object
+    selection : str
+        Selection string
+
+    Returns
+    -------
+    list
+        a list of indexes
+    """
+
+    tokens = parse_selection(selection)
+    sel_list = self.select_tokens(tokens)
+    indexes = np.where(sel_list)
+
+    return indexes[0]
 
 def select_atoms(self, selection):
     """Select atoms from the PDB file based on the selection string.

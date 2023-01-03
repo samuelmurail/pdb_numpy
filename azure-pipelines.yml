@@ -31,5 +31,9 @@ steps:
 
 - script: |
     pip install pytest pytest-azurepipelines pytest-cov
-    pytest
+    pytest --cov-report=xml --cov=pdb_numpy
   displayName: 'pytest'
+
+- script: |
+    bash <(curl -s https://codecov.io/bash)
+  displayName: 'Upload to codecov.io'

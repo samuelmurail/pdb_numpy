@@ -15,16 +15,16 @@ def test_angle_vec():
     """Test angle_vec function."""
 
     angle = geom.angle_vec([1, 0, 0], [0, 1, 0])
-    assert np.degrees(angle) == 90.00
+    assert np.degrees(angle) == pytest.approx(90., 0.00001)
 
     angle = geom.angle_vec([1, 0, 0], [1, 0, 0])
-    assert np.degrees(angle) == 0.0
+    assert np.degrees(angle) == pytest.approx(0., 0.00001)
     
     angle = geom.angle_vec([1, 0, 0], [1, 1, 0])
-    assert np.degrees(angle) == 45.00
+    assert np.degrees(angle) == pytest.approx(45., 0.00001)
 
     angle = geom.angle_vec([1, 0, 0], [-1, 0, 0])
-    assert np.degrees(angle) == 180.00
+    assert np.degrees(angle) == pytest.approx(180., 0.00001)
 
 def test_cryst_convert():
     """Test cryst_convert function."""

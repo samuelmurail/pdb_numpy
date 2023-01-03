@@ -8,8 +8,10 @@ import urllib.request
 import logging
 import numpy as np
 
-from ._geom import cryst_convert
-
+try:
+    from ._geom import cryst_convert
+except ImportError:
+    from _geom import cryst_convert
 
 # Autorship information
 __author__ = "Samuel Murail"

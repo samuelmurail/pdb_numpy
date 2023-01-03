@@ -155,7 +155,7 @@ class Coor:
 if __name__ == "__main__":
     print('Reading pdb file')
     PDB_INPUT = "../3jb9.pdb"
-    test = Coor(PDB_INPUT)
+    test = Coor(pdb_id='3jb9')
 
     print('Test selection')
     # "beta > 60 and ((not altloc B C D or resname TIP))"

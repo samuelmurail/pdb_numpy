@@ -229,6 +229,7 @@ def simple_select_atoms(self, column, values, operator="=="):
         a list of boolean values for each atom in the PDB file
     """
 
+    print(f"Selecting atoms based on {column} {operator} {values}")
 
     keyword_dict = {
         "num": ["num_resnum_uniqresid", 0],
@@ -252,6 +253,8 @@ def simple_select_atoms(self, column, values, operator="=="):
         raise ValueError(f"Column {column} not recognized")
 
     if isinstance(values, list):
+        # issue here !!!
+        print(values)
         values = np.array(values, dtype="|S4")
         if len(values) > 1:
             operator = "isin"
@@ -282,7 +285,7 @@ def simple_select_atoms(self, column, values, operator="=="):
         bool_val = np.isin(self.atom_dict[col][:, index], (values))
     else:
         raise ValueError(f"Operator {operator} not recognized")
-
+    
     return bool_val
 
 
@@ -309,6 +312,8 @@ def select_tokens(self, tokens):
     logical = None
     new_bool_list = []
     not_flag = False
+
+    print(tokens)
 
     # Case for simple selection
     if is_simple_list(tokens):

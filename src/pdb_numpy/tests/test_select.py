@@ -54,6 +54,10 @@ def test_select_atoms(tmp_path):
     new = test.select_atoms(selec)
     assert new.len == 53
 
+    selec = "name CA CX CY and chain A B C and resnum >= 6 and resnum <= 58"
+    new = test.select_atoms(selec)
+    assert new.len == 53
+
     selec = "name CA and chain A and resnum >= 6 and resnum <= 58 and resnum != 30"
     new = test.select_atoms(selec)
     assert new.len == 52
@@ -65,6 +69,18 @@ def test_select_atoms(tmp_path):
     selec = "resname HOH and chain A and x >= 20.0"
     new = test.select_atoms(selec)
     assert new.len == 56
+
+    selec = "name N and resnum == 0"
+    new = test.select_atoms(selec)
+    assert new.len == 1
+
+    selec = "name N and resnum isin 0"
+    new = test.select_atoms(selec)
+    assert new.len == 1
+
+    selec = "name N and resnum 0"
+    new = test.select_atoms(selec)
+    assert new.len == 1
 
 def test_select_atoms_within(tmp_path):
     """Test select_atoms function with within selection."""

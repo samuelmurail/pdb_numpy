@@ -156,6 +156,7 @@ def get_aa_DL_seq(self, gap_in_seq=True):
 
     # Get CA atoms
     CA_index = self.get_index_select("name CA and not altloc B C D")
+    N_C_CB_sel = self.select_atoms("name N C CB and not altloc B C D")
 
     seq_dict = {}
     aa_num_dict = {}
@@ -185,14 +186,15 @@ def get_aa_DL_seq(self, gap_in_seq=True):
             if res_name == 'GLY':
                 seq_dict[chain] += 'G'
             else:
-                N_index = self.get_index_select(f'name N and resnum {uniq_resid}')[0]
-                C_index = self.get_index_select(f'name C and resnum {uniq_resid}')[0]
-                CB_index = self.get_index_select(f'name CB and resnum {uniq_resid}')[0]
+                print(f'name N and resnum {uniq_resid}')
+                N_index = N_C_CB_sel.get_index_select(f'name N and resnum {uniq_resid}')[0]
+                C_index = N_C_CB_sel.get_index_select(f'name C and resnum {uniq_resid}')[0]
+                CB_index = N_C_CB_sel.get_index_select(f'name CB and resnum {uniq_resid}')[0]
                 dihed = Coor.atom_dihed_angle(
                     self.atom_dict["xyz"][index],
-                    self.atom_dict["xyz"][N_index],
-                    self.atom_dict["xyz"][C_index],
-                    self.atom_dict["xyz"][CB_index])
+                    N_C_CB_sel.atom_dict["xyz"][N_index],
+                    N_C_CB_sel.atom_dict["xyz"][C_index],
+                    N_C_CB_sel.atom_dict["xyz"][CB_index])
                 if dihed > 0:
                     seq_dict[chain] += AA_DICT[res_name]
                 else:

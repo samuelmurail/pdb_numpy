@@ -3,6 +3,7 @@
 
 import logging
 import os
+import sys
 
 # Autorship information
 __author__ = "Samuel Murail"
@@ -17,3 +18,5 @@ __status__ = "Beta"
 
 from .coor import Coor
 from .model import Model
+
+logging.basicConfig(level=logging.INFO)

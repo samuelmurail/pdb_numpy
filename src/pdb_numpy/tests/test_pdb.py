@@ -11,7 +11,8 @@ import numpy as np
 import logging
 
 from pdb_numpy import Coor
-from .datafiles import PDB_1Y0M, PQR_1Y0M
+from .datafiles import PDB_1Y0M, PQR_1Y0M, PDB_2RRI
+
 
 def test_get_pdb(tmp_path):
     """Test get_pdb function."""
@@ -33,7 +34,8 @@ def test_get_pdb(tmp_path):
         == "CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P 1 21 1      2          \n"
     )
 
-def test_get_pdb(tmp_path):
+
+def test_get_pdb_models(tmp_path):
     """Test get_pdb function."""
     test = Coor(pdb_id="2rri")
 
@@ -75,8 +77,8 @@ def test_read_write_pdb(tmp_path, caplog):
     caplog.clear()
 
     test.write_pdb(os.path.join(tmp_path, "test.pdb"))
-    assert caplog.record_tuples[0][-1].startswith('Succeed to save file ')
-    assert caplog.record_tuples[0][-1].endswith('test.pdb')
+    assert caplog.record_tuples[0][-1].startswith("Succeed to save file ")
+    assert caplog.record_tuples[0][-1].endswith("test.pdb")
     caplog.set_level(logging.WARNING)
 
     test2 = Coor(os.path.join(tmp_path, "test.pdb"))
@@ -86,7 +88,10 @@ def test_read_write_pdb(tmp_path, caplog):
     for key in test.model[0].atom_dict:
         # Atom index can differ
         if key == "num_resnum_uniqresid":
-            assert (test.model[0].atom_dict[key][:,1:] == test2.model[0].atom_dict[key][:,1:]).all()
+            assert (
+                test.model[0].atom_dict[key][:, 1:]
+                == test2.model[0].atom_dict[key][:, 1:]
+            ).all()
         else:
             assert (test.model[0].atom_dict[key] == test2.model[0].atom_dict[key]).all()
 
@@ -96,8 +101,11 @@ def test_read_write_pdb(tmp_path, caplog):
 
     test2.write_pdb(os.path.join(tmp_path, "test.pdb"))
 
-    assert caplog.record_tuples[0][-1].startswith('PDB file ')
-    assert caplog.record_tuples[0][-1].endswith('test.pdb already exist, file not saved')
+    assert caplog.record_tuples[0][-1].startswith("PDB file ")
+    assert caplog.record_tuples[0][-1].endswith(
+        "test.pdb already exist, file not saved"
+    )
+
 
 def test_read_write_pqr(tmp_path, caplog):
     """Test read_file function."""
@@ -106,3 +114,26 @@ def test_read_write_pqr(tmp_path, caplog):
 
     test.write_pqr(os.path.join(tmp_path, "test_2.pqr"))
     test.write_pdb(os.path.join(tmp_path, "test_2.pdb"))
+
+
+def test_read_write_pdb_models(tmp_path):
+    """Test read and write pdb function with several models."""
+    test = Coor(PDB_2RRI)
+
+    assert test.model_num == 20
+
+    test.write_pdb(os.path.join(tmp_path, "test_2rri.pdb"))
+
+    test_2 = Coor(os.path.join(tmp_path, "test_2rri.pdb"))
+
+    assert test_2.model_num == 20
+
+    for model, model_2 in zip(test.model, test_2.model):
+        for key in model.atom_dict:
+            # Atom index can differ
+            if key == "num_resnum_uniqresid":
+                assert (
+                    model.atom_dict[key][:, 1:] == model_2.atom_dict[key][:, 1:]
+                ).all()
+            else:
+                assert (model.atom_dict[key] == model_2.atom_dict[key]).all()

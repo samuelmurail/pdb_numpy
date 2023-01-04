@@ -14,24 +14,34 @@ from pdb_numpy import _select as select
 
 from .datafiles import PDB_1Y0M, PDB_2RRI
 
+
 def test_parse_selection():
     """Test parse_selection function."""
 
     selection = "name CA and resname ALA"
     selec = select.parse_selection(selection)
-    assert selec == [['name', 'CA'], 'and', ['resname', 'ALA']]
+    assert selec == [["name", "CA"], "and", ["resname", "ALA"]]
 
     selection = "(name CA and resname ALA) or (name C and resname GLY)"
     selec = select.parse_selection(selection)
-    assert selec == [[['name', 'CA'], 'and', ['resname', 'ALA']], 'or', [['name', 'C'], 'and', ['resname', 'GLY']]]
+    assert selec == [
+        [["name", "CA"], "and", ["resname", "ALA"]],
+        "or",
+        [["name", "C"], "and", ["resname", "GLY"]],
+    ]
 
     selection = "name CA and within 8.0 of not resname GLY TRP"
     selec = select.parse_selection(selection)
-    assert selec == [['name', 'CA'], 'and', ['within', '8.0', 'of', ['not', ['resname', 'GLY', 'TRP']]]]
+    assert selec == [
+        ["name", "CA"],
+        "and",
+        ["within", "8.0", "of", ["not", ["resname", "GLY", "TRP"]]],
+    ]
 
     selection = "name CA and x < 10 and y >= -10"
     selec = select.parse_selection(selection)
-    assert selec == [['name', 'CA'], 'and', ['x', '<', '10'], 'and', ['y', '>=', '-10']]
+    assert selec == [["name", "CA"], "and", ["x", "<", "10"], "and", ["y", ">=", "-10"]]
+
 
 def test_select_atoms():
     """Test select_atoms function."""
@@ -113,7 +123,7 @@ def test_select_atoms_within(tmp_path):
     selec = "name CA and chain A"
     new = test.select_atoms(selec)
     assert new.len == 61
-    
+
     selec = "name CA and within 5.0 of resname HOH and chain A"
     new = test.select_atoms(selec)
     assert new.len == 48
@@ -125,6 +135,7 @@ def test_select_atoms_within(tmp_path):
     selec = "name CA and within 5 of not resname HOH ALA GLY SER TRP THR PRO TYR PHE GLU ASP HIS ARG LYS"
     new = test.select_atoms(selec)
     assert new.len == 49
+
 
 def test_select_atoms_within_multi_frame():
     """Test select_atoms function."""

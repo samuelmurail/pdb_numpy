@@ -48,7 +48,7 @@ def parse_parentheses(tokens):
     -------
     list
         a list of nested tokens if parentheses are found
-    
+
     """
 
     new_tokens = []
@@ -134,10 +134,10 @@ def parse_within(tokens):
         if "within" in tokens[i]:
             new_token = tokens[i]
             if tokens[i + 1] != "not":
-                new_token.append(tokens[i+1])
+                new_token.append(tokens[i + 1])
                 i += 1
             else:
-                new_token.append(tokens[i+1: i+3])
+                new_token.append(tokens[i + 1 : i + 3])
                 i += 2
             new_tokens.append(new_token)
         elif isinstance(tokens[i], list):
@@ -184,7 +184,7 @@ def is_simple_list(tokens):
     """Check if the token list is a simple list.
     A simple list is a list of tokens that does not contain
     any nested lists.
-    
+
     Parameters
     ----------
     tokens : list
@@ -204,7 +204,7 @@ def is_simple_list(tokens):
     return True
 
 
-def simple_select_atoms(self, column, values, operator="==", frame=0):
+def simple_select_atoms(self, column, values, operator="=="):
     """Select atoms from the PDB file based on the selection tokens.
     Selection tokens are simple selection containing only one
     keyword, operator, and values.
@@ -214,8 +214,8 @@ def simple_select_atoms(self, column, values, operator="==", frame=0):
 
     Parameters
     ----------
-    self : Coor
-        Coor object
+    self : Model
+        Model object
     column : str
         Keyword for the selection
     values : list
@@ -224,7 +224,7 @@ def simple_select_atoms(self, column, values, operator="==", frame=0):
         Operator for the selection
     frame : int
         Frame number for the selection, default is 0
-    
+
     Returns
     -------
     list
@@ -264,7 +264,7 @@ def simple_select_atoms(self, column, values, operator="==", frame=0):
             raise ValueError(f"Column {column} not recognized")
         if len(values) > 1 and operator in [">", ">=", "<", "<="]:
             raise ValueError(f"Wrong operator {operator} with multiple values")
-        elif len(values) > 1 and operator == '==':
+        elif len(values) > 1 and operator == "==":
             operator = "isin"
         elif len(values) > 1:
             raise ValueError(f"Wrong operator {operator} with multiple values")
@@ -280,26 +280,26 @@ def simple_select_atoms(self, column, values, operator="==", frame=0):
             values = np.array([values], dtype="|S4")
 
     if operator == "==":
-        bool_val = self.model[frame].atom_dict[col][:, index] == values
+        bool_val = self.atom_dict[col][:, index] == values
     elif operator == "!=":
-        bool_val = self.model[frame].atom_dict[col][:, index] != values
+        bool_val = self.atom_dict[col][:, index] != values
     elif operator == ">":
-        bool_val = self.model[frame].atom_dict[col][:, index] > values
+        bool_val = self.atom_dict[col][:, index] > values
     elif operator == ">=":
-        bool_val = self.model[frame].atom_dict[col][:, index] >= values
+        bool_val = self.atom_dict[col][:, index] >= values
     elif operator == "<":
-        bool_val = self.model[frame].atom_dict[col][:, index] < values
+        bool_val = self.atom_dict[col][:, index] < values
     elif operator == "<=":
-        bool_val = self.model[frame].atom_dict[col][:, index] <= values
+        bool_val = self.atom_dict[col][:, index] <= values
     elif operator == "isin":
-        bool_val = np.isin(self.model[frame].atom_dict[col][:, index], (values))
+        bool_val = np.isin(self.atom_dict[col][:, index], (values))
     else:
         raise ValueError(f"Operator {operator} not recognized")
-    
+
     return bool_val
 
 
-def select_tokens(self, tokens, frame=0):
+def select_tokens(self, tokens):
     """Select atoms from the PDB file based on the selection tokens.
     Selection tokens are a list of tokens that can be either
     simple selection or nested selection.
@@ -308,17 +308,17 @@ def select_tokens(self, tokens, frame=0):
 
     Parameters
     ----------
-    self : Coor
-        Coor object
+    self : Model
+        Model object
     tokens : list
         List of nested tokens
     frame : int
         Frame number for the selection, default is 0
-    
+
     Returns
     -------
     list
-        a list of boolean values for each atom in the PDB file    
+        a list of boolean values for each atom in the PDB file
     """
     bool_list = []
     logical = None
@@ -329,19 +329,21 @@ def select_tokens(self, tokens, frame=0):
     if is_simple_list(tokens):
         if tokens[1] in ["==", "!=", ">", ">=", "<", "<="]:
             return self.simple_select_atoms(
-                column=tokens[0], values=tokens[2], operator=tokens[1], frame=frame
-            )
+                column=tokens[0], values=tokens[2], operator=tokens[1]
+                )
         else:
-            return self.simple_select_atoms(column=tokens[0], values=tokens[1:], frame=frame)
+            return self.simple_select_atoms(
+                column=tokens[0], values=tokens[1:]
+            )
     # Case for within selection
     elif tokens[0] == "within":
         if len(tokens) != 4:
             raise ValueError("within selection must have 3 arguments")
-        new_bool_list = self.select_tokens(tokens[-1], frame=frame)
+        new_bool_list = self.select_tokens(tokens[-1])
         distance = float(tokens[1])
-        sel_2 = self.select_index(np.where(new_bool_list)[0], frame=frame)
+        sel_2 = self.model_select_index(np.where(new_bool_list)[0])
 
-        return self.dist_under_index(sel_2, cutoff=distance, frame=frame)
+        return self.dist_under_index(sel_2, cutoff=distance)
 
     i = 0
     while i < len(tokens):
@@ -357,7 +359,7 @@ def select_tokens(self, tokens, frame=0):
             i += 1
             continue
         else:
-            new_bool_list = self.select_tokens(tokens[i], frame=frame)
+            new_bool_list = self.select_tokens(tokens[i])
 
         if not_flag:
             new_bool_list = np.logical_not(new_bool_list)
@@ -369,15 +371,40 @@ def select_tokens(self, tokens, frame=0):
             elif logical == "or":
                 new_bool_list = np.logical_or(bool_list, new_bool_list)
             logical = None
-        
+
         i += 1
-    
+
     return new_bool_list
 
 
-def select_index(self, indexes, frame=0):
+def model_select_index(self, indexes):
     """Select atoms from the PDB file based on the selection indexes.
-    
+
+    Parameters
+    ----------
+    self : Model
+        Model object
+    indexes : list
+        List of indexes
+    frame : int
+        Frame number for the selection, default is 0
+
+    Returns
+    -------
+    Coor
+        a new Coor object with the selected atoms
+    """
+
+    new_model = copy.deepcopy(self)
+
+    for key in new_model.atom_dict:
+        new_model.atom_dict[key] = self.atom_dict[key][indexes]
+
+    return new_model
+
+def select_index(self, indexes):
+    """Select atoms from the PDB file based on the selection indexes.
+
     Parameters
     ----------
     self : Coor
@@ -395,15 +422,15 @@ def select_index(self, indexes, frame=0):
 
     new_coor = copy.deepcopy(self)
 
-    for key in new_coor.model[frame].atom_dict:
-        for model in new_coor.model:
-            model.atom_dict[key] = model.atom_dict[key][indexes]
+    for i in range(len(new_coor.model)):
+        new_coor.model[i] = new_coor.model[i].model_select_index(indexes)
 
     return new_coor
 
+
 def get_index_select(self, selection, frame=0):
     """Return index from the PDB file based on the selection string.
-    
+
     Parameters
     ----------
     self : Coor
@@ -420,14 +447,15 @@ def get_index_select(self, selection, frame=0):
     """
 
     tokens = parse_selection(selection)
-    sel_list = self.select_tokens(tokens, frame=frame)
+    sel_list = self.model[frame].select_tokens(tokens)
     indexes = np.where(sel_list)
 
     return indexes[0]
 
+
 def select_atoms(self, selection, frame=0):
     """Select atoms from the PDB file based on the selection string.
-    
+
     Parameters
     ----------
     self : Coor
@@ -444,21 +472,21 @@ def select_atoms(self, selection, frame=0):
     """
 
     tokens = parse_selection(selection)
-    sel_list = self.select_tokens(tokens, frame=frame)
+    sel_list = self.model[frame].select_tokens(tokens)
     indexes = np.where(sel_list)
 
-    return self.select_index(indexes, frame=frame)
+    return self.select_index(indexes)
 
 
-def dist_under_index(self, sel_2, cutoff, frame=0, frame_2=None):
+def dist_under_index(self, sel_2, cutoff):
     """Select atoms from the PDB file based on distance.
-    
+
     Parameters
     ----------
-    self : Coor
-        Coor object for the first selection
-    sel_2 : Coor
-        Coor object for the second selection
+    self : Model
+        Model object for the first selection
+    sel_2 : Model
+        Model object for the second selection
     cutoff : float
         Cutoff distance for the selection
 
@@ -468,11 +496,8 @@ def dist_under_index(self, sel_2, cutoff, frame=0, frame_2=None):
         list of boolean values for each atom in the PDB file
     """
 
-    if frame_2 is None:
-        frame_2 = frame
-
     # Compute distance matrix
-    dist_mat = distance_matrix(self.model[frame].xyz, sel_2.model[frame_2].xyz)
+    dist_mat = distance_matrix(self.xyz, sel_2.xyz)
 
     # Retrun column under cutoff_max:
     return dist_mat.min(1) < cutoff

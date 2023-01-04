@@ -9,10 +9,10 @@ import logging
 import numpy as np
 
 try:
-    from . import _geom as geom
+    from . import geom as geom
     from .model import Model
 except ImportError:
-    import _geom as geom
+    import pdb_numpy.geom as geom
     from model import Model
 
 
@@ -31,9 +31,10 @@ logger = logging.getLogger(__name__)
 
 FIELD_DICT = {b"A": "ATOM  ", b"H": "HETATM"}
 
+
 def parse_pdb_lines(self, pdb_lines, pqr_format=False):
     """Parse the pdb lines and return atom informations as a dictionnary
-    
+
     Parameters
     ----------
     self : Coor
@@ -42,13 +43,13 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
         list of pdb lines
     pqr_format : bool, optional
         if True, parse pqr format, by default False
-    
+
     Returns
     -------
     None
         self.atom_dict modified as a dictionnary with atom informations
         self.crystal_pack modified as a string with crystal informations
-    
+
     """
 
     atom_index = 0
@@ -78,9 +79,16 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
                     "field": np.array(field_list, dtype="|S1"),
                     "num_resnum_uniqresid": np.array(num_resnum_uniqresid_list),
                     "name_resname": np.array(name_resname_list, dtype="|S4"),
-                    "alterloc_chain_insertres": np.array(alter_chain_insert_elem_list, dtype="|S1"),
+                    "alterloc_chain_insertres": np.array(
+                        alter_chain_insert_elem_list, dtype="|S1"
+                    ),
                     "xyz": np.array(xyz_list),
-                    "occ_beta": np.array(occ_beta_list),}
+                    "occ_beta": np.array(occ_beta_list),
+                }
+                if len(self.model) > 1 and local_model.len != self.model[-1].len:
+                    logger.warning(
+                        f"The atom number is not the same in the model {len(self.model)-1} and the model {len(self.model)}."
+                    )
                 self.model.append(local_model)
                 atom_index = 0
                 uniq_resid = -1
@@ -147,13 +155,13 @@ def get_PDB(self, pdb_ID):
         Coor object
     pdb_ID : str
         pdb ID
-    
+
     Returns
     -------
     None
         self.atom_dict modified as a dictionnary with atom informations
         self.crystal_pack modified as a string with crystal informations
-    
+
     :Example:
     >>> prot_coor = Coor()
     >>> prot_coor.get_PDB('3EAM')
@@ -190,7 +198,6 @@ def get_pdb_string(self):
     >>> print(f'Number of caracters: {len(pdb_str)}')
     Number of caracters: 51264
     """
-
 
     str_out = ""
 
@@ -234,6 +241,7 @@ def get_pdb_string(self):
     str_out += "END\n"
     return str_out
 
+
 def get_pqr_string(self):
     """Return a coor object as a pqr string.
 
@@ -261,7 +269,7 @@ def get_pqr_string(self):
 
     str_out = ""
     if self.crystal_pack is not None:
-        str_out += self.cryst_convert(format_out='pdb')
+        str_out += self.cryst_convert(format_out="pdb")
 
     for model_index, model in enumerate(self.model):
         str_out += f"MODEL    {model_index:4d}\n"
@@ -272,25 +280,27 @@ def get_pqr_string(self):
             # for 2 letters atom type, it should start at coulumn 13 ex:
             #   - with atom type 'FE': 'FE1'
             name = model.atom_dict["name_resname"][i, 0].astype(np.str_)
-            if len(name) <= 3 and name[0] in ['C', 'H', 'O', 'N', 'S', 'P']:
+            if len(name) <= 3 and name[0] in ["C", "H", "O", "N", "S", "P"]:
                 name = " " + name
 
             # Note : Here we use 4 letter residue name.
-            str_out += "{:6s} {:4d} {:4s}  {:3s}{:1s}{:4d} "\
-                    "    {:7.3f} {:7.3f} {:7.3f} {:7.4f} {:7.4f}"\
-                    " \n".format(
-                            FIELD_DICT[model.atom_dict["field"][i]],
-                            i + 1,
-                            name,
-                            model.atom_dict["name_resname"][i, 1].astype(np.str_),
-                            model.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_),
-                            model.atom_dict["num_resnum_uniqresid"][i, 1],
-                            model.atom_dict["xyz"][i, 0],
-                            model.atom_dict["xyz"][i, 1],
-                            model.atom_dict["xyz"][i, 0],
-                            model.atom_dict["occ_beta"][i, 0],
-                            model.atom_dict["occ_beta"][i, 1],
-                            )
+            str_out += (
+                "{:6s} {:4d} {:4s}  {:3s}{:1s}{:4d} "
+                "    {:7.3f} {:7.3f} {:7.3f} {:7.4f} {:7.4f}"
+                " \n".format(
+                    FIELD_DICT[model.atom_dict["field"][i]],
+                    i + 1,
+                    name,
+                    model.atom_dict["name_resname"][i, 1].astype(np.str_),
+                    model.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_),
+                    model.atom_dict["num_resnum_uniqresid"][i, 1],
+                    model.atom_dict["xyz"][i, 0],
+                    model.atom_dict["xyz"][i, 1],
+                    model.atom_dict["xyz"][i, 0],
+                    model.atom_dict["occ_beta"][i, 0],
+                    model.atom_dict["occ_beta"][i, 1],
+                )
+            )
         str_out += "ENDMDL\n"
     str_out += "END\n"
     return str_out
@@ -307,22 +317,22 @@ def write_pdb(self, pdb_out, check_file_out=True):
         path of the pdb file to write
     check_file_out : bool, optional, default=True
         flag to check or not if file has already been created.
-    
+
     Returns
     -------
     None
-    
+
     :Example:
     >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))
     >>> prot_coor.write_pdb(os.path.join(TEST_OUT, 'tmp.pdb'))
     Succeed to save file tmp.pdb
     """
 
-    if check_file_out and  os.path.exists(pdb_out):
+    if check_file_out and os.path.exists(pdb_out):
         logger.info(f"PDB file {pdb_out} already exist, file not saved")
         return
-    
-    filout = open(pdb_out, 'w')
+
+    filout = open(pdb_out, "w")
     filout.write(self.get_pdb_string())
     filout.close()
     logger.info(f"Succeed to save file {os.path.relpath(pdb_out)}")
@@ -358,10 +368,9 @@ def write_pqr(self, pqr_out, check_file_out=True):
     """
 
     if check_file_out and os.path.exists(pqr_out):
-        logger.info("PQR file {} already exist, file not saved".format(
-            pqr_out))
+        logger.info("PQR file {} already exist, file not saved".format(pqr_out))
         return
 
-    filout = open(pqr_out, 'w')
+    filout = open(pqr_out, "w")
     filout.write(self.get_pqr_string())
     filout.close()

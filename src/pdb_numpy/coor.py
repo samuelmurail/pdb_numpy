@@ -8,7 +8,55 @@ import os
 logger = logging.getLogger(__name__)
 
 class Coor:
-    """Topologie based on coordinates like pdb or gro files."""
+    """Topologie based on coordinates like pdb or gro files.
+    
+    Attributes
+    ----------
+    model : list
+        List of Model objects
+    crystal_pack : str
+        Crystal Packing as a string
+    
+    Methods
+    -------
+    read_file(file_in)
+        Read a pdb file and store atom informations as a dictionnary
+        od numpy array. The fonction can also read pqr files if
+        the file extension is .pqr
+    parse_pdb_lines(pdb_lines)  
+        Parse a list of pdb lines and store atom informations as a dictionnary
+        od numpy array. The fonction can also read pqr lines if
+        the file extension is .pqr
+    get_PDB(pdb_id)
+        Download a pdb file from the PDB database and return atom informations as a dictionnary
+        indexed on the atom num.
+    write_pdb(file_out, model_num=0)
+        Write a pdb file from the Coor object
+    get_pdb_string(model_num=0)
+        Return a pdb string from the Coor object
+    write_pqr(file_out, model_num=0)
+        Write a pqr file from the Coor object
+    get_pqr_string(model_num=0)
+        Return a pqr string from the Coor object
+    select_atoms(select)
+        Return a list of atom index corresponding to the selection
+    simple_select_atoms(select)
+        Return a list of atom index corresponding to a simple selection
+    select_tokens(select)
+        Return a list of tokens corresponding to the selection
+    select_index(select)
+        Return a list of atom index corresponding to the selection
+    dist_under_index(index, dist)
+        Return a list of atom index corresponding to the distance
+    get_index_select(select)
+        Return a list of atom index corresponding to the selection
+    get_aa_seq(model_num=0)
+        Return a string of amino acid sequence
+    get_aa_DL_seq(model_num=0)
+        Return a string of amino acid sequence with disulfide bonds
+    
+
+    """
 
     def __init__(self, coor_in=None, pdb_lines=None, pdb_id=None):
         self.model = []
@@ -23,12 +71,12 @@ class Coor:
 
     try:
         from ._pdb import parse_pdb_lines, get_PDB, write_pdb, get_pdb_string, write_pqr, get_pqr_string
-        from ._select import select_atoms, simple_select_atoms, select_tokens, select_index, dist_under_index, get_index_select
+        from ._select import select_atoms, select_index, get_index_select
         from ._alignement import get_aa_seq, get_aa_DL_seq
     except ImportError:
         logger.warning('ImportError: pdb_numpy is not installed, using local files')
         from _pdb import parse_pdb_lines, get_PDB, write_pdb, get_pdb_string, write_pqr, get_pqr_string
-        from _select import select_atoms, simple_select_atoms, select_tokens, select_index, dist_under_index, get_index_select
+        from _select import select_atoms, select_index, get_index_select
         from _alignement import get_aa_seq, get_aa_DL_seq
     
     def read_file(self, file_in):
@@ -70,8 +118,8 @@ class Coor:
             self.parse_pdb_lines(lines, pqr_format=False)
 
         logger.info(
-            f"Succeed to read file { os.path.relpath(file_in)}",
-            f"{self.len} atoms found",
+            f"Succeed to read file { os.path.relpath(file_in)} \n"
+            f"{self.len} atoms found"
         )
 
     @property

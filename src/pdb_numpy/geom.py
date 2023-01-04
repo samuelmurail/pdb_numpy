@@ -13,8 +13,9 @@ __maintainer__ = "Samuel Murail"
 __email__ = "samuel.murail@u-paris.fr"
 __status__ = "Beta"
 
+
 def angle_vec(vec_a, vec_b):
-    """ Compute angle between two vectors.
+    """Compute angle between two vectors.
 
     Parameters
     ----------
@@ -22,7 +23,7 @@ def angle_vec(vec_a, vec_b):
         vector a
     vec_b : numpy.ndarray
         vector b
-    
+
     Returns
     -------
     float
@@ -50,12 +51,10 @@ def angle_vec(vec_a, vec_b):
 
     angle = np.arccos(dot_product)
 
-    return(angle)
+    return angle
 
 
-
-
-def cryst_convert(crystal_pack, format_out='pdb'):
+def cryst_convert(crystal_pack, format_out="pdb"):
     """
     PDB format:
     https://www.wwpdb.org/documentation/file-format-content/format33/sect8.html
@@ -85,7 +84,7 @@ def cryst_convert(crystal_pack, format_out='pdb'):
     line = crystal_pack
 
     if line.startswith("CRYST1"):
-        format_in = 'pdb'
+        format_in = "pdb"
         a = float(line[6:15])
         b = float(line[15:24])
         c = float(line[24:33])
@@ -98,58 +97,74 @@ def cryst_convert(crystal_pack, format_out='pdb'):
         except ValueError:
             z = 1
     else:
-        format_in = 'gro'
+        format_in = "gro"
         line_split = line.split()
         #  v1(x) v2(y) v3(z) v1(y) v1(z) v2(x) v2(z) v3(x) v3(y)
         if len(line_split) == 3:
-            v1 = np.array([float(line_split[0]), 0., 0.])
-            v2 = np.array([0., float(line_split[1]), 0.])
-            v3 = np.array([0., 0., float(line_split[2])])
+            v1 = np.array([float(line_split[0]), 0.0, 0.0])
+            v2 = np.array([0.0, float(line_split[1]), 0.0])
+            v3 = np.array([0.0, 0.0, float(line_split[2])])
         elif len(line_split) == 9:
-            v1 = np.array([float(line_split[0]),
-                           float(line_split[3]),
-                           float(line_split[4])])
-            v2 = np.array([float(line_split[5]),
-                           float(line_split[1]),
-                           float(line_split[6])])
-            v3 = np.array([float(line_split[7]),
-                           float(line_split[8]),
-                           float(line_split[2])])
+            v1 = np.array(
+                [float(line_split[0]), float(line_split[3]), float(line_split[4])]
+            )
+            v2 = np.array(
+                [float(line_split[5]), float(line_split[1]), float(line_split[6])]
+            )
+            v3 = np.array(
+                [float(line_split[7]), float(line_split[8]), float(line_split[2])]
+            )
     # Convert:
-    if format_out == 'pdb':
-        if format_in == 'gro':
-            a = sum(v1**2)**0.5 * 10
-            b = sum(v2**2)**0.5 * 10
-            c = sum(v3**2)**0.5 * 10
+    if format_out == "pdb":
+        if format_in == "gro":
+            a = sum(v1**2) ** 0.5 * 10
+            b = sum(v2**2) ** 0.5 * 10
+            c = sum(v3**2) ** 0.5 * 10
             alpha = np.rad2deg(angle_vec(v2, v3))
             beta = np.rad2deg(angle_vec(v1, v3))
             gamma = np.rad2deg(angle_vec(v1, v2))
             # Following is wrong, to check !!!
-            sGroup = '1'
+            sGroup = "1"
             z = 1
-        new_line = "CRYST1{:9.3f}{:9.3f}{:9.3f}{:7.2f}{:7.2f}"\
-                   "{:7.2f} P{:9} {:3d}\n".format(
-                    a, b, c, alpha, beta, gamma, sGroup, z)
-    elif format_out == 'gro':
-        if format_in == 'pdb':
+        new_line = (
+            "CRYST1{:9.3f}{:9.3f}{:9.3f}{:7.2f}{:7.2f}"
+            "{:7.2f} P{:9} {:3d}\n".format(a, b, c, alpha, beta, gamma, sGroup, z)
+        )
+    elif format_out == "gro":
+        if format_in == "pdb":
             alpha = np.deg2rad(alpha)
             beta = np.deg2rad(beta)
             gamma = np.deg2rad(gamma)
-            v1 = [a / 10, 0., 0.]
-            v2 = [b * np.cos(gamma) / 10, b * np.sin(gamma) / 10, 0.]
-            v = (1.0 - np.cos(alpha)**2 - np.cos(beta)**2 - np.cos(gamma)**2 +
-                 2.0 * np.cos(alpha) * np.cos(beta) * np.cos(gamma))**0.5 *\
-                a * b * c
-            v3 = [c * np.cos(beta) / 10,
-                  (c / np.sin(gamma)) * (np.cos(alpha) -
-                  np.cos(beta) * np.cos(gamma)) / 10,
-                  v / (a * b * np.sin(gamma)) / 10]
-        new_line = "{:10.5f}{:10.5f}{:10.5f}{:10.5f}{:10.5f}"\
-                   "{:10.5f}{:10.5f}{:10.5f}{:10.5f}\n".format(
-                        v1[0], v2[1], v3[2],
-                        v1[1], v1[2], v2[0],
-                        v2[2], v3[0], v3[1])
-    return(new_line)
+            v1 = [a / 10, 0.0, 0.0]
+            v2 = [b * np.cos(gamma) / 10, b * np.sin(gamma) / 10, 0.0]
+            v = (
+                (
+                    1.0
+                    - np.cos(alpha) ** 2
+                    - np.cos(beta) ** 2
+                    - np.cos(gamma) ** 2
+                    + 2.0 * np.cos(alpha) * np.cos(beta) * np.cos(gamma)
+                )
+                ** 0.5
+                * a
+                * b
+                * c
+            )
+            v3 = [
+                c * np.cos(beta) / 10,
+                (c / np.sin(gamma))
+                * (np.cos(alpha) - np.cos(beta) * np.cos(gamma))
+                / 10,
+                v / (a * b * np.sin(gamma)) / 10,
+            ]
+        new_line = (
+            "{:10.5f}{:10.5f}{:10.5f}{:10.5f}{:10.5f}"
+            "{:10.5f}{:10.5f}{:10.5f}{:10.5f}\n".format(
+                v1[0], v2[1], v3[2], v1[1], v1[2], v2[0], v2[2], v3[0], v3[1]
+            )
+        )
+    return new_line
+
 
 def atom_dihed_angle(atom_a, atom_b, atom_c, atom_d):
     """Compute the dihedral anlge using 4 atoms.
@@ -163,13 +178,13 @@ def atom_dihed_angle(atom_a, atom_b, atom_c, atom_d):
     atom_c : np.array
         Coordinates of the third atom
     atom_d : np.array
-        Coordinates of the fourth atom  
-      
+        Coordinates of the fourth atom
+
     Returns
     -------
     float
         Diheral angle in degrees
-    
+
     :Example:
 
     >>> atom_1 = {'xyz': np.array([0.0, -1.0, 0.0])}
@@ -197,7 +212,7 @@ def atom_dihed_angle(atom_a, atom_b, atom_c, atom_d):
     v2 = np.cross(cd, bc)
     v1_x_v2 = np.cross(v1, v2)
 
-    y = np.dot(v1_x_v2, bc)*(1.0/np.linalg.norm(bc))
+    y = np.dot(v1_x_v2, bc) * (1.0 / np.linalg.norm(bc))
     x = np.dot(v1, v2)
     angle = np.arctan2(y, x)
 

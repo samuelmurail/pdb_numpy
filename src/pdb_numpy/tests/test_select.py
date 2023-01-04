@@ -12,7 +12,7 @@ import numpy as np
 from pdb_numpy import Coor
 from pdb_numpy import _select as select
 
-from .datafiles import PDB_1Y0M
+from .datafiles import PDB_1Y0M, PDB_2RRI
 
 def test_parse_selection():
     """Test parse_selection function."""
@@ -33,7 +33,7 @@ def test_parse_selection():
     selec = select.parse_selection(selection)
     assert selec == [['name', 'CA'], 'and', ['x', '<', '10'], 'and', ['y', '>=', '-10']]
 
-def test_select_atoms(tmp_path):
+def test_select_atoms():
     """Test select_atoms function."""
     test = Coor(PDB_1Y0M)
     assert test.len == 648
@@ -78,6 +78,33 @@ def test_select_atoms(tmp_path):
     new = test.select_atoms(selec)
     assert new.len == 6
 
+
+def test_select_atoms_multi_frame():
+    """Test select_atoms function."""
+    test = Coor(PDB_2RRI)
+    assert test.len == 479
+
+    selec = "name N CA and resnum > 20 and resnum < 80"
+    new = test.select_atoms(selec)
+    assert new.len == 16
+    assert new.model[10].len == 16
+
+    selec = "name N CA and resnum > 20 and resnum < 80"
+    new = test.select_atoms(selec, frame=19)
+    assert new.len == 16
+    assert new.model[10].len == 16
+
+    selec = "x > 10"
+    new = test.select_atoms(selec)
+    assert new.len == 57
+    assert new.model[10].len == 57
+
+    selec = "x > 10"
+    new = test.select_atoms(selec, frame=10)
+    assert new.len == 58
+    assert new.model[10].len == 58
+
+
 def test_select_atoms_within(tmp_path):
     """Test select_atoms function with within selection."""
 
@@ -98,3 +125,22 @@ def test_select_atoms_within(tmp_path):
     selec = "name CA and within 5 of not resname HOH ALA GLY SER TRP THR PRO TYR PHE GLU ASP HIS ARG LYS"
     new = test.select_atoms(selec)
     assert new.len == 49
+
+def test_select_atoms_within_multi_frame():
+    """Test select_atoms function."""
+    test = Coor(PDB_2RRI)
+    assert test.len == 479
+
+    selec = "resnum 20"
+    new = test.select_atoms(selec)
+    assert new.len == 22
+
+    selec = "within 5 of resnum 20"
+    new = test.select_atoms(selec)
+    assert new.len == 96
+    assert new.model[19].len == 96
+
+    selec = "within 5 of resnum 20"
+    new = test.select_atoms(selec, frame=15)
+    assert new.len == 99
+    assert new.model[10].len == 99

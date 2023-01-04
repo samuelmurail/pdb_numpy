@@ -23,37 +23,67 @@ __maintainer__ = "Samuel Murail"
 __email__ = "samuel.murail@u-paris.fr"
 __status__ = "Beta"
 
-AA_DICT = {'GLY': 'G',
-           'HIS': 'H',
-           'HSP': 'H',
-           'HSE': 'H',
-           'HSD': 'H',
-           'HIP': 'H',
-           'HIE': 'H',
-           'HID': 'H',
-           'ARG': 'R',
-           'LYS': 'K',
-           'ASP': 'D',
-           'ASPP': 'D',
-           'GLU': 'E',
-           'GLUP': 'E',
-           'SER': 'S',
-           'THR': 'T',
-           'ASN': 'N',
-           'GLN': 'Q',
-           'CYS': 'C',
-           'SEC': 'U',
-           'PRO': 'P',
-           'ALA': 'A',
-           'ILE': 'I',
-           'PHE': 'F',
-           'TYR': 'Y',
-           'TRP': 'W',
-           'VAL': 'V',
-           'LEU': 'L',
-           'MET': 'M'}
+AA_DICT_L = {
+    'GLY': 'G',
+    'HIS': 'H',
+    'HSP': 'H',
+    'HSE': 'H',
+    'HSD': 'H',
+    'HIP': 'H',
+    'HIE': 'H',
+    'HID': 'H',
+    'ARG': 'R',
+    'LYS': 'K',
+    'ASP': 'D',
+    'ASPP': 'D',
+    'GLU': 'E',
+    'GLUP': 'E',
+    'SER': 'S',
+    'THR': 'T',
+    'ASN': 'N',
+    'GLN': 'Q',
+    'CYS': 'C',
+    'SEC': 'U',
+    'PRO': 'P',
+    'ALA': 'A',
+    'ILE': 'I',
+    'PHE': 'F',
+    'TYR': 'Y',
+    'TRP': 'W',
+    'VAL': 'V',
+    'LEU': 'L',
+    'MET': 'M'
+    }
+# D amino acids
+# https://proteopedia.org/wiki/index.php/Amino_Acids
+AA_DICT_D = {
+    'DAL': 'A',
+    'DAR': 'R',
+    'DSG': 'N',
+    'DAS': 'D',
+    'DCY': 'C',
+    'DGN': 'Q',
+    'DGL': 'E',
+    'DHI': 'H',
+    'DIL': 'I',
+    'DLE': 'L',
+    'DLY': 'K',
+    'DME': 'M',
+    'MED': 'M',
+    'DPH': 'F',
+    'DPN': 'F',
+    'DPR': 'P',
+    'DSE': 'S',
+    'DSN': 'S',
+    'DTH': 'T',
+    'DTR': 'W',
+    'DTY': 'Y',
+    'DVA': 'V',
+    }
+# Fusion of the two former dictionaries
+AA_DICT = {**AA_DICT_L, **AA_DICT_D}
 
-def get_aa_seq(self, gap_in_seq=True):
+def get_aa_seq(self, gap_in_seq=True, frame=0):
     """Get the amino acid sequence from a coor object.
 
     Parameters
@@ -62,7 +92,9 @@ def get_aa_seq(self, gap_in_seq=True):
         Coor object
     gap_in_seq : bool, optional
         if True, add gaps in the sequence, by default True
-    
+    frame : int
+        Frame number for the selection, default is 0
+   
     Returns
     -------
     dict
@@ -81,16 +113,16 @@ def get_aa_seq(self, gap_in_seq=True):
     """
 
     # Get CA atoms
-    CA_sel = self.select_atoms("name CA")
+    CA_sel = self.select_atoms("name CA", frame=frame)
 
     seq_dict = {}
     aa_num_dict = {}
 
     for i in range(CA_sel.len):
 
-        chain = CA_sel.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_)
-        res_name = CA_sel.atom_dict["name_resname"][i, 1].astype(np.str_)
-        resnum = CA_sel.atom_dict["num_resnum_uniqresid"][i, 1]
+        chain = CA_sel.model[frame].atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_)
+        res_name = CA_sel.model[frame].atom_dict["name_resname"][i, 1].astype(np.str_)
+        resnum = CA_sel.model[frame].atom_dict["num_resnum_uniqresid"][i, 1]
 
         if chain not in seq_dict:
             seq_dict[chain] = ""
@@ -113,7 +145,7 @@ def get_aa_seq(self, gap_in_seq=True):
     return seq_dict
 
 
-def get_aa_DL_seq(self, gap_in_seq=True):
+def get_aa_DL_seq(self, gap_in_seq=True, frame=0):
     """Get the amino acid sequence from a coor object.
     if amino acid is in D form it will be in lower case.
 
@@ -131,6 +163,8 @@ def get_aa_DL_seq(self, gap_in_seq=True):
         Coor object
     gap_in_seq : bool, optional
         if True, add gaps in the sequence, by default True
+    frame : int
+        Frame number for the selection, default is 0
     
     Returns
     -------
@@ -160,19 +194,18 @@ def get_aa_DL_seq(self, gap_in_seq=True):
     """
 
     # Get CA atoms
-    CA_index = self.get_index_select("name CA and not altloc B C D")
-    N_C_CB_sel = self.select_atoms("name N C CB and not altloc B C D")
+    CA_index = self.get_index_select("name CA and not altloc B C D", frame=frame)
+    N_C_CB_sel = self.select_atoms("name N C CB and not altloc B C D", frame=frame)
 
     seq_dict = {}
     aa_num_dict = {}
 
     for i in CA_index:
-        print("i", i)
 
-        chain = self.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_)
-        res_name = self.atom_dict["name_resname"][i, 1].astype(np.str_)
-        resnum = self.atom_dict["num_resnum_uniqresid"][i, 1]
-        uniq_resid = self.atom_dict["num_resnum_uniqresid"][i, 2]
+        chain = self.model[frame].atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_)
+        res_name = self.model[frame].atom_dict["name_resname"][i, 1].astype(np.str_)
+        resnum = self.model[frame].atom_dict["num_resnum_uniqresid"][i, 1]
+        uniq_resid = self.model[frame].atom_dict["num_resnum_uniqresid"][i, 2]
 
         if chain not in seq_dict:
             seq_dict[chain] = ""
@@ -189,15 +222,14 @@ def get_aa_DL_seq(self, gap_in_seq=True):
             if res_name == 'GLY':
                 seq_dict[chain] += 'G'
             else:
-                print(f'name N and resnum {uniq_resid}')
-                N_index = N_C_CB_sel.get_index_select(f'name N and resnum {uniq_resid}')[0]
-                C_index = N_C_CB_sel.get_index_select(f'name C and resnum {uniq_resid}')[0]
-                CB_index = N_C_CB_sel.get_index_select(f'name CB and resnum {uniq_resid}')[0]
+                N_index = N_C_CB_sel.get_index_select(f'name N and resnum {uniq_resid}', frame=frame)[0]
+                C_index = N_C_CB_sel.get_index_select(f'name C and resnum {uniq_resid}', frame=frame)[0]
+                CB_index = N_C_CB_sel.get_index_select(f'name CB and resnum {uniq_resid}', frame=frame)[0]
                 dihed = geom.atom_dihed_angle(
-                    self.atom_dict["xyz"][i],
-                    N_C_CB_sel.atom_dict["xyz"][N_index],
-                    N_C_CB_sel.atom_dict["xyz"][C_index],
-                    N_C_CB_sel.atom_dict["xyz"][CB_index])
+                    self.model[frame].atom_dict["xyz"][i],
+                    N_C_CB_sel.model[frame].atom_dict["xyz"][N_index],
+                    N_C_CB_sel.model[frame].atom_dict["xyz"][C_index],
+                    N_C_CB_sel.model[frame].atom_dict["xyz"][CB_index])
                 if dihed > 0:
                     seq_dict[chain] += AA_DICT[res_name]
                 else:

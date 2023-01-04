@@ -10,8 +10,10 @@ import numpy as np
 
 try:
     from . import _geom as geom
+    from .model import Model
 except ImportError:
     import _geom as geom
+    from model import Model
 
 
 # Autorship information
@@ -53,6 +55,7 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
     uniq_resid = -1
     old_res_num = -np.inf
     old_insert_res = " "
+    model_num = 1
 
     index_list = []
     field_list = []  # 6 char
@@ -65,7 +68,33 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
     for line in pdb_lines:
         if line.startswith("CRYST1"):
             self.crystal_pack = line
-        if line.startswith("ATOM") or line.startswith("HETATM"):
+        elif line.startswith("MODEL"):
+            # print('Read Model {}'.format(model_num))
+            model_num += 1
+        elif line.startswith("ENDMDL") or line.startswith("END"):
+            if len(field_list) > 0:
+                local_model = Model()
+                local_model.atom_dict = {
+                    "field": np.array(field_list, dtype="|S1"),
+                    "num_resnum_uniqresid": np.array(num_resnum_uniqresid_list),
+                    "name_resname": np.array(name_resname_list, dtype="|S4"),
+                    "alterloc_chain_insertres": np.array(alter_chain_insert_elem_list, dtype="|S1"),
+                    "xyz": np.array(xyz_list),
+                    "occ_beta": np.array(occ_beta_list),}
+                self.model.append(local_model)
+                atom_index = 0
+                uniq_resid = -1
+                old_res_num = -np.inf
+                old_insert_res = " "
+                model_num = 1
+                index_list = []
+                field_list = []  # 6 char
+                num_resnum_uniqresid_list = []  # int 5 digits (+1 with Chimera)
+                alter_chain_insert_elem_list = []  # 1 char
+                name_resname_list = []  # 4 / 3 char (+1 with Chimera) = 4
+                xyz_list = []  # real (8.3)
+                occ_beta_list = []  # real (6.2)
+        elif line.startswith("ATOM") or line.startswith("HETATM"):
             field = line[:6].strip()
             atom_num = int(line[6:11])
             atom_name = line[12:16].strip()
@@ -106,15 +135,6 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
             xyz_list.append(xyz)
             occ_beta_list.append([occ, beta])
             atom_index += 1
-
-    self.atom_dict = {
-        "field": np.array(field_list, dtype="|S1"),
-        "num_resnum_uniqresid": np.array(num_resnum_uniqresid_list),
-        "name_resname": np.array(name_resname_list, dtype="|S4"),
-        "alterloc_chain_insertres": np.array(alter_chain_insert_elem_list, dtype="|S1"),
-        "xyz": np.array(xyz_list),
-        "occ_beta": np.array(occ_beta_list),
-    }
 
 
 def get_PDB(self, pdb_ID):
@@ -177,38 +197,41 @@ def get_pdb_string(self):
     if self.crystal_pack is not None:
         str_out += geom.cryst_convert(self.crystal_pack, format_out="pdb")
 
-    atom_index = 0
-    for i in range(self.len):
-        # Atom name should start a column 14, with the type of atom ex:
-        #   - with atom type 'C': ' CH3'
-        # for 2 letters atom type, it should start at coulumn 13 ex:
-        #   - with atom type 'FE': 'FE1'
-        name = self.atom_dict["name_resname"][i, 0].astype(np.str_)
-        if len(name) <= 3 and name[0] in ["C", "H", "O", "N", "S", "P"]:
-            name = " " + name
+    for model_index, model in enumerate(self.model):
+        str_out += f"MODEL    {model_index:4d}\n"
 
-        # Note : Here we use 4 letter residue name.
-        str_out += (
-            "{:6s}{:5d} {:4s}{:1s}{:4s}{:1s}{:4d}{:1s}"
-            "   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}"
-            "          {:2s}\n".format(
-                FIELD_DICT[self.atom_dict["field"][i]],
-                i + 1,
-                name,
-                self.atom_dict["alterloc_chain_insertres"][i, 0].astype(np.str_),
-                self.atom_dict["name_resname"][i, 1].astype(np.str_),
-                self.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_),
-                self.atom_dict["num_resnum_uniqresid"][i, 1],
-                self.atom_dict["alterloc_chain_insertres"][i, 2].astype(np.str_),
-                self.atom_dict["xyz"][i, 0],
-                self.atom_dict["xyz"][i, 1],
-                self.atom_dict["xyz"][i, 2],
-                self.atom_dict["occ_beta"][i, 0],
-                self.atom_dict["occ_beta"][i, 1],
-                self.atom_dict["alterloc_chain_insertres"][i, 3].astype(np.str_),
+        for i in range(model.len):
+            # Atom name should start a column 14, with the type of atom ex:
+            #   - with atom type 'C': ' CH3'
+            # for 2 letters atom type, it should start at coulumn 13 ex:
+            #   - with atom type 'FE': 'FE1'
+            name = model.atom_dict["name_resname"][i, 0].astype(np.str_)
+            if len(name) <= 3 and name[0] in ["C", "H", "O", "N", "S", "P"]:
+                name = " " + name
+
+            # Note : Here we use 4 letter residue name.
+            str_out += (
+                "{:6s}{:5d} {:4s}{:1s}{:4s}{:1s}{:4d}{:1s}"
+                "   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}"
+                "          {:2s}\n".format(
+                    FIELD_DICT[model.atom_dict["field"][i]],
+                    i + 1,
+                    name,
+                    model.atom_dict["alterloc_chain_insertres"][i, 0].astype(np.str_),
+                    model.atom_dict["name_resname"][i, 1].astype(np.str_),
+                    model.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_),
+                    model.atom_dict["num_resnum_uniqresid"][i, 1],
+                    model.atom_dict["alterloc_chain_insertres"][i, 2].astype(np.str_),
+                    model.atom_dict["xyz"][i, 0],
+                    model.atom_dict["xyz"][i, 1],
+                    model.atom_dict["xyz"][i, 2],
+                    model.atom_dict["occ_beta"][i, 0],
+                    model.atom_dict["occ_beta"][i, 1],
+                    model.atom_dict["alterloc_chain_insertres"][i, 3].astype(np.str_),
+                )
             )
-        )
-
+        str_out += "ENDMDL\n"
+    str_out += "END\n"
     return str_out
 
 def get_pqr_string(self):
@@ -240,31 +263,36 @@ def get_pqr_string(self):
     if self.crystal_pack is not None:
         str_out += self.cryst_convert(format_out='pdb')
 
-    for i in range(self.len):
-        # Atom name should start a column 14, with the type of atom ex:
-        #   - with atom type 'C': ' CH3'
-        # for 2 letters atom type, it should start at coulumn 13 ex:
-        #   - with atom type 'FE': 'FE1'
-        name = self.atom_dict["name_resname"][i, 0].astype(np.str_)
-        if len(name) <= 3 and name[0] in ['C', 'H', 'O', 'N', 'S', 'P']:
-            name = " " + name
+    for model_index, model in enumerate(self.model):
+        str_out += f"MODEL    {model_index:4d}\n"
 
-        # Note : Here we use 4 letter residue name.
-        str_out += "{:6s} {:4d} {:4s}  {:3s}{:1s}{:4d} "\
-                   "    {:7.3f} {:7.3f} {:7.3f} {:7.4f} {:7.4f}"\
-                   " \n".format(
-                        FIELD_DICT[self.atom_dict["field"][i]],
-                        i + 1,
-                        name,
-                        self.atom_dict["name_resname"][i, 1].astype(np.str_),
-                        self.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_),
-                        self.atom_dict["num_resnum_uniqresid"][i, 1],
-                        self.atom_dict["xyz"][i, 0],
-                        self.atom_dict["xyz"][i, 1],
-                        self.atom_dict["xyz"][i, 0],
-                        self.atom_dict["occ_beta"][i, 0],
-                        self.atom_dict["occ_beta"][i, 1],
-                        )
+        for i in range(model.len):
+            # Atom name should start a column 14, with the type of atom ex:
+            #   - with atom type 'C': ' CH3'
+            # for 2 letters atom type, it should start at coulumn 13 ex:
+            #   - with atom type 'FE': 'FE1'
+            name = model.atom_dict["name_resname"][i, 0].astype(np.str_)
+            if len(name) <= 3 and name[0] in ['C', 'H', 'O', 'N', 'S', 'P']:
+                name = " " + name
+
+            # Note : Here we use 4 letter residue name.
+            str_out += "{:6s} {:4d} {:4s}  {:3s}{:1s}{:4d} "\
+                    "    {:7.3f} {:7.3f} {:7.3f} {:7.4f} {:7.4f}"\
+                    " \n".format(
+                            FIELD_DICT[model.atom_dict["field"][i]],
+                            i + 1,
+                            name,
+                            model.atom_dict["name_resname"][i, 1].astype(np.str_),
+                            model.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_),
+                            model.atom_dict["num_resnum_uniqresid"][i, 1],
+                            model.atom_dict["xyz"][i, 0],
+                            model.atom_dict["xyz"][i, 1],
+                            model.atom_dict["xyz"][i, 0],
+                            model.atom_dict["occ_beta"][i, 0],
+                            model.atom_dict["occ_beta"][i, 1],
+                            )
+        str_out += "ENDMDL\n"
+    str_out += "END\n"
     return str_out
 
 

@@ -150,3 +150,55 @@ def cryst_convert(crystal_pack, format_out='pdb'):
                         v1[1], v1[2], v2[0],
                         v2[2], v3[0], v3[1])
     return(new_line)
+
+def atom_dihed_angle(atom_a, atom_b, atom_c, atom_d):
+    """Compute the dihedral anlge using 4 atoms.
+
+    Parameters
+    ----------
+    atom_a : np.array
+        Coordinates of the first atom
+    atom_b : np.array
+        Coordinates of the second atom
+    atom_c : np.array
+        Coordinates of the third atom
+    atom_d : np.array
+        Coordinates of the fourth atom  
+      
+    Returns
+    -------
+    float
+        Diheral angle in degrees
+    
+    :Example:
+
+    >>> atom_1 = {'xyz': np.array([0.0, -1.0, 0.0])}
+    >>> atom_2 = {'xyz': np.array([0.0, 0.0, 0.0])}
+    >>> atom_3 = {'xyz': np.array([1.0, 0.0, 0.0])}
+    >>> atom_4 = {'xyz': np.array([1.0, 1.0, 0.0])}
+    >>> atom_5 = {'xyz': np.array([1.0, -1.0, 0.0])}
+    >>> atom_6 = {'xyz': np.array([1.0, -1.0, 1.0])}
+    >>> angle_1 = Coor.atom_dihed_angle(atom_1, atom_2, atom_3, atom_4)
+    >>> print('{:.3f}'.format(angle_1))
+    180.000
+    >>> angle_2 = Coor.atom_dihed_angle(atom_1, atom_2, atom_3, atom_5)
+    >>> print('{:.3f}'.format(angle_2))
+    0.000
+    >>> angle_3 = Coor.atom_dihed_angle(atom_1, atom_2, atom_3, atom_6)
+    >>> print('{:.3f}'.format(angle_3))
+    -45.000
+    """
+
+    ab = -1 * (atom_b - atom_a)
+    bc = atom_c - atom_b
+    cd = atom_d - atom_c
+
+    v1 = np.cross(ab, bc)
+    v2 = np.cross(cd, bc)
+    v1_x_v2 = np.cross(v1, v2)
+
+    y = np.dot(v1_x_v2, bc)*(1.0/np.linalg.norm(bc))
+    x = np.dot(v1, v2)
+    angle = np.arctan2(y, x)
+
+    return np.degrees(angle)

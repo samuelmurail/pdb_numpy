@@ -74,13 +74,9 @@ def test_select_atoms(tmp_path):
     new = test.select_atoms(selec)
     assert new.len == 1
 
-    selec = "name N and resnum isin 0"
+    selec = "name N CA and resnum 0 1 2"
     new = test.select_atoms(selec)
-    assert new.len == 1
-
-    selec = "name N and resnum 0"
-    new = test.select_atoms(selec)
-    assert new.len == 1
+    assert new.len == 6
 
 def test_select_atoms_within(tmp_path):
     """Test select_atoms function with within selection."""

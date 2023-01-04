@@ -4,6 +4,11 @@
 import numpy as np
 import logging
 
+try:
+    from . import _geom as geom
+except ImportError:
+    import _geom as geom
+
 # Logging
 logger = logging.getLogger(__name__)
 
@@ -161,8 +166,6 @@ def get_aa_DL_seq(self, gap_in_seq=True):
     seq_dict = {}
     aa_num_dict = {}
 
-    print(CA_index)
-
     for i in CA_index:
         print("i", i)
 
@@ -190,8 +193,8 @@ def get_aa_DL_seq(self, gap_in_seq=True):
                 N_index = N_C_CB_sel.get_index_select(f'name N and resnum {uniq_resid}')[0]
                 C_index = N_C_CB_sel.get_index_select(f'name C and resnum {uniq_resid}')[0]
                 CB_index = N_C_CB_sel.get_index_select(f'name CB and resnum {uniq_resid}')[0]
-                dihed = Coor.atom_dihed_angle(
-                    self.atom_dict["xyz"][index],
+                dihed = geom.atom_dihed_angle(
+                    self.atom_dict["xyz"][i],
                     N_C_CB_sel.atom_dict["xyz"][N_index],
                     N_C_CB_sel.atom_dict["xyz"][C_index],
                     N_C_CB_sel.atom_dict["xyz"][CB_index])

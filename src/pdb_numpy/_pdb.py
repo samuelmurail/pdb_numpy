@@ -9,9 +9,10 @@ import logging
 import numpy as np
 
 try:
-    from ._geom import cryst_convert
+    from . import _geom as geom
 except ImportError:
-    from _geom import cryst_convert
+    import _geom as geom
+
 
 # Autorship information
 __author__ = "Samuel Murail"
@@ -174,7 +175,7 @@ def get_pdb_string(self):
     str_out = ""
 
     if self.crystal_pack is not None:
-        str_out += cryst_convert(self.crystal_pack, format_out="pdb")
+        str_out += geom.cryst_convert(self.crystal_pack, format_out="pdb")
 
     atom_index = 0
     for i in range(self.len):

@@ -229,8 +229,6 @@ def simple_select_atoms(self, column, values, operator="=="):
         a list of boolean values for each atom in the PDB file
     """
 
-    print(f"Selecting atoms based on {column} {operator} {values}")
-
     keyword_dict = {
         "num": ["num_resnum_uniqresid", 0],
         "resname": ["name_resname", 1],
@@ -253,11 +251,21 @@ def simple_select_atoms(self, column, values, operator="=="):
         raise ValueError(f"Column {column} not recognized")
 
     if isinstance(values, list):
-        # issue here !!!
-        print(values)
-        values = np.array(values, dtype="|S4")
-        if len(values) > 1:
+        if column in ["resname", "chain", "name", "altloc"]:
+            values = np.array(values, dtype="|S4")
+        elif column in ["resid", "resnum"]:
+            print(values)
+            values = np.array(values, dtype=int)
+        elif column in ["beta", "occupancy", "x", "y", "z"]:
+            values = np.array(values, dtype=float)
+        else:
+            raise ValueError(f"Column {column} not recognized")
+        if len(values) > 1 and operator in [">", ">=", "<", "<="]:
+            raise ValueError(f"Wrong operator {operator} with multiple values")
+        elif len(values) > 1 and operator == '==':
             operator = "isin"
+        elif len(values) > 1:
+            raise ValueError(f"Wrong operator {operator} with multiple values")
 
     elif isinstance(values, str):
         # Remove the "." before checking if the string is numeric
@@ -312,8 +320,6 @@ def select_tokens(self, tokens):
     logical = None
     new_bool_list = []
     not_flag = False
-
-    print(tokens)
 
     # Case for simple selection
     if is_simple_list(tokens):

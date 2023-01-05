@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/samuelmurail/pdb_numpy/branch/main/graph/badge.svg?token=MCVDZ7GD0V)](https://codecov.io/gh/samuelmurail/pdb_numpy)
 
 
-Pdb_Numpy
+Pdb Numpy
 ==============
 
 Pdb_Manip_py is a python library allowing simple operations on pdb coor files.
@@ -23,9 +23,9 @@ Main features:
 Author
 --------------
 
-* `Samuel Murail <https://samuelmurail.github.io/PersonalPage/>`_, Associate Professor - `Université Paris Cité <https://u-paris.fr>`_, `CMPLI <http://bfa.univ-paris-diderot.fr/equipe-8/>`_.
+* [Samuel Murail](https://samuelmurail.github.io/PersonalPage/), Associate Professor - [Université Paris Cité](https://u-paris.fr), [CMPLI](http://bfa.univ-paris-diderot.fr/equipe-8/).
 
-See also the list of `contributors <https://github.com/samuelmurail/pdb_numpy/contributors>`_ who participated in this project.
+See also the list of [contributors](https://github.com/samuelmurail/pdb_numpy/contributors) who participated in this project.
 
 License
 --------------

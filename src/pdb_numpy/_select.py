@@ -6,6 +6,8 @@ import copy
 import numpy as np
 from scipy.spatial import distance_matrix
 
+from ._alignement import AA_DICT
+
 # Autorship information
 __author__ = "Samuel Murail"
 __copyright__ = "Copyright 2022, RPBS"
@@ -32,6 +34,11 @@ KEYWORDS = [
     "y",
     "z",
 ]
+
+NICKNAMES = {
+    "protein": f"resname {' '.join(AA_DICT.keys())}",
+    "backbone": f"resname {' '.join(AA_DICT.keys())} and name N CA C O",
+}
 
 
 def parse_parentheses(tokens):
@@ -172,6 +179,9 @@ def parse_selection(selection):
         selection = selection.replace(char, f" {char} ")
     for char in ["< =", "> ="]:
         selection = selection.replace(char, f" {char[0]+char[-1]} ")
+    for nickname in NICKNAMES:
+        selection = selection.replace(nickname, NICKNAMES[nickname])
+    
     tokens = selection.split()
 
     tokens = parse_parentheses(tokens)
@@ -422,8 +432,8 @@ def select_index(self, indexes):
 
     new_coor = copy.deepcopy(self)
 
-    for i in range(len(new_coor.model)):
-        new_coor.model[i] = new_coor.model[i].model_select_index(indexes)
+    for i in range(len(new_coor.models)):
+        new_coor.models[i] = new_coor.models[i].model_select_index(indexes)
 
     return new_coor
 
@@ -447,7 +457,7 @@ def get_index_select(self, selection, frame=0):
     """
 
     tokens = parse_selection(selection)
-    sel_list = self.model[frame].select_tokens(tokens)
+    sel_list = self.models[frame].select_tokens(tokens)
     indexes = np.where(sel_list)
 
     return indexes[0]
@@ -472,7 +482,7 @@ def select_atoms(self, selection, frame=0):
     """
 
     tokens = parse_selection(selection)
-    sel_list = self.model[frame].select_tokens(tokens)
+    sel_list = self.models[frame].select_tokens(tokens)
     indexes = np.where(sel_list)
 
     return self.select_index(indexes)

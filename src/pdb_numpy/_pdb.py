@@ -85,11 +85,11 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
                     "xyz": np.array(xyz_list),
                     "occ_beta": np.array(occ_beta_list),
                 }
-                if len(self.model) > 1 and local_model.len != self.model[-1].len:
+                if len(self.models) > 1 and local_model.len != self.models[-1].len:
                     logger.warning(
-                        f"The atom number is not the same in the model {len(self.model)-1} and the model {len(self.model)}."
+                        f"The atom number is not the same in the model {len(self.models)-1} and the model {len(self.models)}."
                     )
-                self.model.append(local_model)
+                self.models.append(local_model)
                 atom_index = 0
                 uniq_resid = -1
                 old_res_num = -np.inf
@@ -204,7 +204,7 @@ def get_pdb_string(self):
     if self.crystal_pack is not None:
         str_out += geom.cryst_convert(self.crystal_pack, format_out="pdb")
 
-    for model_index, model in enumerate(self.model):
+    for model_index, model in enumerate(self.models):
         str_out += f"MODEL    {model_index:4d}\n"
 
         for i in range(model.len):
@@ -271,7 +271,7 @@ def get_pqr_string(self):
     if self.crystal_pack is not None:
         str_out += self.cryst_convert(format_out="pdb")
 
-    for model_index, model in enumerate(self.model):
+    for model_index, model in enumerate(self.models):
         str_out += f"MODEL    {model_index:4d}\n"
 
         for i in range(model.len):

@@ -42,6 +42,130 @@ def test_parse_selection():
     selec = select.parse_selection(selection)
     assert selec == [["name", "CA"], "and", ["x", "<", "10"], "and", ["y", ">=", "-10"]]
 
+    selection = "chain A and protein"
+    selec = select.parse_selection(selection)
+    assert selec == [
+        ["chain", "A"],
+        "and",
+        [
+            "resname",
+            "GLY",
+            "HIS",
+            "HSP",
+            "HSE",
+            "HSD",
+            "HIP",
+            "HIE",
+            "HID",
+            "ARG",
+            "LYS",
+            "ASP",
+            "ASPP",
+            "GLU",
+            "GLUP",
+            "SER",
+            "THR",
+            "ASN",
+            "GLN",
+            "CYS",
+            "SEC",
+            "PRO",
+            "ALA",
+            "ILE",
+            "PHE",
+            "TYR",
+            "TRP",
+            "VAL",
+            "LEU",
+            "MET",
+            "DAL",
+            "DAR",
+            "DSG",
+            "DAS",
+            "DCY",
+            "DGN",
+            "DGL",
+            "DHI",
+            "DIL",
+            "DLE",
+            "DLY",
+            "DME",
+            "MED",
+            "DPH",
+            "DPN",
+            "DPR",
+            "DSE",
+            "DSN",
+            "DTH",
+            "DTR",
+            "DTY",
+            "DVA",
+        ],
+    ]
+
+    selection = "chain A and backbone"
+    selec = select.parse_selection(selection)
+    assert selec == [
+        ["chain", "A"],
+        "and",
+        [
+            "resname",
+            "GLY",
+            "HIS",
+            "HSP",
+            "HSE",
+            "HSD",
+            "HIP",
+            "HIE",
+            "HID",
+            "ARG",
+            "LYS",
+            "ASP",
+            "ASPP",
+            "GLU",
+            "GLUP",
+            "SER",
+            "THR",
+            "ASN",
+            "GLN",
+            "CYS",
+            "SEC",
+            "PRO",
+            "ALA",
+            "ILE",
+            "PHE",
+            "TYR",
+            "TRP",
+            "VAL",
+            "LEU",
+            "MET",
+            "DAL",
+            "DAR",
+            "DSG",
+            "DAS",
+            "DCY",
+            "DGN",
+            "DGL",
+            "DHI",
+            "DIL",
+            "DLE",
+            "DLY",
+            "DME",
+            "MED",
+            "DPH",
+            "DPN",
+            "DPR",
+            "DSE",
+            "DSN",
+            "DTH",
+            "DTR",
+            "DTY",
+            "DVA",
+        ],
+        "and",
+        ["name", "N", "CA", "C", "O"],
+    ]
+
 
 def test_select_atoms():
     """Test select_atoms function."""
@@ -51,6 +175,14 @@ def test_select_atoms():
     selec = "name CA and resname ALA"
     new = test.select_atoms(selec)
     assert new.len == 4
+
+    selec = "backbone and resid >= 796 and resid <= 848"
+    new = test.select_atoms(selec)
+    assert new.len == 214
+
+    selec = "protein and resid >= 796 and resid <= 848"
+    new = test.select_atoms(selec)
+    assert new.len == 463
 
     selec = "resname HOH and chain A"
     new = test.select_atoms(selec)
@@ -97,22 +229,22 @@ def test_select_atoms_multi_frame():
     selec = "name N CA and resnum > 20 and resnum < 80"
     new = test.select_atoms(selec)
     assert new.len == 16
-    assert new.model[10].len == 16
+    assert new.models[10].len == 16
 
     selec = "name N CA and resnum > 20 and resnum < 80"
     new = test.select_atoms(selec, frame=19)
     assert new.len == 16
-    assert new.model[10].len == 16
+    assert new.models[10].len == 16
 
     selec = "x > 10"
     new = test.select_atoms(selec)
     assert new.len == 57
-    assert new.model[10].len == 57
+    assert new.models[10].len == 57
 
     selec = "x > 10"
     new = test.select_atoms(selec, frame=10)
     assert new.len == 58
-    assert new.model[10].len == 58
+    assert new.models[10].len == 58
 
 
 def test_select_atoms_within(tmp_path):
@@ -149,9 +281,9 @@ def test_select_atoms_within_multi_frame():
     selec = "within 5 of resnum 20"
     new = test.select_atoms(selec)
     assert new.len == 96
-    assert new.model[19].len == 96
+    assert new.models[19].len == 96
 
     selec = "within 5 of resnum 20"
     new = test.select_atoms(selec, frame=15)
     assert new.len == 99
-    assert new.model[10].len == 99
+    assert new.models[10].len == 99

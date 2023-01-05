@@ -12,7 +12,7 @@ class Coor:
     
     Attributes
     ----------
-    model : list
+    models : list
         List of Model objects
     crystal_pack : str
         Crystal Packing as a string
@@ -59,7 +59,7 @@ class Coor:
     """
 
     def __init__(self, coor_in=None, pdb_lines=None, pdb_id=None):
-        self.model = []
+        self.models = []
         self.crystal_pack = None
 
         if coor_in is not None:
@@ -124,8 +124,8 @@ class Coor:
 
     @property
     def len(self):
-        return self.model[0].len
+        return self.models[0].len
 
     @property
     def model_num(self):
-        return len(self.model)
+        return len(self.models)

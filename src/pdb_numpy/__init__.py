@@ -15,8 +15,12 @@ __maintainer__ = "Samuel Murail"
 __email__ = "samuel.murail@u-paris.fr"
 __status__ = "Beta"
 
+# Logging
+logger = logging.getLogger(__name__)
+def show_log():
+    logger.setLevel(logging.INFO)
+    logger.addHandler(logging.StreamHandler(sys.stdout))
 
 from .coor import Coor
 from .model import Model
 
-logging.basicConfig(level=logging.INFO)

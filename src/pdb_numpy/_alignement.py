@@ -4,10 +4,13 @@
 import numpy as np
 import logging
 
+from . import analysis
+
 try:
     from . import geom
 except ImportError:
     import pdb_numpy.geom as geom
+    import pdb_numpy.analysis as analysis
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -440,7 +443,6 @@ def get_aa_DL_seq(self, gap_in_seq=True, frame=0):
     Reference:
     https://onlinelibrary.wiley.com/doi/full/10.1002/prot.10320
 
-
     Parameters
     ----------
     self : Coor
@@ -649,7 +651,22 @@ def align_seq(seq_1, seq_2, gap_cost=-8, gap_extension=-2):
 
 
 def print_align_seq(seq_1, seq_2, line_len=80):
-    """Print the aligned sequences with a line length of 80 characters."""
+    """Print the aligned sequences with a line length of 80 characters.
+    
+    Parameters
+    ----------
+    seq_1 : str
+        First sequence
+    seq_2 : str
+        Second sequence
+    line_len : int, optional
+        Length of the line, by default 80
+
+    Returns
+    -------
+    None
+    
+    """
 
     sim_seq = ""
     for i in range(len(seq_1)):
@@ -698,6 +715,26 @@ def get_common_atoms(
 ):
     """Get atom selection in common for two atom_dict based on sequence
     alignement.
+
+    Parameters
+    ----------
+    coor_1 : Coor
+        First coordinate
+    coor_2 : Coor
+        Second coordinate
+    chain_1 : list, optional
+        List of chain to consider in the first coordinate, by default ["A"]
+    chain_2 : list, optional
+        List of chain to consider in the second coordinate, by default ["A"]
+    back_names : list, optional
+        List of backbone atom names, by default ["C", "N", "O", "CA"]
+
+    Returns
+    -------
+    sel_index_1 : list
+        List of index of the first coordinate
+    sel_index_2 : list
+        List of index of the second coordinate
     """
 
     coor_1_back = coor_1.select_atoms(
@@ -753,20 +790,35 @@ def get_common_atoms(
     return align_sel_1, align_sel_2
 
 def coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0):
-    """Align two structure."""
+    """Align two structure.
+    
+    Parameters
+    ----------
+    coor_1 : Coor
+        First coordinate
+    coor_2 : Coor
+        Second coordinate
+    index_1 : list
+        List of atom index to align in the first coordinates
+    index_2 : list
+        List of atom index to align in the second coordinates
+    frame_ref : int, optional
+        Frame to use as reference for coor_2, by default 0
+
+    Returns
+    -------
+    None
+    """
 
     assert len(index_1) == len(index_2), "Two structure don't have the same atom number"
 
     centroid_2 = coor_2.models[frame_ref].xyz[index_2].mean(axis=0)
     coor_2.models[frame_ref].xyz -= centroid_2
     ref_coor = coor_2.models[frame_ref].xyz[index_2]
-    print('ref_coor', ref_coor.shape)
-    print('index', index_1, index_2)
 
     for model in coor_1.models:
         centroid_1 = model.xyz[index_1].mean(axis=0)
         model.xyz -= centroid_1
-        print('coor', model.xyz[index_1].shape)
 
         rot_mat = geom.quaternion_rotate(model.xyz[index_1], ref_coor)
         
@@ -774,3 +826,39 @@ def coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0):
         model.xyz += centroid_2
     
     coor_2.models[frame_ref].xyz += centroid_2
+
+def align_seq_based(coor_1, coor_2, chain_1=["A"], chain_2=["A"], back_names=["C", "N", "O", "CA"], compute_rmsd=True):
+    """Align two structure based on sequence alignement.
+    
+    Parameters
+    ----------
+    coor_1 : Coor
+        First coordinate
+    coor_2 : Coor
+        Second coordinate
+    chain_1 : list, optional
+        List of chain to consider in the first coordinate, by default ["A"]
+    chain_2 : list, optional
+        List of chain to consider in the second coordinate, by default ["A"]
+    back_names : list, optional
+        List of backbone atom names, by default ["C", "N", "O", "CA"]
+    compute_rmsd : bool, optional
+        Compute RMSD between the two structure, by default True
+
+    Returns
+    -------
+    rmsd : float, optional
+        RMSD between the two structure
+    sel_index_1 : list
+        List of index of the first coordinate
+    sel_index_2 : list
+        List of index of the second coordinate
+    """
+
+    index_1, index_2 = get_common_atoms(coor_1, coor_2, chain_1, chain_2, back_names)
+    coor_align(coor_1, coor_2, index_1, index_2)
+
+    if compute_rmsd:
+        return analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2]), [index_1, index_2]
+    else:
+        return None, [index_1, index_2]

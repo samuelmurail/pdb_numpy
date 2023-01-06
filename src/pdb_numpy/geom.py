@@ -265,16 +265,18 @@ def quaternion_rotate(X, Y):
     calculate_rmsd.py
     Calculate the rotation
 
-    :param coor_1: coordinates array of size (N, D),\
-        where N is points and D is dimension.
-    :type coor_1: np.array
+    Parameters
+    ----------
+    X : np.ndarray
+        coordinates array of size (N, D), where N is points and D is dimension.
+    Y : np.ndarray
+        coordinates array of size (N, D), where N is points and D is dimension.
 
-    :param coor_2: coordinates array of size (N, D),\
-        where N is points and D is dimension.
-    :type coor_2: np.array
+    Returns
+    -------
+    np.ndarray
+        rotation matrix
 
-    :return: rotation matrix
-    :rtype: np.array of size (D, D)
     """
 
     N = X.shape[0]
@@ -287,52 +289,3 @@ def quaternion_rotate(X, Y):
     r = eigen[1][:, eigen[0].argmax()]
     rot = quaternion_transform(r)
     return rot
-
-def kabsch_rotate(coor_1, coor_2):
-    """ Source: https://github.com/charnley/rmsd/blob/master/rmsd/\
-    calculate_rmsd.py
-    Using the Kabsch algorithm with two sets of paired point P and Q, \
-    centered around the centroid. Each vector set is represented as an NxD
-    matrix, where D is the the dimension of the space.
-
-    The algorithm works in three steps:
-    - a centroid translation of P and Q (assumed done before this
-    function call)
-    - the computation of a covariance matrix C
-    - computation of the optimal rotation matrix U
-    For more info see http://en.wikipedia.org/wiki/Kabsch_algorithm
-
-    :param coor_1: coordinates array of size (N, D),
-        where N is points and D is dimension.
-    :type coor_1: np.array
-
-    :param coor_2: coordinates array of size (N, D),
-        where N is points and D is dimension.
-    :type coor_2: np.array
-
-    :return: rotation matrix
-    :rtype: np.array of size (D, D)
-    """
-
-    # Computation of the covariance matrix
-    C = np.dot(np.transpose(coor_1), coor_2)
-
-    # Computation of the optimal rotation matrix
-    # This can be done using singular value decomposition (SVD)
-    # Getting the sign of the det(V)*(W) to decide
-    # whether we need to correct our rotation matrix to ensure a
-    # right-handed coordinate system.
-    # And finally calculating the optimal rotation matrix U
-    # see http://en.wikipedia.org/wiki/Kabsch_algorithm
-
-    V, S, W = np.linalg.svd(C)
-    d = (np.linalg.det(V) * np.linalg.det(W)) < 0.0
-
-    if d:
-        S[-1] = -S[-1]
-        V[:, -1] = -V[:, -1]
-
-    # Create Rotation matrix U
-    rot_mat = np.dot(V, W)
-
-    return rot_mat

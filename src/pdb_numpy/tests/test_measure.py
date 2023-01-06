@@ -10,7 +10,7 @@ from .datafiles import PDB_1U85, PDB_1UBD
 import pdb_numpy
 from pdb_numpy import Coor
 from pdb_numpy import _alignement as alignement
-from pdb_numpy import measure
+from pdb_numpy import analysis
 import logging
 import pytest
 
@@ -26,17 +26,15 @@ def test_measure_rmsd():
     print(index_1)
 
     assert len(index_1) == len(index_2) == 132
-    rmsd = measure.compute_rmsd_to(coor_1, coor_2, index_list=[index_1, index_2])
+    rmsd = analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2])
     assert rmsd[0] == pytest.approx(57.19326881650206, 0.0001)
 
 
     alignement.coor_align(
         coor_1, coor_2, index_1, index_2, frame_ref=0)
 
-    coor_1.write_pdb("test.pdb")
-    coor_2.write_pdb("test2.pdb")
 
-    rmsds = measure.compute_rmsd_to(coor_1, coor_2, index_list=[index_1, index_2])
+    rmsds = analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2])
     expected_rmsds = [
         4.30748178690184,
         3.7504159976361806,

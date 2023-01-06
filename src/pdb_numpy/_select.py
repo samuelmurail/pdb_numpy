@@ -511,3 +511,24 @@ def dist_under_index(self, sel_2, cutoff):
 
     # Retrun column under cutoff_max:
     return dist_mat.min(1) < cutoff
+
+
+def remove_incomplete_backbone_residues(coor, back_atom=['CA', 'C', 'N', 'O']):
+    """ Remove residue with non all backbone atoms
+    """
+
+    no_alter_loc = coor.select_atoms('not altloc B C D')
+
+    # Get all backbone atoms
+    backbone = no_alter_loc.select_atoms(f'name {" ".join(back_atom)}')
+    uniq_res_num = np.unique(backbone.uniq_resid)
+
+    if len(uniq_res_num)*len(back_atom) == backbone.len:
+        return no_alter_loc
+    
+    else:
+        uniq_res_to_remove = []
+        for uniq_res in uniq_res_num:
+            if sum(backbone.uniq_resid == uniq_res) != len(back_atom):
+                uniq_res_to_remove.append(uniq_res)
+        

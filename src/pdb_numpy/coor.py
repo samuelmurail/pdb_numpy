@@ -8,7 +8,8 @@ import os
 logger = logging.getLogger(__name__)
 
 class Coor:
-    """Topologie based on coordinates like pdb or gro files.
+    """Coordinate and topologie object based on coordinates
+    like pdb or gro files.
     
     Attributes
     ----------
@@ -80,16 +81,18 @@ class Coor:
         from _alignement import get_aa_seq, get_aa_DL_seq
     
     def read_file(self, file_in):
-        """Read a pdb file and return atom informations as a dictionnary
-        indexed on the atom num. The fonction can also read pqr files if
-        specified with ``pqr_format = True``,
-        it will only change the column format of beta and occ factors.
+        """Read a pdb/pqr/gro file and return atom informations as a Coor
+        object.
 
-        :param pdb_in: path of the pdb file to read
-        :type pdb_in: str
+        Parameters
+        ----------
+        file_in : str
+            Path of the pdb file to read
+        
+        Returns
+        -------
+        None
 
-        :param pqr_format: Flag for .pqr file format reading.
-        :type pqr_format: bool, default=False
 
         :Example:
 

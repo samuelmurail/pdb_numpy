@@ -68,11 +68,9 @@ class Model:
 
     try:
         from ._select import simple_select_atoms, select_tokens, model_select_index, dist_under_index
-        #from ._alignement import get_aa_seq, get_aa_DL_seq
     except ImportError:
         logger.warning('ImportError: pdb_numpy is not installed, using local files')
         from _select import simple_select_atoms, select_tokens, model_select_index, dist_under_index
-        #from _alignement import get_aa_seq, get_aa_DL_seq
 
     @property
     def len(self):

@@ -63,7 +63,7 @@ def rmsd(coor_1, coor_2, selection="name CA",
 
     return rmsd_list
 
-def interface_rmsd(coor_1, coor_2, rec_chain, lig_chain, cutoff=10.0):
+def interface_rmsd(coor_1, coor_2, rec_chain, lig_chain, cutoff=10.0, back_atom=['CA', 'N', 'C', 'O']):
     """ Compute the interface RMSD between two models.
     The interface is defined as the distance between the ligand and the receptor
     below the cutoff distance. The RMSD is computed between the ligand and the
@@ -82,6 +82,8 @@ def interface_rmsd(coor_1, coor_2, rec_chain, lig_chain, cutoff=10.0):
         List of ligand chain
     cutoff : float, default=10.0
         Cutoff distance for the interface
+    back_atom : list, default=['CA', 'N', 'C', 'O']
+        List of backbone atoms to use for the RMSD calculation
         
     Returns
     -------
@@ -97,10 +99,10 @@ def interface_rmsd(coor_1, coor_2, rec_chain, lig_chain, cutoff=10.0):
     lig_interface = coor_1.select_atoms(f'chain {" ".join(lig_chain)} and within {cutoff} of chain {" ".join(rec_chain)}')
     rec_interface = coor_1.select_atoms(f'chain {" ".join(rec_chain)} and within {cutoff} of chain {" ".join(lig_chain)}')
 
-    interface_rmsd = np.concatenate((np.unique(lig_interface.models[0].res_num), np.unique(rec_interface.models[0].res_num)))
+    interface_rmsd = np.concatenate((np.unique(lig_interface.models[0].uniq_resid), np.unique(rec_interface.models[0].uniq_resid)))
 
-    index_1 = coor_1.get_index_select(f'resnum {" ".join([str(i) for i in interface_rmsd])}') 
-    index_2 = coor_2.get_index_select(f'resnum {" ".join([str(i) for i in interface_rmsd])}') 
+    index_1 = coor_1.get_index_select(f'resnum {" ".join([str(i) for i in interface_rmsd])} and name {" ".join(back_atom)}') 
+    index_2 = coor_2.get_index_select(f'resnum {" ".join([str(i) for i in interface_rmsd])} and name {" ".join(back_atom)}') 
 
     print(index_1, index_2)
 
@@ -204,18 +206,14 @@ def dockQ(coor, native_coor, rec_chain=None,
         model.res_num[:] = -1
         model.res_num[align_rec_native_index + align_lig_native_index] = native_res_num
 
-    print(interface_rmsd(back_coor, native_back_coor, rec_chain, lig_chain, cutoff=10.0))
+    irmsd = interface_rmsd(back_coor, native_back_coor, rec_chain, lig_chain, cutoff=10.0)
+    logger.info(f'Interface   RMSD: {irmsd[0]:.3f} A')
 
 
     ## Delete non common atoms:
-    model_del_index = self.get_index_selection({'res_num': [0]})
-    self.del_atom_index(index_list=model_del_index)
-    native_del_index = native_coor.get_index_selection({'res_num': [0]})
-    native_coor.del_atom_index(index_list=native_del_index)
-    logger.info(f'Delete atoms {len(model_del_index)} in Model and {len(native_del_index)} in Native')
 
-    irmsd = self.interface_rmsd(native_coor, native_rec_chain, native_lig_chain)
-    logger.info(f'Interface   RMSD: {irmsd:.3f} A')
+    #logger.info(f'Delete atoms {len(model_del_index)} in Model and {len(native_del_index)} in Native')
+
     fnat, fnonnat = self.compute_native_contact(native_coor, rec_chain,
         lig_chain, native_rec_chain, native_lig_chain)
     logger.info(f'Fnat: {fnat:.3f}      Fnonnat: {fnonnat:.3f}')

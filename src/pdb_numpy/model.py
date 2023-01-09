@@ -72,6 +72,7 @@ class Model:
         logger.warning('ImportError: pdb_numpy is not installed, using local files')
         from _select import simple_select_atoms, select_tokens, model_select_index, dist_under_index
 
+
     @property
     def len(self):
         return len(self.atom_dict["field"])

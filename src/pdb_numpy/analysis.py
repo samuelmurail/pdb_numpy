@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import numpy as np
+import logging
 
 # Autorship information
 __author__ = "Samuel Murail"
@@ -13,6 +14,16 @@ __maintainer__ = "Samuel Murail"
 __email__ = "samuel.murail@u-paris.fr"
 __status__ = "Beta"
 
+# Logging
+logger = logging.getLogger(__name__)
+
+from . import _alignement as alignement
+from . import _select as select
+
+#try:
+#    from ._select import remove_incomplete_backbone_residues
+#except ImportError:
+#    from _select import remove_incomplete_backbone_residues
 
 def rmsd(coor_1, coor_2, selection="name CA",
                     index_list=None):
@@ -52,20 +63,87 @@ def rmsd(coor_1, coor_2, selection="name CA",
 
     return rmsd_list
 
-def compute_dockQ(coor, native_coor, rec_chain=None,
+def interface_rmsd(coor_1, coor_2, rec_chain, lig_chain, cutoff=10.0):
+    """ Compute the interface RMSD between two models.
+    The interface is defined as the distance between the ligand and the receptor
+    below the cutoff distance. The RMSD is computed between the ligand and the
+    receptor of the two models.
+
+
+    Parameters
+    ----------
+    coor_1 : Coor
+        First coordinates
+    coor_2 : Coor
+        Second coordinates
+    rec_chain : list
+        List of receptor chain
+    lig_chain : list
+        List of ligand chain
+    cutoff : float, default=10.0
+        Cutoff distance for the interface
+        
+    Returns
+    -------
+    float
+        Interface RMSD value
+
+    Note:
+    -----
+    Both coor object must have equivalent residues.
+
+    """
+
+    lig_interface = coor_1.select_atoms(f'chain {" ".join(lig_chain)} and within {cutoff} of chain {" ".join(rec_chain)}')
+    rec_interface = coor_1.select_atoms(f'chain {" ".join(rec_chain)} and within {cutoff} of chain {" ".join(lig_chain)}')
+
+    interface_rmsd = np.concatenate((np.unique(lig_interface.models[0].res_num), np.unique(rec_interface.models[0].res_num)))
+
+    index_1 = coor_1.get_index_select(f'resnum {" ".join([str(i) for i in interface_rmsd])}') 
+    index_2 = coor_2.get_index_select(f'resnum {" ".join([str(i) for i in interface_rmsd])}') 
+
+    print(index_1, index_2)
+
+    alignement.coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0)
+
+    return rmsd(coor_1, coor_2, index_list=[index_1, index_2])
+
+
+def dockQ(coor, native_coor, rec_chain=None,
     lig_chain=None, native_rec_chain=None, native_lig_chain=None,
-    back_atom=pdb_manip.BACK_ATOM):
+    back_atom=['CA', 'N', 'C', 'O']):
+    """ Compute docking quality score between a model and a native structure.
+    The score is computed as follow:
+    1. Align the receptor on the native receptor using the backbone atoms
+    2. Compute the RMSD between the ligand and the native ligand
+    3. Compute the RMSD between the receptor and the native receptor
 
-    # Remove hydrogens and non protein atoms as well as altloc
-    model_coor = coor.select_atoms("protein and not altloc B C D")
-    native_coor = native_coor.select_atoms("protein and not altloc B C D")
+    Parameters
+    ----------
+    coor : Coor
+        Model coordinates
+    native_coor : Coor
+        Native coordinates
+    rec_chain : list, default=None
+        List of receptor chain
+    lig_chain : list, default=None
+        List of ligand chain
+    native_rec_chain : list, default=None
+        List of native receptor chain
+    native_lig_chain : list, default=None
+        List of native ligand chain
+    back_atom : list, default=['CA', 'N', 'C', 'O']
+        List of backbone atoms
 
-    # Remove incomplete backbone residue:
-    self.remove_incomplete_backbone_residues(back_atom=back_atom)
-    native_coor.remove_incomplete_backbone_residues(back_atom=back_atom)
+    Returns
+    -------
+    float
+        Docking quality score
+
+    """
 
     # Get shortest chain's sequence to identify peptide and receptor chains
-    model_seq = model_coor.get_aa_seq()
+    model_seq = coor.get_aa_seq()
     native_seq = native_coor.get_aa_seq()
 
     if lig_chain is None:
@@ -82,33 +160,52 @@ def compute_dockQ(coor, native_coor, rec_chain=None,
         native_rec_chain = [chain for chain in native_seq if chain not in native_lig_chain]
     logger.info(f'Native receptor chain : {" ".join(native_rec_chain)}')
 
-    # Put lig chain at the end of the dict:
-    model_coor = self.select_part_dict(
-        selec_dict={'chain': rec_chain + lig_chain})
-    native_coor = native_coor.select_part_dict(
-        selec_dict={'chain': native_rec_chain + native_lig_chain})
+    # Remove hydrogens and non protein atoms as well as altloc
+    back_coor = coor.select_atoms(
+        f"protein and not altloc B C D and chain {' '.join(rec_chain + lig_chain)}")
+    native_back_coor = native_coor.select_atoms(
+        f"protein and not altloc B C D and chain {' '.join(native_rec_chain + native_lig_chain)}")
 
-    self.set_good_chain_order(lig_chain)
-    native_coor.set_good_chain_order(native_lig_chain)
+    # Remove incomplete backbone residue:
+    back_coor = select.remove_incomplete_backbone_residues(back_coor)
+    native_back_coor = select.remove_incomplete_backbone_residues(native_back_coor)
+
+    # Put lig chain at the end of the dict:
+    back_coor.change_order('chain', rec_chain + lig_chain)
+    native_back_coor.change_order('chain', native_rec_chain + native_lig_chain)
 
     # Align model on native structure using model back atoms:
-    rmsd_prot, [align_rec_index, align_rec_native_index] = self.align_seq_coor_to(
-        native_coor, chain_1=rec_chain, chain_2=native_rec_chain,
+    rmsd_prot, [align_rec_index, align_rec_native_index] = alignement.align_seq_based(
+        back_coor, native_back_coor, chain_1=rec_chain, chain_2=native_rec_chain,
         back_names=back_atom)
-    logger.info(f'Receptor RMSD: {rmsd_prot:.3f} A')
+    logger.info(f'Receptor RMSD: {rmsd_prot[0]:.3f} A')
+    logger.info(f'Found {len(align_rec_index)//len(back_atom):d} residues in common (receptor)')
+
+    back_coor.write_pdb('tmp.pdb')
+    native_back_coor.write_pdb('tmp2.pdb')
 
     ########################
     # Compute ligand RMSD: #
     ########################
 
-    lrmsd, [align_lig_index, align_lig_native_index] = self.align_seq_coor_to(
-        native_coor, chain_1=lig_chain, chain_2=native_lig_chain, align=False,
+    lrmsd, [align_lig_index, align_lig_native_index] = alignement.rmsd_seq_based(
+        back_coor, native_back_coor, chain_1=lig_chain, chain_2=native_lig_chain,
         back_names=back_atom)
-    logger.info(f'Ligand   RMSD: {lrmsd:.3f} A')
+    logger.info(f'Ligand   RMSD: {lrmsd[0]:.3f} A')
+    logger.info(f'Found {len(align_lig_index)//len(back_atom):d} residues in common (ligand)')
 
-    self.set_same_resid_in_common(native_coor,
-        align_rec_index + align_lig_index,
-        align_rec_native_index + align_lig_native_index)
+    # Set same resid in common:
+    old_res_num = back_coor.models[0].res_num[align_rec_index + align_lig_index]
+    native_res_num = native_back_coor.models[0].res_num[align_rec_native_index + align_lig_native_index]
+    for model in back_coor.models:
+        model.res_num[:] = -1
+        model.res_num[align_rec_index + align_lig_index] = old_res_num
+    for model in native_back_coor.models:
+        model.res_num[:] = -1
+        model.res_num[align_rec_native_index + align_lig_native_index] = native_res_num
+
+    print(interface_rmsd(back_coor, native_back_coor, rec_chain, lig_chain, cutoff=10.0))
+
 
     ## Delete non common atoms:
     model_del_index = self.get_index_selection({'res_num': [0]})

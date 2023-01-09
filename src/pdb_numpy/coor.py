@@ -3,6 +3,7 @@
 
 import logging
 import os
+import numpy as np
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -124,6 +125,69 @@ class Coor:
             f"Succeed to read file { os.path.relpath(file_in)} \n"
             f"{self.len} atoms found"
         )
+
+    def change_order(self, field, order_list):
+        """Change the order of the atoms in the model
+        
+        Parameters
+        ----------
+        field : str
+            Field to change the order
+        order_list : list
+            List of the new order
+        
+        Returns
+        -------
+        None
+            Change the order of the atoms in the model
+
+        Examples
+        >>> test = Coor(pdb_id='1jd4')
+        >>> test.change_order('chain', ['B', 'C', 'A'])
+        """
+
+        keyword_dict = {
+            "num": ["num_resnum_uniqresid", 0],
+            "resname": ["name_resname", 1],
+            "chain": ["alterloc_chain_insertres", 1],
+            "name": ["name_resname", 0],
+            "altloc": ["alterloc_chain_insertres", 0],
+            "resid": ["num_resnum_uniqresid", 1],
+            "resnum": ["num_resnum_uniqresid", 2],
+            "beta": ["occ_beta", 1],
+            "occupancy": ["occ_beta", 0],
+            "x": ["xyz", 0],
+            "y": ["xyz", 1],
+            "z": ["xyz", 2],
+        }
+
+        if field not in keyword_dict:
+            raise ValueError("Field not found")
+        else:
+            keyword = keyword_dict[field][0]
+            index = keyword_dict[field][1]
+
+            field_uniqs = np.unique(self.models[0].atom_dict[keyword][:, index])
+            if isinstance(order_list[0], str):
+                order_list = np.array(order_list, dtype="|S4")
+
+            for field_uniq in field_uniqs:
+                if field_uniq not in order_list:
+                    logger.info(f"Field {field_uniq} not found in order list, will be added at the end")
+                    order_list.append(field_uniq)
+        
+        new_order = np.array([], dtype=np.int32)
+        for value in order_list:
+            new_order = np.append(new_order, np.where(self.models[0].atom_dict[keyword][:, index] == value)[0])
+        
+        assert len(new_order) == self.len, "Inconsistent number of atoms"
+
+        for model in self.models:
+            for key in ["alterloc_chain_insertres", "name_resname", "num_resnum_uniqresid", "xyz", "occ_beta"]:
+                model.atom_dict[key] = model.atom_dict[key][new_order,:]
+        
+        return
+
 
     @property
     def len(self):

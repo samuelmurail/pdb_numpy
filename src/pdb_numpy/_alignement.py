@@ -862,3 +862,35 @@ def align_seq_based(coor_1, coor_2, chain_1=["A"], chain_2=["A"], back_names=["C
         return analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2]), [index_1, index_2]
     else:
         return None, [index_1, index_2]
+
+def rmsd_seq_based(coor_1, coor_2, chain_1=["A"], chain_2=["A"], back_names=["C", "N", "O", "CA"], compute_rmsd=True):
+    """Align two structure based on sequence alignement.
+    
+    Parameters
+    ----------
+    coor_1 : Coor
+        First coordinate
+    coor_2 : Coor
+        Second coordinate
+    chain_1 : list, optional
+        List of chain to consider in the first coordinate, by default ["A"]
+    chain_2 : list, optional
+        List of chain to consider in the second coordinate, by default ["A"]
+    back_names : list, optional
+        List of backbone atom names, by default ["C", "N", "O", "CA"]
+    compute_rmsd : bool, optional
+        Compute RMSD between the two structure, by default True
+
+    Returns
+    -------
+    rmsd : float, optional
+        RMSD between the two structure
+    sel_index_1 : list
+        List of index of the first coordinate
+    sel_index_2 : list
+        List of index of the second coordinate
+    """
+
+    index_1, index_2 = get_common_atoms(coor_1, coor_2, chain_1, chain_2, back_names)
+    return analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2]), [index_1, index_2]
+

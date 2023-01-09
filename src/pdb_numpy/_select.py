@@ -266,7 +266,6 @@ def simple_select_atoms(self, column, values, operator="=="):
         if column in ["resname", "chain", "name", "altloc"]:
             values = np.array(values, dtype="|S4")
         elif column in ["resid", "resnum"]:
-            print(values)
             values = np.array(values, dtype=int)
         elif column in ["beta", "occupancy", "x", "y", "z"]:
             values = np.array(values, dtype=float)
@@ -507,6 +506,11 @@ def dist_under_index(self, sel_2, cutoff):
     """
 
     # Compute distance matrix
+    if self.xyz.shape[0] == 0:
+        return np.array([])
+    elif sel_2.xyz.shape[0] == 0:
+        return np.array([False] * self.xyz.shape[0])
+    print(self.xyz.shape, sel_2.xyz.shape)
     dist_mat = distance_matrix(self.xyz, sel_2.xyz)
 
     # Retrun column under cutoff_max:

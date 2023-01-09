@@ -260,6 +260,14 @@ def test_select_atoms_within(tmp_path):
     new = test.select_atoms(selec)
     assert new.len == 48
 
+    selec = "name CA and within 1.0 of resname HOH and chain A"
+    new = test.select_atoms(selec)
+    assert new.len == 0
+
+    selec = "name CX and within 10.0 of resname HOH and chain A"
+    new = test.select_atoms(selec)
+    assert new.len == 0
+
     selec = "name CA and not within 5 of resname HOH and chain A"
     new = test.select_atoms(selec)
     assert new.len == 13

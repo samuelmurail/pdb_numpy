@@ -92,7 +92,7 @@ def interface_rmsd(coor_1, coor_2, rec_chain, lig_chain, cutoff=10.0, back_atom=
 
     Note:
     -----
-    Both coor object must have equivalent residues.
+    Both coor object must have equivalent residues number in both chains.
 
     """
 
@@ -104,12 +104,62 @@ def interface_rmsd(coor_1, coor_2, rec_chain, lig_chain, cutoff=10.0, back_atom=
     index_1 = coor_1.get_index_select(f'resnum {" ".join([str(i) for i in interface_rmsd])} and name {" ".join(back_atom)}') 
     index_2 = coor_2.get_index_select(f'resnum {" ".join([str(i) for i in interface_rmsd])} and name {" ".join(back_atom)}') 
 
-    print(index_1, index_2)
-
     alignement.coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0)
 
     return rmsd(coor_1, coor_2, index_list=[index_1, index_2])
 
+def native_contact(coor, native_coor, rec_chain,
+        lig_chain, native_rec_chain, native_lig_chain, cutoff=5.0):
+    """ Compute the native contact score between a model and a native structure.
+
+    Parameters
+    ----------
+    coor : Coor
+        Model coordinates
+    native_coor : Coor
+        Native coordinates
+    rec_chain : list
+        List of receptor chain
+    lig_chain : list
+        List of ligand chain
+    native_rec_chain : list
+        List of native receptor chain
+    native_lig_chain : list
+        List of native ligand chain
+    cutoff : float, default=5.0
+        Cutoff distance for the native contact
+
+    Returns
+    -------
+    float
+        Native contact score
+    """
+
+    native_rec_interface = native_coor.select_atoms(
+        f'chain {" ".join(native_rec_chain)} and within {cutoff} of chain {" ".join(native_lig_chain)}')
+
+    native_rec_lig_interface = native_coor.select_atoms(
+        f'(chain {" ".join(native_rec_chain)} and within {cutoff} of chain {" ".join(native_lig_chain)}) or'\
+        f'(chain {" ".join(native_lig_chain)} and within {cutoff} of chain {" ".join(native_rec_chain)})')
+    
+    native_contact_list = []
+    native_res_residue = native_rec_interface.models[0].res_num
+    for residue in np.unique(native_res_residue):
+        res_lig = native_rec_lig_interface.select_atoms(f'chain {" ".join(native_lig_chain)} and within {cutoff} of (resid {residue} and chain {" ".join(native_rec_chain)})')
+        native_contact_list.append([residue, np.unique(res_lig.models[0].res_num)])
+    
+    print('native_contact_list', native_contact_list)
+
+    rec_lig_interface = coor.select_atoms(
+        f'(chain {" ".join(rec_chain)} and within {cutoff} of chain {" ".join(lig_chain)}) or'\
+        f'(chain {" ".join(lig_chain)} and within {cutoff} of chain {" ".join(rec_chain)})')
+    
+    print(rec_lig_interface.len)
+
+    for residue, contact in native_contact_list:
+        #print('YO', residue, contact)
+        res_lig = rec_lig_interface.select_atoms(f'chain {" ".join(lig_chain)} and within {cutoff} of (resid {residue} and chain {" ".join(rec_chain)})')
+        print('YP', residue, contact, np.unique(res_lig.models[0].res_num))
 
 def dockQ(coor, native_coor, rec_chain=None,
     lig_chain=None, native_rec_chain=None, native_lig_chain=None,
@@ -210,11 +260,7 @@ def dockQ(coor, native_coor, rec_chain=None,
     logger.info(f'Interface   RMSD: {irmsd[0]:.3f} A')
 
 
-    ## Delete non common atoms:
-
-    #logger.info(f'Delete atoms {len(model_del_index)} in Model and {len(native_del_index)} in Native')
-
-    fnat, fnonnat = self.compute_native_contact(native_coor, rec_chain,
+    fnat, fnonnat = native_contact(back_coor, native_coor, rec_chain,
         lig_chain, native_rec_chain, native_lig_chain)
     logger.info(f'Fnat: {fnat:.3f}      Fnonnat: {fnonnat:.3f}')
 

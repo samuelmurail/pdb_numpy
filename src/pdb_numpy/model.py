@@ -43,7 +43,7 @@ class Model:
         Array containing the insertion code
     elem : numpy.ndarray
         Array containing the element
-    res_num : numpy.ndarray
+    resid : numpy.ndarray
         Array containing the residue number
     uniq_resid : numpy.ndarray
         Array containing the unique residue id
@@ -67,10 +67,10 @@ class Model:
         self.atom_dict = {}
 
     try:
-        from ._select import simple_select_atoms, select_tokens, model_select_index, dist_under_index
+        from ._select import simple_select_atoms, select_atoms, select_tokens, select_index, dist_under_index, get_index_select
     except ImportError:
         logger.warning('ImportError: pdb_numpy is not installed, using local files')
-        from _select import simple_select_atoms, select_tokens, model_select_index, dist_under_index
+        from _select import simple_select_atoms, select_atoms, select_tokens, select_index, dist_under_index, get_index_select
 
 
     @property
@@ -83,7 +83,7 @@ class Model:
 
     @property
     def num(self):
-        return self.atom_dict["num_resnum_uniqresid"][:, 0]
+        return self.atom_dict["num_resid_uniqresid"][:, 0]
 
     @property
     def name(self):
@@ -110,12 +110,16 @@ class Model:
         return self.atom_dict["alterloc_chain_insertres"][:, 3]
 
     @property
-    def res_num(self):
-        return self.atom_dict["num_resnum_uniqresid"][:, 1]
+    def resid(self):
+        return self.atom_dict["num_resid_uniqresid"][:, 1]
 
     @property
     def uniq_resid(self):
-        return self.atom_dict["num_resnum_uniqresid"][:, 2]
+        return self.atom_dict["num_resid_uniqresid"][:, 2]
+
+    @property
+    def residue(self):
+        return self.atom_dict["num_resid_uniqresid"][:, 2]
 
     @property
     def occ(self):
@@ -147,7 +151,7 @@ class Model:
 
     @num.setter
     def num(self, value):
-        self.atom_dict["num_resnum_uniqresid"][:, 0] = value
+        self.atom_dict["num_resid_uniqresid"][:, 0] = value
 
     @name.setter
     def name(self, value):
@@ -173,13 +177,17 @@ class Model:
     def elem(self, value):
         self.atom_dict["alterloc_chain_insertres"][:, 3] = value
 
-    @res_num.setter
-    def res_num(self, value):
-        self.atom_dict["num_resnum_uniqresid"][:, 1] = value
+    @resid.setter
+    def resid(self, value):
+        self.atom_dict["num_resid_uniqresid"][:, 1] = value
 
     @uniq_resid.setter
     def uniq_resid(self, value):
-        self.atom_dict["num_resnum_uniqresid"][:, 2] = value
+        self.atom_dict["num_resid_uniqresid"][:, 2] = value
+
+    @residue.setter
+    def residue(self, value):
+        self.atom_dict["num_resid_uniqresid"][:, 2] = value
 
     @x.setter
     def x(self, value):

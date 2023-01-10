@@ -27,7 +27,7 @@ KEYWORDS = [
     "name",
     "altloc",
     "resid",
-    "resnum",
+    "residue",
     "beta",
     "occ",
     "x",
@@ -160,7 +160,7 @@ def parse_selection(selection):
     The selection string is parsed into a list of tokens.
     The tokens are either keywords, operators, or parentheses.
     The keywords are "resname", "chain", "name", "altloc", "resid",
-    "resnum", "beta", "occupancy", "x", "y", "z".
+    "residue", "beta", "occupancy", "x", "y", "z".
     The operators are "==", "!=", ">", ">=", "<", "<=".
     The parentheses are "(", ")".
 
@@ -219,7 +219,7 @@ def simple_select_atoms(self, column, values, operator="=="):
     Selection tokens are simple selection containing only one
     keyword, operator, and values.
     The keywords are "resname", "chain", "name", "altloc", "resid",
-    "resnum", "beta", "occupancy", "x", "y", "z".
+    "residue", "beta", "occupancy", "x", "y", "z".
     The operators are "==", "!=", ">", ">=", "<", "<=", "isin".
 
     Parameters
@@ -241,14 +241,15 @@ def simple_select_atoms(self, column, values, operator="=="):
         a list of boolean values for each atom in the PDB file
     """
 
+
     keyword_dict = {
-        "num": ["num_resnum_uniqresid", 0],
+        "num": ["num_resid_uniqresid", 0],
         "resname": ["name_resname", 1],
         "chain": ["alterloc_chain_insertres", 1],
         "name": ["name_resname", 0],
         "altloc": ["alterloc_chain_insertres", 0],
-        "resid": ["num_resnum_uniqresid", 1],
-        "resnum": ["num_resnum_uniqresid", 2],
+        "resid": ["num_resid_uniqresid", 1],
+        "residue": ["num_resid_uniqresid", 2],
         "beta": ["occ_beta", 1],
         "occupancy": ["occ_beta", 0],
         "x": ["xyz", 0],
@@ -265,7 +266,7 @@ def simple_select_atoms(self, column, values, operator="=="):
     if isinstance(values, list):
         if column in ["resname", "chain", "name", "altloc"]:
             values = np.array(values, dtype="|S4")
-        elif column in ["resid", "resnum"]:
+        elif column in ["resid", "residue"]:
             values = np.array(values, dtype=int)
         elif column in ["beta", "occupancy", "x", "y", "z"]:
             values = np.array(values, dtype=float)
@@ -287,6 +288,7 @@ def simple_select_atoms(self, column, values, operator="=="):
                 values = float(values)
         else:
             values = np.array([values], dtype="|S4")
+
 
     if operator == "==":
         bool_val = self.atom_dict[col][:, index] == values
@@ -350,7 +352,7 @@ def select_tokens(self, tokens):
             raise ValueError("within selection must have 3 arguments")
         new_bool_list = self.select_tokens(tokens[-1])
         distance = float(tokens[1])
-        sel_2 = self.model_select_index(np.where(new_bool_list)[0])
+        sel_2 = self.select_index(np.where(new_bool_list)[0])
 
         return self.dist_under_index(sel_2, cutoff=distance)
 
@@ -382,11 +384,11 @@ def select_tokens(self, tokens):
             logical = None
 
         i += 1
-
+    
     return new_bool_list
 
 
-def model_select_index(self, indexes):
+def select_index(self, indexes):
     """Select atoms from the PDB file based on the selection indexes.
 
     Parameters
@@ -411,39 +413,14 @@ def model_select_index(self, indexes):
 
     return new_model
 
-def select_index(self, indexes):
-    """Select atoms from the PDB file based on the selection indexes.
 
-    Parameters
-    ----------
-    self : Coor
-        Coor object
-    indexes : list
-        List of indexes
-    frame : int
-        Frame number for the selection, default is 0
-
-    Returns
-    -------
-    Coor
-        a new Coor object with the selected atoms
-    """
-
-    new_coor = copy.deepcopy(self)
-
-    for i in range(len(new_coor.models)):
-        new_coor.models[i] = new_coor.models[i].model_select_index(indexes)
-
-    return new_coor
-
-
-def get_index_select(self, selection, frame=0):
+def get_index_select(self, selection):
     """Return index from the PDB file based on the selection string.
 
     Parameters
     ----------
-    self : Coor
-        Coor object
+    self : Model
+        Model object
     selection : str
         Selection string
     frame : int
@@ -456,19 +433,19 @@ def get_index_select(self, selection, frame=0):
     """
 
     tokens = parse_selection(selection)
-    sel_list = self.models[frame].select_tokens(tokens)
+    sel_list = self.select_tokens(tokens)
     indexes = np.where(sel_list)
 
     return indexes[0]
 
 
-def select_atoms(self, selection, frame=0):
+def select_atoms(self, selection):
     """Select atoms from the PDB file based on the selection string.
 
     Parameters
     ----------
-    self : Coor
-        Coor object
+    self : Model
+        Model object
     selection : str
         Selection string
     frame : int
@@ -477,11 +454,11 @@ def select_atoms(self, selection, frame=0):
     Returns
     -------
     Coor
-        a new Coor object with the selected atoms
+        a new Model object with the selected atoms
     """
 
     tokens = parse_selection(selection)
-    sel_list = self.models[frame].select_tokens(tokens)
+    sel_list = self.select_tokens(tokens)
     indexes = np.where(sel_list)
 
     return self.select_index(indexes)
@@ -510,7 +487,6 @@ def dist_under_index(self, sel_2, cutoff):
         return np.array([])
     elif sel_2.xyz.shape[0] == 0:
         return np.array([False] * self.xyz.shape[0])
-    print(self.xyz.shape, sel_2.xyz.shape)
     dist_mat = distance_matrix(self.xyz, sel_2.xyz)
 
     # Retrun column under cutoff_max:
@@ -548,4 +524,4 @@ def remove_incomplete_backbone_residues(coor, back_atom=['CA', 'C', 'N', 'O']):
             uniq_res_to_remove.append(uniq_res)
             logger.warning(f'Removing residue {uniq_res} has incomplete backbone atoms')
 
-    return no_alter_loc.select_atoms(f'not resnum {" ".join(uniq_res_to_remove)}')
+    return no_alter_loc.select_atoms(f'not residue {" ".join(uniq_res_to_remove)}')

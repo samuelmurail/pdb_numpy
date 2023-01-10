@@ -10,6 +10,7 @@ import pytest
 import numpy as np
 import logging
 
+import pdb_numpy
 from pdb_numpy import Coor
 from .datafiles import PDB_1Y0M, PQR_1Y0M, PDB_2RRI
 
@@ -22,7 +23,8 @@ def test_get_pdb(tmp_path):
 
     assert test.models[0].atom_dict["name_resname"][0, 1] == b"THR"
     assert test.models[0].resname[0] == b"THR"
-    assert test.models[0].res_num[0] == 791
+    assert test.models[0].resid[0] == 791
+    assert test.models[0].uniq_resid[0] == 0
     assert test.models[0].name[0] == b"N"
     assert test.models[0].num[0] == 1
     assert test.models[0].x[0] == -1.432
@@ -45,7 +47,7 @@ def test_get_pdb_models(tmp_path):
 
     assert test.models[0].atom_dict["name_resname"][0, 1] == b"HIS"
     assert test.models[0].resname[0] == b"HIS"
-    assert test.models[0].res_num[0] == 1
+    assert test.models[0].resid[0] == 1
     assert test.models[0].name[0] == b"N"
     assert test.models[0].num[0] == 1
     assert test.models[0].x[0] == -11.432
@@ -55,7 +57,7 @@ def test_get_pdb_models(tmp_path):
 
     assert test.models[19].atom_dict["name_resname"][0, 1] == b"HIS"
     assert test.models[19].resname[0] == b"HIS"
-    assert test.models[19].res_num[0] == 1
+    assert test.models[19].resid[0] == 1
     assert test.models[19].name[0] == b"N"
     assert test.models[19].num[0] == 1
     assert test.models[19].x[0] == 1.574
@@ -70,6 +72,9 @@ def test_get_pdb_models(tmp_path):
 
 def test_read_write_pdb(tmp_path, caplog):
     """Test read_file function."""
+
+    pdb_numpy.logger.setLevel(level=logging.INFO)
+
     test = Coor(PDB_1Y0M)
     assert test.len == 648
 
@@ -85,7 +90,7 @@ def test_read_write_pdb(tmp_path, caplog):
 
     for key in test.models[0].atom_dict:
         # Atom index can differ
-        if key == "num_resnum_uniqresid":
+        if key == "num_resid_uniqresid":
             assert (
                 test.models[0].atom_dict[key][:, 1:]
                 == test2.models[0].atom_dict[key][:, 1:]

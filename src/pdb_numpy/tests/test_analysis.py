@@ -6,7 +6,7 @@
 Tests for _alignement functions
 """
 
-from .datafiles import PDB_1U85, PDB_1UBD, PDB_1JD4, PDB_5M6N
+from .datafiles import PDB_1U85, PDB_1UBD, PDB_1JD4, PDB_5M6N, PDB_1RXZ, PDB_1RXZ_Colabfold
 import pdb_numpy
 from pdb_numpy import Coor
 from pdb_numpy import _alignement as alignement
@@ -93,13 +93,70 @@ def test_dockq_bad(tmp_path):
 
     """
 
+    pdb_numpy.logger.setLevel(level=logging.INFO)
+
     model_coor = Coor(PDB_1JD4)
     native_coor = Coor(PDB_5M6N)
 
+    #dockq = analysis.dockQ(model_coor, native_coor, rec_chain=["A"], lig_chain=["B"], native_rec_chain=["A"], native_lig_chain=["B"])
     dockq = analysis.dockQ(model_coor, native_coor)
 
-    assert pytest.approx(dockq['DockQ'], 0.5) == 0.010
-    assert dockq['Fnat'] == 0.0
-    assert dockq['Fnonnat'] == 1.0
-    assert pytest.approx(dockq['LRMS'], 0.1) == 59.981
-    assert pytest.approx(dockq['iRMS'], 0.5) == 15.631
+    assert pytest.approx(dockq['DockQ'][0], 0.5) == 0.010
+    assert dockq['Fnat'][0] == 0.0
+    assert dockq['Fnonnat'][0] == 1.0
+    assert pytest.approx(dockq['LRMS'][0], 0.1) == 59.981
+    assert pytest.approx(dockq['iRMS'][0], 0.5) == 15.631
+
+    print(dockq)
+
+
+def test_dockq_good(tmp_path):
+    """
+
+    TO FIX !!, should be more precise
+
+    Raw DockQ results:
+    ****************************************************************
+    *                       DockQ                                  *
+    *   Scoring function for protein-protein docking models        *
+    *   Statistics on CAPRI data:                                  *
+    *    0.00 <= DockQ <  0.23 - Incorrect                         *
+    *    0.23 <= DockQ <  0.49 - Acceptable quality                *
+    *    0.49 <= DockQ <  0.80 - Medium quality                    *
+    *            DockQ >= 0.80 - High quality                      *
+    *   Reference: Sankar Basu and Bjorn Wallner, DockQ: A quality *
+    *   measure for protein-protein docking models, submitted      *
+    *                                                              *
+    *   For the record:                                            *
+    *   Definition of contact <5A (Fnat)                           *
+    *   Definition of interface <10A all heavy atoms (iRMS)        *
+    *   For comments, please email: bjorn.wallner@.liu.se          *
+    *                                                              *
+    ****************************************************************
+    Model  : test.pdb
+    Native : ../pdb_manip_py/test/input/1rxz.pdb
+    Number of equivalent residues in chain A 245 (receptor)
+    Number of equivalent residues in chain B 11 (ligand)
+    Fnat 0.963 52 correct of 54 native contacts
+    Fnonnat 0.088 5 non-native of 57 model contacts
+    iRMS 0.618
+    LRMS 1.050
+    DockQ 0.934 
+
+    """
+
+    pdb_numpy.logger.setLevel(level=logging.INFO)
+
+    model_coor = Coor(PDB_1RXZ_Colabfold)
+    native_coor = Coor(PDB_1RXZ)
+
+    #dockq = analysis.dockQ(model_coor, native_coor, rec_chain=["A"], lig_chain=["B"], native_rec_chain=["A"], native_lig_chain=["B"])
+    dockq = analysis.dockQ(model_coor, native_coor)
+
+    assert pytest.approx(dockq['DockQ'][0], 0.5) == 0.934
+    assert pytest.approx(dockq['Fnat'][0], 0.01) == 0.963
+    assert pytest.approx(dockq['Fnonnat'][0], 10) == 0.088
+    assert pytest.approx(dockq['LRMS'][0], 0.1) == 1.050
+    assert pytest.approx(dockq['iRMS'][0], 0.5) == 0.618
+
+    print(dockq)

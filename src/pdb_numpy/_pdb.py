@@ -54,13 +54,13 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
 
     atom_index = 0
     uniq_resid = -1
-    old_res_num = -np.inf
+    old_resid = -np.inf
     old_insert_res = " "
     model_num = 1
 
     index_list = []
     field_list = []  # 6 char
-    num_resnum_uniqresid_list = []  # int 5 digits (+1 with Chimera)
+    num_resid_uniqresid_list = []  # int 5 digits (+1 with Chimera)
     alter_chain_insert_elem_list = []  # 1 char
     name_resname_list = []  # 4 / 3 char (+1 with Chimera) = 4
     xyz_list = []  # real (8.3)
@@ -77,7 +77,7 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
                 local_model = Model()
                 local_model.atom_dict = {
                     "field": np.array(field_list, dtype="|S1"),
-                    "num_resnum_uniqresid": np.array(num_resnum_uniqresid_list),
+                    "num_resid_uniqresid": np.array(num_resid_uniqresid_list),
                     "name_resname": np.array(name_resname_list, dtype="|S4"),
                     "alterloc_chain_insertres": np.array(
                         alter_chain_insert_elem_list, dtype="|S1"
@@ -92,12 +92,12 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
                 self.models.append(local_model)
                 atom_index = 0
                 uniq_resid = -1
-                old_res_num = -np.inf
+                old_resid = -np.inf
                 old_insert_res = " "
                 model_num = 1
                 index_list = []
                 field_list = []  # 6 char
-                num_resnum_uniqresid_list = []  # int 5 digits (+1 with Chimera)
+                num_resid_uniqresid_list = []  # int 5 digits (+1 with Chimera)
                 alter_chain_insert_elem_list = []  # 1 char
                 name_resname_list = []  # 4 / 3 char (+1 with Chimera) = 4
                 xyz_list = []  # real (8.3)
@@ -108,7 +108,7 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
             atom_name = line[12:16].strip()
             res_name = line[17:20].strip()
             chain = line[21]
-            res_num = int(line[22:26])
+            resid = int(line[22:26])
             insert_res = line[26:27]
             xyz = [float(line[30:38]), float(line[38:46]), float(line[46:54])]
             if pqr_format:
@@ -129,12 +129,12 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
                 beta = 0.0
             else:
                 beta = float(beta)
-            if res_num != old_res_num or insert_res != old_insert_res:
+            if resid != old_resid or insert_res != old_insert_res:
                 uniq_resid += 1
-                old_res_num = res_num
+                old_resid = resid
                 old_insert_res = insert_res
             field_list.append(field[0])
-            num_resnum_uniqresid_list.append([atom_num, res_num, uniq_resid])
+            num_resid_uniqresid_list.append([atom_num, resid, uniq_resid])
             index_list.append(atom_index)
             name_resname_list.append([atom_name, res_name])
             alter_chain_insert_elem_list.append(
@@ -227,7 +227,7 @@ def get_pdb_string(self):
                     model.atom_dict["alterloc_chain_insertres"][i, 0].astype(np.str_),
                     model.atom_dict["name_resname"][i, 1].astype(np.str_),
                     model.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_),
-                    model.atom_dict["num_resnum_uniqresid"][i, 1],
+                    model.atom_dict["num_resid_uniqresid"][i, 1],
                     model.atom_dict["alterloc_chain_insertres"][i, 2].astype(np.str_),
                     model.atom_dict["xyz"][i, 0],
                     model.atom_dict["xyz"][i, 1],
@@ -293,7 +293,7 @@ def get_pqr_string(self):
                     name,
                     model.atom_dict["name_resname"][i, 1].astype(np.str_),
                     model.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_),
-                    model.atom_dict["num_resnum_uniqresid"][i, 1],
+                    model.atom_dict["num_resid_uniqresid"][i, 1],
                     model.atom_dict["xyz"][i, 0],
                     model.atom_dict["xyz"][i, 1],
                     model.atom_dict["xyz"][i, 0],

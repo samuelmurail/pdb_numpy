@@ -130,23 +130,23 @@ def get_aa_seq(self, gap_in_seq=True, frame=0):
             .astype(np.str_)
         )
         res_name = CA_sel.models[frame].atom_dict["name_resname"][i, 1].astype(np.str_)
-        resnum = CA_sel.models[frame].atom_dict["num_resnum_uniqresid"][i, 1]
+        resid = CA_sel.models[frame].atom_dict["num_resid_uniqresid"][i, 1]
 
         if chain not in seq_dict:
             seq_dict[chain] = ""
-            aa_num_dict[chain] = resnum
+            aa_num_dict[chain] = resid
 
         if res_name in AA_DICT:
-            if resnum != aa_num_dict[chain] + 1 and len(seq_dict[chain]) != 0:
+            if resid != aa_num_dict[chain] + 1 and len(seq_dict[chain]) != 0:
                 logger.warning(
-                    f"Residue {chain}:{res_name}:{resnum} is "
+                    f"Residue {chain}:{res_name}:{resid} is "
                     f"not consecutive, there might be missing "
                     f"residues"
                 )
                 if gap_in_seq:
-                    seq_dict[chain] += "-" * (resnum - aa_num_dict[chain] - 1)
+                    seq_dict[chain] += "-" * (resid - aa_num_dict[chain] - 1)
             seq_dict[chain] += AA_DICT[res_name]
-            aa_num_dict[chain] = resnum
+            aa_num_dict[chain] = resid
         else:
             logger.warning(f"Residue {res_name} in chain {chain} not " "recognized")
 
@@ -202,6 +202,7 @@ def get_aa_DL_seq(self, gap_in_seq=True, frame=0):
 
     # Get CA atoms
     CA_index = self.get_index_select("name CA and not altloc B C D", frame=frame)
+    print(CA_index)
     N_C_CB_sel = self.select_atoms("name N C CB and not altloc B C D", frame=frame)
 
     seq_dict = {}
@@ -215,33 +216,33 @@ def get_aa_DL_seq(self, gap_in_seq=True, frame=0):
             .astype(np.str_)
         )
         res_name = self.models[frame].atom_dict["name_resname"][i, 1].astype(np.str_)
-        resnum = self.models[frame].atom_dict["num_resnum_uniqresid"][i, 1]
-        uniq_resid = self.models[frame].atom_dict["num_resnum_uniqresid"][i, 2]
+        resid = self.models[frame].atom_dict["num_resid_uniqresid"][i, 1]
+        uniq_resid = self.models[frame].atom_dict["num_resid_uniqresid"][i, 2]
 
         if chain not in seq_dict:
             seq_dict[chain] = ""
-            aa_num_dict[chain] = resnum
+            aa_num_dict[chain] = resid
 
         if res_name in AA_DICT:
-            if resnum != aa_num_dict[chain] + 1 and len(seq_dict[chain]) != 0:
+            if resid != aa_num_dict[chain] + 1 and len(seq_dict[chain]) != 0:
                 logger.warning(
-                    f"Residue {chain}:{res_name}:{resnum} is "
+                    f"Residue {chain}:{res_name}:{resid} is "
                     "not consecutive, there might be missing "
                     "residues"
                 )
                 if gap_in_seq:
-                    seq_dict[chain] += "-" * (resnum - aa_num_dict[chain] - 1)
+                    seq_dict[chain] += "-" * (resid - aa_num_dict[chain] - 1)
             if res_name == "GLY":
                 seq_dict[chain] += "G"
             else:
                 N_index = N_C_CB_sel.get_index_select(
-                    f"name N and resnum {uniq_resid}", frame=frame
+                    f"name N and residue {uniq_resid}", frame=frame
                 )[0]
                 C_index = N_C_CB_sel.get_index_select(
-                    f"name C and resnum {uniq_resid}", frame=frame
+                    f"name C and residue {uniq_resid}", frame=frame
                 )[0]
                 CB_index = N_C_CB_sel.get_index_select(
-                    f"name CB and resnum {uniq_resid}", frame=frame
+                    f"name CB and residue {uniq_resid}", frame=frame
                 )[0]
                 dihed = geom.atom_dihed_angle(
                     self.models[frame].atom_dict["xyz"][i],
@@ -252,9 +253,9 @@ def get_aa_DL_seq(self, gap_in_seq=True, frame=0):
                 if dihed > 0:
                     seq_dict[chain] += AA_DICT[res_name]
                 else:
-                    logger.warning(f"Residue {AA_DICT[res_name]}{resnum} is in D form")
+                    logger.warning(f"Residue {AA_DICT[res_name]}{resid} is in D form")
                     seq_dict[chain] += AA_DICT[res_name].lower()
-            aa_num_dict[chain] = resnum
+            aa_num_dict[chain] = resid
         else:
             logger.warning(f"Residue {res_name} in chain {chain} not " "recognized")
 
@@ -486,6 +487,7 @@ def get_common_atoms(
     assert len(sel_index_2) == len(seq_2) * len(back_names)
 
     align_seq_1, align_seq_2 = align_seq(seq_1, seq_2)
+    # print_align_seq(align_seq_1, align_seq_2)
 
     align_sel_1 = []
     align_sel_2 = []
@@ -578,6 +580,7 @@ def align_seq_based(coor_1, coor_2, chain_1=["A"], chain_2=["A"], back_names=["C
 
     index_1, index_2 = get_common_atoms(coor_1, coor_2, chain_1, chain_2, back_names)
     coor_align(coor_1, coor_2, index_1, index_2)
+    
 
     if compute_rmsd:
         return analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2]), [index_1, index_2]

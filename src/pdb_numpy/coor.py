@@ -3,6 +3,7 @@
 
 import logging
 import os
+import copy
 import numpy as np
 
 # Logging
@@ -147,13 +148,13 @@ class Coor:
         """
 
         keyword_dict = {
-            "num": ["num_resnum_uniqresid", 0],
+            "num": ["num_resid_uniqresid", 0],
             "resname": ["name_resname", 1],
             "chain": ["alterloc_chain_insertres", 1],
             "name": ["name_resname", 0],
             "altloc": ["alterloc_chain_insertres", 0],
-            "resid": ["num_resnum_uniqresid", 1],
-            "resnum": ["num_resnum_uniqresid", 2],
+            "resid": ["num_resid_uniqresid", 1],
+            "resid": ["num_resid_uniqresid", 2],
             "beta": ["occ_beta", 1],
             "occupancy": ["occ_beta", 0],
             "x": ["xyz", 0],
@@ -183,10 +184,79 @@ class Coor:
         assert len(new_order) == self.len, "Inconsistent number of atoms"
 
         for model in self.models:
-            for key in ["alterloc_chain_insertres", "name_resname", "num_resnum_uniqresid", "xyz", "occ_beta"]:
+            for key in ["alterloc_chain_insertres", "name_resname", "num_resid_uniqresid", "xyz", "occ_beta"]:
                 model.atom_dict[key] = model.atom_dict[key][new_order,:]
         
         return
+
+
+    def select_index(self, indexes):
+        """Select atoms from the PDB file based on the selection indexes.
+
+        Parameters
+        ----------
+        self : Coor
+            Coor object
+        indexes : list
+            List of indexes
+        frame : int
+            Frame number for the selection, default is 0
+
+        Returns
+        -------
+        Coor
+            a new Coor object with the selected atoms
+        """
+
+        new_coor = copy.deepcopy(self)
+        for i in range(len(new_coor.models)):
+            new_coor.models[i] = new_coor.models[i].select_index(indexes)
+
+        return new_coor
+
+
+    def get_index_select(self, selection, frame=0):
+        """Return index from the PDB file based on the selection string.
+
+        Parameters
+        ----------
+        self : Coor
+            Coor object
+        selection : str
+            Selection string
+        frame : int
+            Frame number for the selection, default is 0
+
+        Returns
+        -------
+        list
+            a list of indexes
+        """
+
+        indexes = self.models[frame].get_index_select(selection)
+        return indexes
+
+
+    def select_atoms(self, selection, frame=0):
+        """Select atoms from the PDB file based on the selection string.
+
+        Parameters
+        ----------
+        self : Coor
+            Coor object
+        selection : str
+            Selection string
+        frame : int
+            Frame number for the selection, default is 0
+
+        Returns
+        -------
+        Coor
+            a new Coor object with the selected atoms
+        """
+
+        indexes = self.models[frame].get_index_select(selection)
+        return self.select_index(indexes)
 
 
     @property
@@ -196,3 +266,71 @@ class Coor:
     @property
     def model_num(self):
         return len(self.models)
+    
+    @property
+    def field(self):
+        return self.models[0].atom_dict["field"]
+
+    @property
+    def num(self):
+        return self.models[0].atom_dict["num_resid_uniqresid"][:, 0]
+
+    @property
+    def name(self):
+        return self.models[0].atom_dict["name_resname"][:, 0]
+
+    @property
+    def resname(self):
+        return self.models[0].atom_dict["name_resname"][:, 1]
+
+    @property
+    def alterloc(self):
+        return self.models[0].atom_dict["alterloc_chain_insertres"][:, 0]
+
+    @property
+    def chain(self):
+        return self.models[0].atom_dict["alterloc_chain_insertres"][:, 1]
+
+    @property
+    def insertres(self):
+        return self.models[0].atom_dict["alterloc_chain_insertres"][:, 2]
+
+    @property
+    def elem(self):
+        return self.models[0].atom_dict["alterloc_chain_insertres"][:, 3]
+
+    @property
+    def resid(self):
+        return self.models[0].atom_dict["num_resid_uniqresid"][:, 1]
+
+    @property
+    def uniq_resid(self):
+        return self.models[0].atom_dict["num_resid_uniqresid"][:, 2]
+
+    @property
+    def residue(self):
+        return self.models[0].atom_dict["num_resid_uniqresid"][:, 2]
+
+    @property
+    def occ(self):
+        return self.models[0].atom_dict["occ_beta"][:, 0]
+
+    @property
+    def beta(self):
+        return self.models[0].atom_dict["occ_beta"][:, 1]
+
+    @property
+    def xyz(self):
+        return self.models[0].atom_dict["xyz"]
+
+    @property
+    def x(self):
+        return self.models[0].atom_dict["xyz"][:, 0]
+
+    @property
+    def y(self):
+        return self.models[0].atom_dict["xyz"][:, 1]
+
+    @property
+    def z(self):
+        return self.models[0].atom_dict["xyz"][:, 2]

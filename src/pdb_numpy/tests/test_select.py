@@ -192,15 +192,15 @@ def test_select_atoms():
     new = test.select_atoms(selec)
     assert new.len == 53
 
-    selec = "name CA and chain A and resnum >= 6 and resnum <= 58"
+    selec = "name CA and chain A and residue >= 6 and residue <= 58"
     new = test.select_atoms(selec)
     assert new.len == 53
 
-    selec = "name CA CX CY and chain A B C and resnum >= 6 and resnum <= 58"
+    selec = "name CA CX CY and chain A B C and residue >= 6 and residue <= 58"
     new = test.select_atoms(selec)
     assert new.len == 53
 
-    selec = "name CA and chain A and resnum >= 6 and resnum <= 58 and resnum != 30"
+    selec = "name CA and chain A and residue >= 6 and residue <= 58 and residue != 30"
     new = test.select_atoms(selec)
     assert new.len == 52
 
@@ -212,11 +212,13 @@ def test_select_atoms():
     new = test.select_atoms(selec)
     assert new.len == 56
 
-    selec = "name N and resnum == 0"
+    selec = "name N and residue == 0"
+    print(test.models[0].residue)
+    print(test.models[0].name)
     new = test.select_atoms(selec)
     assert new.len == 1
 
-    selec = "name N CA and resnum 0 1 2"
+    selec = "name N CA and residue 0 1 2"
     new = test.select_atoms(selec)
     assert new.len == 6
 
@@ -226,12 +228,12 @@ def test_select_atoms_multi_frame():
     test = Coor(PDB_2RRI)
     assert test.len == 479
 
-    selec = "name N CA and resnum > 20 and resnum < 80"
+    selec = "name N CA and residue > 20 and residue < 80"
     new = test.select_atoms(selec)
     assert new.len == 16
     assert new.models[10].len == 16
 
-    selec = "name N CA and resnum > 20 and resnum < 80"
+    selec = "name N CA and residue > 20 and residue < 80"
     new = test.select_atoms(selec, frame=19)
     assert new.len == 16
     assert new.models[10].len == 16
@@ -282,16 +284,16 @@ def test_select_atoms_within_multi_frame():
     test = Coor(PDB_2RRI)
     assert test.len == 479
 
-    selec = "resnum 20"
+    selec = "residue 20"
     new = test.select_atoms(selec)
     assert new.len == 22
 
-    selec = "within 5 of resnum 20"
+    selec = "within 5 of residue 20"
     new = test.select_atoms(selec)
     assert new.len == 96
     assert new.models[19].len == 96
 
-    selec = "within 5 of resnum 20"
+    selec = "within 5 of residue 20"
     new = test.select_atoms(selec, frame=15)
     assert new.len == 99
     assert new.models[10].len == 99

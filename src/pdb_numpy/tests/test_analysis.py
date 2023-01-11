@@ -6,7 +6,7 @@
 Tests for _alignement functions
 """
 
-from .datafiles import PDB_1U85, PDB_1UBD, PDB_1JD4, PDB_5M6N, PDB_1RXZ, PDB_1RXZ_Colabfold
+from .datafiles import PDB_1U85, PDB_1UBD, PDB_1JD4, PDB_5M6N, PDB_1RXZ, PDB_1RXZ_Colabfold, DOCKQ_MODEL, DOCKQ_NATIVE
 import pdb_numpy
 from pdb_numpy import Coor
 from pdb_numpy import _alignement as alignement
@@ -153,10 +153,59 @@ def test_dockq_good(tmp_path):
     #dockq = analysis.dockQ(model_coor, native_coor, rec_chain=["A"], lig_chain=["B"], native_rec_chain=["A"], native_lig_chain=["B"])
     dockq = analysis.dockQ(model_coor, native_coor)
 
-    assert pytest.approx(dockq['DockQ'][0], 0.5) == 0.934
+    assert pytest.approx(dockq['DockQ'][0], 0.01) == 0.934
     assert pytest.approx(dockq['Fnat'][0], 0.01) == 0.963
-    assert pytest.approx(dockq['Fnonnat'][0], 10) == 0.088
+    assert pytest.approx(dockq['Fnonnat'][0], 0.01) == 0.088
     assert pytest.approx(dockq['LRMS'][0], 0.1) == 1.050
     assert pytest.approx(dockq['iRMS'][0], 0.5) == 0.618
 
     print(dockq)
+
+
+def test_dockq_model(tmp_path):
+    """
+
+    TO FIX !!, should be more precise
+
+    Raw DockQ results:
+    ***********************************************************
+    *                       DockQ                             *
+    *   Scoring function for protein-protein docking models   *
+    *   Statistics on CAPRI data:                             *
+    *    0    <  DockQ <  0.23 - Incorrect                    *
+    *    0.23 <= DockQ <  0.49 - Acceptable quality           *
+    *    0.49 <= DockQ <  0.80 - Medium quality               *
+    *            DockQ >= 0.80 - High quality                 *
+    *   Reference: Sankar Basu and Bjorn Wallner, DockQ:...   *
+    *   For comments, please email: bjornw@ifm.liu.se         *
+    ***********************************************************
+
+    Number of equivalent residues in chain A 1492 (receptor)
+    Number of equivalent residues in chain B 912 (ligand)
+    Fnat 0.533 32 correct of 60 native contacts
+    Fnonnat 0.238 10 non-native of 42 model contacts
+    iRMS 1.232
+    LRMS 1.516
+    CAPRI Medium
+    DockQ_CAPRI Medium
+    DockQ 0.700
+
+    """
+
+    pdb_numpy.logger.setLevel(level=logging.INFO)
+
+    model_coor = Coor(DOCKQ_MODEL)
+    native_coor = Coor(DOCKQ_NATIVE)
+
+    #dockq = analysis.dockQ(model_coor, native_coor, rec_chain=["A"], lig_chain=["B"], native_rec_chain=["A"], native_lig_chain=["B"])
+    dockq = analysis.dockQ(model_coor, native_coor)
+
+    assert pytest.approx(dockq['DockQ'][0], 0.5) == 0.7
+    assert pytest.approx(dockq['Fnat'][0], 0.01) == 0.533
+    assert pytest.approx(dockq['Fnonnat'][0], 0.01) == 0.238
+    assert pytest.approx(dockq['LRMS'][0], 0.1) == 1.516
+    assert pytest.approx(dockq['iRMS'][0], 0.5) == 1.232
+
+    print(dockq)
+
+    assert 0 == 1

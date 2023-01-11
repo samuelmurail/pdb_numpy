@@ -21,3 +21,6 @@ PDB_5M6N = os.path.join(TEST_FILE_PATH, "5m6n.pdb")
 
 PDB_1RXZ = os.path.join(TEST_FILE_PATH, "1rxz.pdb")
 PDB_1RXZ_Colabfold = os.path.join(TEST_FILE_PATH, "1rxz_colabfold_model_1.pdb")
+
+DOCKQ_MODEL = os.path.join(TEST_FILE_PATH, "model.pdb")
+DOCKQ_NATIVE = os.path.join(TEST_FILE_PATH, "native.pdb")

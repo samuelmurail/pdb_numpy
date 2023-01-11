@@ -144,6 +144,26 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
             occ_beta_list.append([occ, beta])
             atom_index += 1
 
+    if len(field_list) > 0:
+        logger.warning("No ENDMDL in the pdb file.")
+        local_model = Model()
+        local_model.atom_dict = {
+            "field": np.array(field_list, dtype="|S1"),
+            "num_resid_uniqresid": np.array(num_resid_uniqresid_list),
+            "name_resname": np.array(name_resname_list, dtype="|S4"),
+            "alterloc_chain_insertres": np.array(
+                alter_chain_insert_elem_list, dtype="|S1"
+            ),
+            "xyz": np.array(xyz_list),
+            "occ_beta": np.array(occ_beta_list),
+        }
+        if len(self.models) > 1 and local_model.len != self.models[-1].len:
+            logger.warning(
+                f"The atom number is not the same in the model {len(self.models)-1} and the model {len(self.models)}."
+                )
+        self.models.append(local_model)
+
+
 
 def get_PDB(self, pdb_ID):
     """Get a pdb file from the PDB using its ID

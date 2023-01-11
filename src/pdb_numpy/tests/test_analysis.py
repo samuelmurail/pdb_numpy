@@ -207,5 +207,3 @@ def test_dockq_model(tmp_path):
     assert pytest.approx(dockq['iRMS'][0], 0.5) == 1.232
 
     print(dockq)
-
-    assert 0 == 1

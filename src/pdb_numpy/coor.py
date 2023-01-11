@@ -186,9 +186,29 @@ class Coor:
         for model in self.models:
             for key in ["alterloc_chain_insertres", "name_resname", "num_resid_uniqresid", "xyz", "occ_beta"]:
                 model.atom_dict[key] = model.atom_dict[key][new_order,:]
+        self.reset_residue_index()
         
         return
 
+    def reset_residue_index(self):
+        """Reset the residue index to the original index of the pdb file.
+        
+        Returns
+        -------
+        None
+            Change the residue index in the model
+        """
+
+        residue = -1
+        last_residue = self.models[0].atom_dict["num_resid_uniqresid"][0, 2]
+        for model in self.models:
+            for i in range(model.atom_dict["num_resid_uniqresid"].shape[0]):
+                if model.atom_dict["num_resid_uniqresid"][i, 2] != last_residue:
+                    residue += 1
+                    last_residue = model.atom_dict["num_resid_uniqresid"][i, 2]
+                model.atom_dict["num_resid_uniqresid"][i, 1] = residue
+        
+        return
 
     def select_index(self, indexes):
         """Select atoms from the PDB file based on the selection indexes.

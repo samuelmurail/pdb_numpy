@@ -10,7 +10,7 @@ import pytest
 import numpy as np
 
 from pdb_numpy import Coor
-from pdb_numpy import _select as select
+from pdb_numpy import select as select
 
 from .datafiles import PDB_1Y0M, PDB_2RRI
 

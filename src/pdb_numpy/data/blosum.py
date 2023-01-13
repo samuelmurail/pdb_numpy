@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# coding: utf-8
 
 BLOSUM62 = {
     ("W", "F"): 1,

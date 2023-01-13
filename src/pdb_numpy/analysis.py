@@ -18,7 +18,7 @@ __status__ = "Beta"
 logger = logging.getLogger(__name__)
 
 from . import _alignement as alignement
-from . import _select as select
+from . import select as select
 
 #try:
 #    from ._select import remove_incomplete_backbone_residues

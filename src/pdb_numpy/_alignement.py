@@ -6,6 +6,7 @@ import logging
 
 from . import analysis
 from .data.blosum import BLOSUM62
+from .data.aa_dict import AA_DICT
 
 try:
     from . import geom
@@ -26,66 +27,6 @@ __version__ = "0.0.1"
 __maintainer__ = "Samuel Murail"
 __email__ = "samuel.murail@u-paris.fr"
 __status__ = "Beta"
-
-AA_DICT_L = {
-    "GLY": "G",
-    "HIS": "H",
-    "HSP": "H",
-    "HSE": "H",
-    "HSD": "H",
-    "HIP": "H",
-    "HIE": "H",
-    "HID": "H",
-    "ARG": "R",
-    "LYS": "K",
-    "ASP": "D",
-    "ASPP": "D",
-    "GLU": "E",
-    "GLUP": "E",
-    "SER": "S",
-    "THR": "T",
-    "ASN": "N",
-    "GLN": "Q",
-    "CYS": "C",
-    "SEC": "U",
-    "PRO": "P",
-    "ALA": "A",
-    "ILE": "I",
-    "PHE": "F",
-    "TYR": "Y",
-    "TRP": "W",
-    "VAL": "V",
-    "LEU": "L",
-    "MET": "M",
-}
-# D amino acids
-# https://proteopedia.org/wiki/index.php/Amino_Acids
-AA_DICT_D = {
-    "DAL": "A",
-    "DAR": "R",
-    "DSG": "N",
-    "DAS": "D",
-    "DCY": "C",
-    "DGN": "Q",
-    "DGL": "E",
-    "DHI": "H",
-    "DIL": "I",
-    "DLE": "L",
-    "DLY": "K",
-    "DME": "M",
-    "MED": "M",
-    "DPH": "F",
-    "DPN": "F",
-    "DPR": "P",
-    "DSE": "S",
-    "DSN": "S",
-    "DTH": "T",
-    "DTR": "W",
-    "DTY": "Y",
-    "DVA": "V",
-}
-# Fusion of the two former dictionaries
-AA_DICT = {**AA_DICT_L, **AA_DICT_D}
 
 def get_aa_seq(self, gap_in_seq=True, frame=0):
     """Get the amino acid sequence from a coor object.

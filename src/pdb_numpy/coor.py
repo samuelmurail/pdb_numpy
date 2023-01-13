@@ -74,12 +74,10 @@ class Coor:
 
     try:
         from ._pdb import parse_pdb_lines, get_PDB, write_pdb, get_pdb_string, write_pqr, get_pqr_string
-        from ._select import select_atoms, select_index, get_index_select
         from ._alignement import get_aa_seq, get_aa_DL_seq
     except ImportError:
         logger.warning('ImportError: pdb_numpy is not installed, using local files')
         from _pdb import parse_pdb_lines, get_PDB, write_pdb, get_pdb_string, write_pqr, get_pqr_string
-        from _select import select_atoms, select_index, get_index_select
         from _alignement import get_aa_seq, get_aa_DL_seq
     
     def read_file(self, file_in):

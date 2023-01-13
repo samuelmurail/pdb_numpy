@@ -65,7 +65,13 @@ class Model:
     xyz : numpy.ndarray
         Array containing the x, y and z coordinates
 
-    
+    Methods
+    -------
+    select(selection)
+        Select atoms from the model
+    select_index(selection)
+        Select atoms from the model and return the index
+
     """
 
     def __init__(self):

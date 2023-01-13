@@ -23,9 +23,9 @@ Main features:
 Author
 --------------
 
-* `Samuel Murail <https://samuelmurail.github.io/PersonalPage/>`_, Associate Professor - `Université Paris Cité <https://u-paris.fr>`_, `CMPLI <http://bfa.univ-paris-diderot.fr/equipe-8/`_.
+* `Samuel Murail <https://samuelmurail.github.io/PersonalPage/>`_, Associate Professor - `Université Paris Cité <https://u-paris.fr>`_, `CMPLI <http://bfa.univ-paris-diderot.fr/equipe-8/>`_.
 
-See also the list of `contributors <https://github.com/samuelmurail/pdb_numpy/contributors>`_` who participated in this project.
+See also the list of `contributors <https://github.com/samuelmurail/pdb_numpy/contributors>`_ who participated in this project.
 
 License
 --------------

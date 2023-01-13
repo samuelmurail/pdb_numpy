@@ -1,7 +1,7 @@
-docking_py
+PDB Numpy
 ==========
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
    pdb_numpy

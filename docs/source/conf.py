@@ -23,14 +23,16 @@ sys.path.insert(0, os.path.abspath('../../src/'))
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.todo',
-    'sphinx.ext.githubpages',
-    'sphinxarg.ext',
-    'sphinx.ext.mathjax',
-    'nbsphinx',
-]
+#extensions = [
+#    'sphinx.ext.autodoc',
+#    'sphinx.ext.todo',
+#    'sphinx.ext.githubpages',
+#    'sphinxarg.ext',
+#    'sphinx.ext.mathjax',
+#    'nbsphinx',
+#]
+
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage', 'numpydoc']
 
 templates_path = ['_templates']
 exclude_patterns = []

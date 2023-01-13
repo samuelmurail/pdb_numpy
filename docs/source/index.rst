@@ -8,8 +8,9 @@ Welcome to pdb_numpy's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Table of Contents:
 
+   readme
    modules
 
 

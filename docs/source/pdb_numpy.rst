@@ -1,30 +1,31 @@
 PDB\_Numpy package
 ===================
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   pdb_numpy.tests
 
 Submodules
 ----------
 
 
-pdb\_numpy.docking module
---------------------------
+pdb\_numpy.coor module
+----------------------
 
-.. automodule:: pdb_numpy
+.. automodule:: pdb_numpy.coor
    :members:
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+pdb\_numpy.model module
+-----------------------
 
-.. automodule:: pdb_numpy
+.. automodule:: pdb_numpy.model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pdb\_numpy.analysis module
+--------------------------
+
+.. automodule:: pdb_numpy.analysis
    :members:
    :undoc-members:
    :show-inheritance:

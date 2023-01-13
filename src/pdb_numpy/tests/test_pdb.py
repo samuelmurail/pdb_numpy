@@ -44,26 +44,32 @@ def test_get_pdb_models(tmp_path):
     assert test.model_num == 20
 
     assert test.len == 479
+    assert test.active_model == 0
 
     assert test.models[0].atom_dict["name_resname"][0, 1] == b"HIS"
+    assert test.resname[0] == b"HIS"
     assert test.models[0].resname[0] == b"HIS"
-    assert test.models[0].resid[0] == 1
-    assert test.models[0].name[0] == b"N"
-    assert test.models[0].num[0] == 1
-    assert test.models[0].x[0] == -11.432
-    assert test.models[0].y[0] == 14.757
-    assert test.models[0].z[0] == -14.63
-    assert list(test.models[0].atom_dict["xyz"][0, :]) == [-11.432, 14.757, -14.63]
+    assert test.resid[0] == 1
+    assert test.name[0] == b"N"
+    assert test.num[0] == 1
+    assert test.x[0] == -11.432
+    assert test.y[0] == 14.757
+    assert test.z[0] == -14.63
+    assert list(test.xyz[0, :]) == [-11.432, 14.757, -14.63]
+
+    test.active_model = 19
+    assert test.active_model == 19
 
     assert test.models[19].atom_dict["name_resname"][0, 1] == b"HIS"
-    assert test.models[19].resname[0] == b"HIS"
+    assert test.resname[0] == b"HIS"
     assert test.models[19].resid[0] == 1
     assert test.models[19].name[0] == b"N"
+    assert test.name[0] == b"N"
     assert test.models[19].num[0] == 1
     assert test.models[19].x[0] == 1.574
     assert test.models[19].y[0] == 17.66
     assert test.models[19].z[0] == -0.301
-    assert list(test.models[19].atom_dict["xyz"][0, :]) == [1.574, 17.66, -0.301]
+    assert list(test.xyz[0, :]) == [1.574, 17.66, -0.301]
     assert (
         test.crystal_pack
         == "CRYST1    1.000    1.000    1.000  90.00  90.00  90.00 P 1           1          \n"

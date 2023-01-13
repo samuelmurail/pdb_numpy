@@ -20,6 +20,8 @@ class Coor:
         List of Model objects
     crystal_pack : str
         Crystal Packing as a string
+    active_model : int
+        Index of the active model
 
     Methods
     -------
@@ -63,6 +65,7 @@ class Coor:
     """
 
     def __init__(self, coor_in=None, pdb_lines=None, pdb_id=None):
+        self.active_model = 0
         self.models = []
         self.crystal_pack = None
 
@@ -302,7 +305,7 @@ class Coor:
 
     @property
     def len(self):
-        return self.models[0].len
+        return self.models[self.active_model].len
 
     @property
     def model_num(self):
@@ -310,68 +313,68 @@ class Coor:
 
     @property
     def field(self):
-        return self.models[0].atom_dict["field"]
+        return self.models[self.active_model].atom_dict["field"]
 
     @property
     def num(self):
-        return self.models[0].atom_dict["num_resid_uniqresid"][:, 0]
+        return self.models[self.active_model].atom_dict["num_resid_uniqresid"][:, 0]
 
     @property
     def name(self):
-        return self.models[0].atom_dict["name_resname"][:, 0]
+        return self.models[self.active_model].atom_dict["name_resname"][:, 0]
 
     @property
     def resname(self):
-        return self.models[0].atom_dict["name_resname"][:, 1]
+        return self.models[self.active_model].atom_dict["name_resname"][:, 1]
 
     @property
     def alterloc(self):
-        return self.models[0].atom_dict["alterloc_chain_insertres"][:, 0]
+        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][:, 0]
 
     @property
     def chain(self):
-        return self.models[0].atom_dict["alterloc_chain_insertres"][:, 1]
+        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][:, 1]
 
     @property
     def insertres(self):
-        return self.models[0].atom_dict["alterloc_chain_insertres"][:, 2]
+        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][:, 2]
 
     @property
     def elem(self):
-        return self.models[0].atom_dict["alterloc_chain_insertres"][:, 3]
+        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][:, 3]
 
     @property
     def resid(self):
-        return self.models[0].atom_dict["num_resid_uniqresid"][:, 1]
+        return self.models[self.active_model].atom_dict["num_resid_uniqresid"][:, 1]
 
     @property
     def uniq_resid(self):
-        return self.models[0].atom_dict["num_resid_uniqresid"][:, 2]
+        return self.models[self.active_model].atom_dict["num_resid_uniqresid"][:, 2]
 
     @property
     def residue(self):
-        return self.models[0].atom_dict["num_resid_uniqresid"][:, 2]
+        return self.models[self.active_model].atom_dict["num_resid_uniqresid"][:, 2]
 
     @property
     def occ(self):
-        return self.models[0].atom_dict["occ_beta"][:, 0]
+        return self.models[self.active_model].atom_dict["occ_beta"][:, 0]
 
     @property
     def beta(self):
-        return self.models[0].atom_dict["occ_beta"][:, 1]
+        return self.models[self.active_model].atom_dict["occ_beta"][:, 1]
 
     @property
     def xyz(self):
-        return self.models[0].atom_dict["xyz"]
+        return self.models[self.active_model].atom_dict["xyz"]
 
     @property
     def x(self):
-        return self.models[0].atom_dict["xyz"][:, 0]
+        return self.models[self.active_model].atom_dict["xyz"][:, 0]
 
     @property
     def y(self):
-        return self.models[0].atom_dict["xyz"][:, 1]
+        return self.models[self.active_model].atom_dict["xyz"][:, 1]
 
     @property
     def z(self):
-        return self.models[0].atom_dict["xyz"][:, 2]
+        return self.models[self.active_model].atom_dict["xyz"][:, 2]

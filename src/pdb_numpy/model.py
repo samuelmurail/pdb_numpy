@@ -9,16 +9,6 @@ from scipy.spatial import distance_matrix
 
 from . import select
 
-# Autorship information
-__author__ = "Samuel Murail"
-__copyright__ = "Copyright 2022, RPBS"
-__credits__ = ["Samuel Murail"]
-__license__ = "GNU General Public License v2.0"
-__version__ = "0.0.1"
-__maintainer__ = "Samuel Murail"
-__email__ = "samuel.murail@u-paris.fr"
-__status__ = "Beta"
-
 # Logging
 logger = logging.getLogger(__name__)
 

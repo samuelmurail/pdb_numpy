@@ -160,9 +160,8 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
         if len(self.models) > 1 and local_model.len != self.models[-1].len:
             logger.warning(
                 f"The atom number is not the same in the model {len(self.models)-1} and the model {len(self.models)}."
-                )
+            )
         self.models.append(local_model)
-
 
 
 def get_PDB(self, pdb_ID):

@@ -96,12 +96,14 @@ def test_read_write_pdb(tmp_path, caplog):
                 == test2.models[0].atom_dict[key][:, 1:]
             ).all()
         else:
-            assert (test.models[0].atom_dict[key] == test2.models[0].atom_dict[key]).all()
+            assert (
+                test.models[0].atom_dict[key] == test2.models[0].atom_dict[key]
+            ).all()
 
     # Test if overwritting file is prevent
     test2.write_pdb(os.path.join(tmp_path, "test.pdb"))
 
-    #captured = caplog.records
+    # captured = caplog.records
 
     assert captured[-1].msg.startswith("PDB file ")
     assert captured[-1].msg.endswith("test.pdb already exist, file not saved")

@@ -9,24 +9,25 @@ import numpy as np
 # Logging
 logger = logging.getLogger(__name__)
 
+
 class Coor:
     """Coordinate and topologie object based on coordinates
     like pdb or gro files.
-    
+
     Attributes
     ----------
     models : list
         List of Model objects
     crystal_pack : str
         Crystal Packing as a string
-    
+
     Methods
     -------
     read_file(file_in)
         Read a pdb file and store atom informations as a dictionnary
         od numpy array. The fonction can also read pqr files if
         the file extension is .pqr
-    parse_pdb_lines(pdb_lines)  
+    parse_pdb_lines(pdb_lines)
         Parse a list of pdb lines and store atom informations as a dictionnary
         od numpy array. The fonction can also read pqr lines if
         the file extension is .pqr
@@ -57,7 +58,7 @@ class Coor:
         Return a string of amino acid sequence
     get_aa_DL_seq(model_num=0)
         Return a string of amino acid sequence with disulfide bonds
-    
+
 
     """
 
@@ -73,13 +74,27 @@ class Coor:
             self.get_PDB(pdb_id)
 
     try:
-        from ._pdb import parse_pdb_lines, get_PDB, write_pdb, get_pdb_string, write_pqr, get_pqr_string
+        from ._pdb import (
+            parse_pdb_lines,
+            get_PDB,
+            write_pdb,
+            get_pdb_string,
+            write_pqr,
+            get_pqr_string,
+        )
         from ._alignement import get_aa_seq, get_aa_DL_seq
     except ImportError:
-        logger.warning('ImportError: pdb_numpy is not installed, using local files')
-        from _pdb import parse_pdb_lines, get_PDB, write_pdb, get_pdb_string, write_pqr, get_pqr_string
+        logger.warning("ImportError: pdb_numpy is not installed, using local files")
+        from _pdb import (
+            parse_pdb_lines,
+            get_PDB,
+            write_pdb,
+            get_pdb_string,
+            write_pqr,
+            get_pqr_string,
+        )
         from _alignement import get_aa_seq, get_aa_DL_seq
-    
+
     def read_file(self, file_in):
         """Read a pdb/pqr/gro file and return atom informations as a Coor
         object.
@@ -127,14 +142,14 @@ class Coor:
 
     def change_order(self, field, order_list):
         """Change the order of the atoms in the model
-        
+
         Parameters
         ----------
         field : str
             Field to change the order
         order_list : list
             List of the new order
-        
+
         Returns
         -------
         None
@@ -172,25 +187,36 @@ class Coor:
 
             for field_uniq in field_uniqs:
                 if field_uniq not in order_list:
-                    logger.info(f"Field {field_uniq} not found in order list, will be added at the end")
+                    logger.info(
+                        f"Field {field_uniq} not found in order list, will be added at the end"
+                    )
                     order_list.append(field_uniq)
-        
+
         new_order = np.array([], dtype=np.int32)
         for value in order_list:
-            new_order = np.append(new_order, np.where(self.models[0].atom_dict[keyword][:, index] == value)[0])
-        
+            new_order = np.append(
+                new_order,
+                np.where(self.models[0].atom_dict[keyword][:, index] == value)[0],
+            )
+
         assert len(new_order) == self.len, "Inconsistent number of atoms"
 
         for model in self.models:
-            for key in ["alterloc_chain_insertres", "name_resname", "num_resid_uniqresid", "xyz", "occ_beta"]:
-                model.atom_dict[key] = model.atom_dict[key][new_order,:]
+            for key in [
+                "alterloc_chain_insertres",
+                "name_resname",
+                "num_resid_uniqresid",
+                "xyz",
+                "occ_beta",
+            ]:
+                model.atom_dict[key] = model.atom_dict[key][new_order, :]
         self.reset_residue_index()
-        
+
         return
 
     def reset_residue_index(self):
         """Reset the residue index to the original index of the pdb file.
-        
+
         Returns
         -------
         None
@@ -205,7 +231,7 @@ class Coor:
                     residue += 1
                     last_residue = model.atom_dict["num_resid_uniqresid"][i, 2]
                 model.atom_dict["num_resid_uniqresid"][i, 1] = residue
-        
+
         return
 
     def select_index(self, indexes):
@@ -232,7 +258,6 @@ class Coor:
 
         return new_coor
 
-
     def get_index_select(self, selection, frame=0):
         """Return index from the PDB file based on the selection string.
 
@@ -253,7 +278,6 @@ class Coor:
 
         indexes = self.models[frame].get_index_select(selection)
         return indexes
-
 
     def select_atoms(self, selection, frame=0):
         """Select atoms from the PDB file based on the selection string.
@@ -276,7 +300,6 @@ class Coor:
         indexes = self.models[frame].get_index_select(selection)
         return self.select_index(indexes)
 
-
     @property
     def len(self):
         return self.models[0].len
@@ -284,7 +307,7 @@ class Coor:
     @property
     def model_num(self):
         return len(self.models)
-    
+
     @property
     def field(self):
         return self.models[0].atom_dict["field"]

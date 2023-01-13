@@ -1,7 +1,7 @@
-PDB Numpy
-==========
+pdb_numpy
+=========
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
    pdb_numpy

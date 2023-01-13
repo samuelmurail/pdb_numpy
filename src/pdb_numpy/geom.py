@@ -219,7 +219,6 @@ def atom_dihed_angle(atom_a, atom_b, atom_c, atom_d):
     return np.degrees(angle)
 
 
-
 def quaternion_transform(r):
     """
     Source: https://github.com/charnley/rmsd/blob/master/rmsd/\
@@ -233,18 +232,18 @@ def quaternion_transform(r):
     rot = Wt_r.dot(Q_r)[:3, :3]
     return rot
 
+
 def makeW(r1, r2, r3, r4=0):
     """
     Source: https://github.com/charnley/rmsd/blob/master/rmsd/\
     calculate_rmsd.py
     matrix involved in quaternion rotation
     """
-    W = np.asarray([
-        [r4, r3, -r2, r1],
-        [-r3, r4, r1, r2],
-        [r2, -r1, r4, r3],
-        [-r1, -r2, -r3, r4]])
+    W = np.asarray(
+        [[r4, r3, -r2, r1], [-r3, r4, r1, r2], [r2, -r1, r4, r3], [-r1, -r2, -r3, r4]]
+    )
     return W
+
 
 def makeQ(r1, r2, r3, r4=0):
     """
@@ -252,12 +251,11 @@ def makeQ(r1, r2, r3, r4=0):
     calculate_rmsd.py
     matrix involved in quaternion rotation
     """
-    Q = np.asarray([
-        [r4, -r3, r2, r1],
-        [r3, r4, -r1, r2],
-        [-r2, r1, r4, r3],
-        [-r1, -r2, -r3, r4]])
+    Q = np.asarray(
+        [[r4, -r3, r2, r1], [r3, r4, -r1, r2], [-r2, r1, r4, r3], [-r1, -r2, -r3, r4]]
+    )
     return Q
+
 
 def quaternion_rotate(X, Y):
     """

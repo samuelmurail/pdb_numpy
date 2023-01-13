@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 class Model:
     """Model class for pdb_numpy
-    
+
     Attributes
     ----------
     atom_dict : dict
@@ -217,8 +217,6 @@ class Model:
     def occ(self, value):
         self.atom_dict["occ_beta"][:, 0] = value
 
-
-
     def simple_select_atoms(self, column, values, operator="=="):
         """Select atoms from the PDB file based on the selection tokens.
         Selection tokens are simple selection containing only one
@@ -245,7 +243,6 @@ class Model:
         list
             a list of boolean values for each atom in the PDB file
         """
-
 
         keyword_dict = {
             "num": ["num_resid_uniqresid", 0],
@@ -294,7 +291,6 @@ class Model:
             else:
                 values = np.array([values], dtype="|S4")
 
-
         if operator == "==":
             bool_val = self.atom_dict[col][:, index] == values
         elif operator == "!=":
@@ -313,7 +309,6 @@ class Model:
             raise ValueError(f"Operator {operator} not recognized")
 
         return bool_val
-
 
     def select_tokens(self, tokens):
         """Select atoms from the PDB file based on the selection tokens.
@@ -346,11 +341,9 @@ class Model:
             if tokens[1] in ["==", "!=", ">", ">=", "<", "<="]:
                 return self.simple_select_atoms(
                     column=tokens[0], values=tokens[2], operator=tokens[1]
-                    )
-            else:
-                return self.simple_select_atoms(
-                    column=tokens[0], values=tokens[1:]
                 )
+            else:
+                return self.simple_select_atoms(column=tokens[0], values=tokens[1:])
         # Case for within selection
         elif tokens[0] == "within":
             if len(tokens) != 4:
@@ -389,9 +382,8 @@ class Model:
                 logical = None
 
             i += 1
-        
-        return new_bool_list
 
+        return new_bool_list
 
     def select_index(self, indexes):
         """Select atoms from the PDB file based on the selection indexes.
@@ -418,7 +410,6 @@ class Model:
 
         return new_model
 
-
     def get_index_select(self, selection):
         """Return index from the PDB file based on the selection string.
 
@@ -443,7 +434,6 @@ class Model:
 
         return indexes[0]
 
-
     def select_atoms(self, selection):
         """Select atoms from the PDB file based on the selection string.
 
@@ -467,7 +457,6 @@ class Model:
         indexes = np.where(sel_list)
 
         return self.select_index(indexes)
-
 
     def dist_under_index(self, sel_2, cutoff):
         """Select atoms from the PDB file based on distance.

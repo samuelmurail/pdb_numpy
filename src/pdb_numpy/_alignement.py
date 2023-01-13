@@ -28,6 +28,7 @@ __maintainer__ = "Samuel Murail"
 __email__ = "samuel.murail@u-paris.fr"
 __status__ = "Beta"
 
+
 def get_aa_seq(self, gap_in_seq=True, frame=0):
     """Get the amino acid sequence from a coor object.
 
@@ -315,7 +316,7 @@ def align_seq(seq_1, seq_2, gap_cost=-8, gap_extension=-2):
 
 def print_align_seq(seq_1, seq_2, line_len=80):
     """Print the aligned sequences with a line length of 80 characters.
-    
+
     Parameters
     ----------
     seq_1 : str
@@ -328,7 +329,7 @@ def print_align_seq(seq_1, seq_2, line_len=80):
     Returns
     -------
     None
-    
+
     """
 
     sim_seq = ""
@@ -453,9 +454,10 @@ def get_common_atoms(
     ), "Two selection don't have the same atom number"
     return align_sel_1, align_sel_2
 
+
 def coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0):
     """Align two structure.
-    
+
     Parameters
     ----------
     coor_1 : Coor
@@ -485,15 +487,23 @@ def coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0):
         model.xyz -= centroid_1
 
         rot_mat = geom.quaternion_rotate(model.xyz[index_1], ref_coor)
-        
+
         model.xyz = np.dot(model.xyz, rot_mat)
         model.xyz += centroid_2
-    
+
     coor_2.models[frame_ref].xyz += centroid_2
 
-def align_seq_based(coor_1, coor_2, chain_1=["A"], chain_2=["A"], back_names=["C", "N", "O", "CA"], compute_rmsd=True):
+
+def align_seq_based(
+    coor_1,
+    coor_2,
+    chain_1=["A"],
+    chain_2=["A"],
+    back_names=["C", "N", "O", "CA"],
+    compute_rmsd=True,
+):
     """Align two structure based on sequence alignement.
-    
+
     Parameters
     ----------
     coor_1 : Coor
@@ -521,16 +531,26 @@ def align_seq_based(coor_1, coor_2, chain_1=["A"], chain_2=["A"], back_names=["C
 
     index_1, index_2 = get_common_atoms(coor_1, coor_2, chain_1, chain_2, back_names)
     coor_align(coor_1, coor_2, index_1, index_2)
-    
 
     if compute_rmsd:
-        return analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2]), [index_1, index_2]
+        return analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2]), [
+            index_1,
+            index_2,
+        ]
     else:
         return None, [index_1, index_2]
 
-def rmsd_seq_based(coor_1, coor_2, chain_1=["A"], chain_2=["A"], back_names=["C", "N", "O", "CA"], compute_rmsd=True):
+
+def rmsd_seq_based(
+    coor_1,
+    coor_2,
+    chain_1=["A"],
+    chain_2=["A"],
+    back_names=["C", "N", "O", "CA"],
+    compute_rmsd=True,
+):
     """Align two structure based on sequence alignement.
-    
+
     Parameters
     ----------
     coor_1 : Coor
@@ -557,5 +577,7 @@ def rmsd_seq_based(coor_1, coor_2, chain_1=["A"], chain_2=["A"], back_names=["C"
     """
 
     index_1, index_2 = get_common_atoms(coor_1, coor_2, chain_1, chain_2, back_names)
-    return analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2]), [index_1, index_2]
-
+    return analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2]), [
+        index_1,
+        index_2,
+    ]

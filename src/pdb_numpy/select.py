@@ -180,7 +180,7 @@ def parse_selection(selection):
         selection = selection.replace(char, f" {char[0]+char[-1]} ")
     for nickname in NICKNAMES:
         selection = selection.replace(nickname, NICKNAMES[nickname])
-    
+
     tokens = selection.split()
 
     tokens = parse_parentheses(tokens)
@@ -213,9 +213,8 @@ def is_simple_list(tokens):
     return True
 
 
-
-def remove_incomplete_backbone_residues(coor, back_atom=['CA', 'C', 'N', 'O']):
-    """ Remove residue with non complete backbone atoms
+def remove_incomplete_backbone_residues(coor, back_atom=["CA", "C", "N", "O"]):
+    """Remove residue with non complete backbone atoms
 
     Parameters
     ----------
@@ -230,19 +229,19 @@ def remove_incomplete_backbone_residues(coor, back_atom=['CA', 'C', 'N', 'O']):
         a new Coor object with the selected atoms
     """
 
-    no_alter_loc = coor.select_atoms('not altloc B C D')
+    no_alter_loc = coor.select_atoms("not altloc B C D")
 
     # Get all backbone atoms
     backbone = no_alter_loc.select_atoms(f'name {" ".join(back_atom)}')
     uniq_res_num = np.unique(backbone.models[0].uniq_resid)
 
-    if len(uniq_res_num)*len(back_atom) == backbone.len:
+    if len(uniq_res_num) * len(back_atom) == backbone.len:
         return no_alter_loc
-    
+
     uniq_res_to_remove = []
     for uniq_res in uniq_res_num:
         if sum(backbone.models[0].uniq_resid == uniq_res) != len(back_atom):
             uniq_res_to_remove.append(uniq_res)
-            logger.warning(f'Removing residue {uniq_res} has incomplete backbone atoms')
+            logger.warning(f"Removing residue {uniq_res} has incomplete backbone atoms")
 
     return no_alter_loc.select_atoms(f'not residue {" ".join(uniq_res_to_remove)}')

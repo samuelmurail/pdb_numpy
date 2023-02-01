@@ -14,7 +14,7 @@
 Pdb Numpy
 ==============
 
-Pdb_Manip_py is a python library allowing simple operations on pdb coor files.
+Pdb_Numpy is a python library allowing simple operations on pdb coor files.
 
 * Source code repository:
    https://github.com/samuelmurail/pdb_numpy

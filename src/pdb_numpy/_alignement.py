@@ -414,11 +414,11 @@ def get_common_atoms(
     for chain in chain_2:
         seq_2 += sel_2_seq[chain].replace("-", "")
 
-    assert len(sel_index_1) == len(seq_1) * len(back_names)
-    assert len(sel_index_2) == len(seq_2) * len(back_names)
+    assert len(sel_index_1) == len(seq_1) * len(back_names), "Incomplete backbone atoms for first Coor object"
+    assert len(sel_index_2) == len(seq_2) * len(back_names), "Incomplete backbone atoms for second Coor object"
 
     align_seq_1, align_seq_2 = align_seq(seq_1, seq_2)
-    # print_align_seq(align_seq_1, align_seq_2)
+    print_align_seq(align_seq_1, align_seq_2)
 
     align_sel_1 = []
     align_sel_2 = []

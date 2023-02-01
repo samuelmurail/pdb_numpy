@@ -224,27 +224,14 @@ def align_seq(seq_1, seq_2, gap_cost=-8, gap_extension=-2):
     # Initialize the matrix
     matrix = np.zeros((len_1 + 1, len_2 + 1))
 
-    # Initialize the traceback matrix
-    traceback = np.zeros((len_1 + 1, len_2 + 1))
-
     # Fill the matrix
     for i in range(1, len_1 + 1):
         for j in range(1, len_2 + 1):
             # Identify the BLOSUM62 score
-            if (seq_1[i - 1], seq_2[j - 1]) in BLOSUM62:
-                match = matrix[i - 1, j - 1] + BLOSUM62[(seq_1[i - 1], seq_2[j - 1])]
-            else:
-                match = matrix[i - 1, j - 1] + BLOSUM62[(seq_2[j - 1], seq_1[i - 1])]
+            match = matrix[i - 1, j - 1] + BLOSUM62[(seq_2[j - 1], seq_1[i - 1])]
             delete = matrix[i - 1, j] + gap_cost
             insert = matrix[i, j - 1] + gap_cost
             matrix[i, j] = max(match, delete, insert)
-
-            if matrix[i, j] == match:
-                traceback[i, j] = 1
-            elif matrix[i, j] == delete:
-                traceback[i, j] = 2
-            elif matrix[i, j] == insert:
-                traceback[i, j] = 3
 
     # Identify the maximum score
     min_seq = min(len_1, len_2)
@@ -276,16 +263,16 @@ def align_seq(seq_1, seq_2, gap_cost=-8, gap_extension=-2):
     align_2 += seq_2[j:]
 
     while i != 0 and j != 0:
-        if traceback[i, j] == 1:
+        if matrix[i, j] == matrix[i - 1, j - 1] + BLOSUM62[(seq_1[i - 1], seq_2[j - 1])]:
             align_1 = seq_1[i - 1] + align_1
             align_2 = seq_2[j - 1] + align_2
             i -= 1
             j -= 1
-        elif traceback[i, j] == 2:
+        elif matrix[i, j] == matrix[i - 1, j] + gap_cost:
             align_1 = seq_1[i - 1] + align_1
             align_2 = "-" + align_2
             i -= 1
-        elif traceback[i, j] == 3:
+        elif matrix[i, j] == matrix[i, j - 1] + gap_cost:
             align_1 = "-" + align_1
             align_2 = seq_2[j - 1] + align_2
             j -= 1

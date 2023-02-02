@@ -224,14 +224,32 @@ def align_seq(seq_1, seq_2, gap_cost=-8, gap_extension=-2):
     # Initialize the matrix
     matrix = np.zeros((len_1 + 1, len_2 + 1))
 
+    prev_line = np.zeros((len_2 + 1), dtype=bool)
+
     # Fill the matrix
     for i in range(1, len_1 + 1):
+        # print(i)
+        prev = False  # insertion matrix[i, j - 1]
         for j in range(1, len_2 + 1):
             # Identify the BLOSUM62 score
             match = matrix[i - 1, j - 1] + BLOSUM62[(seq_2[j - 1], seq_1[i - 1])]
-            delete = matrix[i - 1, j] + gap_cost
-            insert = matrix[i, j - 1] + gap_cost
-            matrix[i, j] = max(match, delete, insert)
+            gap_delete = gap_extension if prev else gap_cost
+            gap_insert = gap_extension if prev_line[j] else gap_cost
+            delete = matrix[i - 1, j] + gap_delete
+            insert = matrix[i, j - 1] + gap_insert
+
+            if match > delete and match > insert:
+                prev_line[j] = False
+                prev = False
+                matrix[i, j] = match
+            elif delete > insert:
+                prev_line[j] = False
+                prev = True
+                matrix[i, j] = delete
+            else:
+                prev_line[j] = True
+                prev = False
+                matrix[i, j] = insert
 
     # Identify the maximum score
     min_seq = min(len_1, len_2)
@@ -263,16 +281,25 @@ def align_seq(seq_1, seq_2, gap_cost=-8, gap_extension=-2):
     align_2 += seq_2[j:]
 
     while i != 0 and j != 0:
-        if matrix[i, j] == matrix[i - 1, j - 1] + BLOSUM62[(seq_1[i - 1], seq_2[j - 1])]:
+        if (
+            matrix[i, j]
+            == matrix[i - 1, j - 1] + BLOSUM62[(seq_1[i - 1], seq_2[j - 1])]
+        ):
             align_1 = seq_1[i - 1] + align_1
             align_2 = seq_2[j - 1] + align_2
             i -= 1
             j -= 1
-        elif matrix[i, j] == matrix[i - 1, j] + gap_cost:
+        elif (
+            matrix[i, j] == matrix[i - 1, j] + gap_cost
+            or matrix[i, j] == matrix[i - 1, j] + gap_extension
+        ):
             align_1 = seq_1[i - 1] + align_1
             align_2 = "-" + align_2
             i -= 1
-        elif matrix[i, j] == matrix[i, j - 1] + gap_cost:
+        elif (
+            matrix[i, j] == matrix[i, j - 1] + gap_cost
+            or matrix[i, j] == matrix[i, j - 1] + gap_extension
+        ):
             align_1 = "-" + align_1
             align_2 = seq_2[j - 1] + align_2
             j -= 1
@@ -401,8 +428,12 @@ def get_common_atoms(
     for chain in chain_2:
         seq_2 += sel_2_seq[chain].replace("-", "")
 
-    assert len(sel_index_1) == len(seq_1) * len(back_names), "Incomplete backbone atoms for first Coor object"
-    assert len(sel_index_2) == len(seq_2) * len(back_names), "Incomplete backbone atoms for second Coor object"
+    assert len(sel_index_1) == len(seq_1) * len(
+        back_names
+    ), "Incomplete backbone atoms for first Coor object"
+    assert len(sel_index_2) == len(seq_2) * len(
+        back_names
+    ), "Incomplete backbone atoms for second Coor object"
 
     align_seq_1, align_seq_2 = align_seq(seq_1, seq_2)
     print_align_seq(align_seq_1, align_seq_2)

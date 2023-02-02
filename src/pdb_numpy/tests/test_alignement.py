@@ -71,10 +71,10 @@ def test_seq_align(caplog):
     alignement.print_align_seq(align_seq_1, align_seq_2, line_len=80)
     captured = caplog.records
 
-    assert captured[-4].msg == "Identity seq1: 23.66%"
-    assert captured[-3].msg == "Identity seq2: 21.93%"
-    assert captured[-2].msg == "Similarity seq1: 61.51%"
-    assert captured[-1].msg == "Similarity seq2: 57.02%"
+    assert captured[-4].msg == "Identity seq1: 28.71%"
+    assert captured[-3].msg == "Identity seq2: 26.61%"
+    assert captured[-2].msg == "Similarity seq1: 65.30%"
+    assert captured[-1].msg == "Similarity seq2: 60.53%"
 
     seq_1 = "AQDMVSPPPPIADEPLTVNTGIYLIECYSLDDKAETFKVNAFLSLSWKDRRLAFDPV"
     seq_2 = "AQDMVSPPPPIADEPLTVN"
@@ -124,6 +124,17 @@ def test_seq_align(caplog):
     assert captured[-2].msg == "Similarity seq1: 100.00%"
     assert captured[-1].msg == "Similarity seq2: 33.33%"
 
+    seq_1 = "AQDMVSPPPPIADEPLTVNSLSWKDRRL"
+    seq_2 = "AQDMVSPPPPIADEPLTVNTGIYLIECYSLDDKAETFKVNAFLSLSWKDRRLAFDPV"
+
+    align_seq_1, align_seq_2 = alignement.align_seq(seq_1, seq_2)
+    alignement.print_align_seq(align_seq_1, align_seq_2, line_len=80)
+    captured = caplog.records
+
+    assert captured[-4].msg == "Identity seq1: 100.00%"
+    assert captured[-3].msg == "Identity seq2: 33.33%"
+    assert captured[-2].msg == "Similarity seq1: 100.00%"
+    assert captured[-1].msg == "Similarity seq2: 33.33%"
 
 def test_get_common_atoms():
 
@@ -147,26 +158,26 @@ def test_align_seq_based():
     rmsds, _ = alignement.align_seq_based(coor_1, coor_2, chain_1=["A"], chain_2=["C"])
 
     expected_rmsds = [
-        4.30748178690184,
-        3.7504159976361806,
-        2.7068940076423074,
-        2.600529077576382,
-        2.656892136667444,
-        4.7544497391667395,
-        4.792903631775622,
-        3.7151001906610728,
-        2.9370087025705742,
-        4.037471216056802,
-        4.665874324427908,
-        5.097241378405115,
-        4.235201820344594,
-        3.626302556868146,
-        4.4185432599691,
-        4.811605005671994,
-        4.771841985503643,
-        2.66502640408188,
-        3.659934863246669,
-        3.415988136254585,
+        4.551392068864117,
+        3.692734305896772,
+        2.961440392183652,
+        2.918557421940943,
+        2.968167115959881,
+        4.713840805152014,
+        4.905764779023341,
+        3.64433762590341,
+        3.0390811834360276,
+        4.135482660281541,
+        4.756941670520779,
+        5.167595261532749,
+        4.1688244243418,
+        3.696836176306741,
+        4.733270329584532,
+        4.833551346702968,
+        4.879533969775495,
+        2.863993756859103,
+        3.689521386288375,
+        3.3868095168417947,
     ]
 
     for expected_rmsd, rmsd in zip(expected_rmsds, rmsds):

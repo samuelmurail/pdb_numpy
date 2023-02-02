@@ -329,19 +329,27 @@ class Coor:
 
     @property
     def alterloc(self):
-        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][:, 0]
+        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][
+            :, 0
+        ]
 
     @property
     def chain(self):
-        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][:, 1]
+        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][
+            :, 1
+        ]
 
     @property
     def insertres(self):
-        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][:, 2]
+        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][
+            :, 2
+        ]
 
     @property
     def elem(self):
-        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][:, 3]
+        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][
+            :, 3
+        ]
 
     @property
     def resid(self):

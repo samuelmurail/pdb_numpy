@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 def show_log():
     logger.setLevel(logging.INFO)
-    logger.addHandler(logging.StreamHandler(sys.stdout))
+    # logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
 from .coor import Coor

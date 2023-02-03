@@ -5,6 +5,8 @@ import logging
 import os
 import copy
 import numpy as np
+from .data.aa_dict import AA_DICT
+from . import geom
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -85,7 +87,8 @@ class Coor:
             write_pqr,
             get_pqr_string,
         )
-        from .alignement import get_aa_seq, get_aa_DL_seq
+
+        # from .alignement import get_aa_seq, get_aa_DL_seq
     except ImportError:
         logger.warning("ImportError: pdb_numpy is not installed, using local files")
         from _pdb import (
@@ -96,7 +99,8 @@ class Coor:
             write_pqr,
             get_pqr_string,
         )
-        from pdb_numpy.alignement import get_aa_seq, get_aa_DL_seq
+
+        # from pdb_numpy.alignement import get_aa_seq, get_aa_DL_seq
 
     def read_file(self, file_in):
         """Read a pdb/pqr/gro file and return atom informations as a Coor
@@ -302,6 +306,185 @@ class Coor:
 
         indexes = self.models[frame].get_index_select(selection)
         return self.select_index(indexes)
+
+    def get_aa_seq(self, gap_in_seq=True, frame=0):
+        """Get the amino acid sequence from a coor object.
+
+        Parameters
+        ----------
+        self : Coor
+            Coor object
+        gap_in_seq : bool, optional
+            if True, add gaps in the sequence, by default True
+        frame : int
+            Frame number for the selection, default is 0
+    
+        Returns
+        -------
+        dict
+            Dictionary with chain as key and sequence as value.
+        
+        :Example:
+
+        >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))\
+        >>> prot_coor.get_aa_seq()
+        {'A': 'TFKSAVKALFDYKAQREDELTFTKSAIIQNVEKQDGGWWRGDYGGKKQLWFPSNYVEEMIN'}
+
+        .. warning::
+            If atom chains are not arranged sequentialy (A,A,A,B,B,A,A,A ...),
+            the first atom seq will be overwritten by the last one.
+
+        """
+
+        # Get CA atoms
+        CA_sel = self.select_atoms("name CA", frame=frame)
+
+        seq_dict = {}
+        aa_num_dict = {}
+
+        for i in range(CA_sel.len):
+
+            chain = (
+                CA_sel.models[frame]
+                .atom_dict["alterloc_chain_insertres"][i, 1]
+                .astype(np.str_)
+            )
+            res_name = (
+                CA_sel.models[frame].atom_dict["name_resname"][i, 1].astype(np.str_)
+            )
+            resid = CA_sel.models[frame].atom_dict["num_resid_uniqresid"][i, 1]
+
+            if chain not in seq_dict:
+                seq_dict[chain] = ""
+                aa_num_dict[chain] = resid
+
+            if res_name in AA_DICT:
+                if resid != aa_num_dict[chain] + 1 and len(seq_dict[chain]) != 0:
+                    logger.info(
+                        f"Residue {chain}:{res_name}:{resid} is "
+                        f"not consecutive, there might be missing "
+                        f"residues"
+                    )
+                    if gap_in_seq:
+                        seq_dict[chain] += "-" * (resid - aa_num_dict[chain] - 1)
+                seq_dict[chain] += AA_DICT[res_name]
+                aa_num_dict[chain] = resid
+            else:
+                logger.warning(f"Residue {res_name} in chain {chain} not " "recognized")
+
+        return seq_dict
+
+    def get_aa_DL_seq(self, gap_in_seq=True, frame=0):
+        """Get the amino acid sequence from a coor object.
+        if amino acid is in D form it will be in lower case.
+
+        L or D form is determined using CA-N-C-CB angle
+        Angle should take values around +34° and -34° for
+        L- and D-amino acid residues.
+        
+        Reference:
+        https://onlinelibrary.wiley.com/doi/full/10.1002/prot.10320
+
+        Parameters
+        ----------
+        self : Coor
+            Coor object
+        gap_in_seq : bool, optional
+            if True, add gaps in the sequence, by default True
+        frame : int
+            Frame number for the selection, default is 0
+        
+        Returns
+        -------
+        dict
+            Dictionary with chain as key and sequence as value.
+        
+        :Example:
+
+        >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))\
+        #doctest: +ELLIPSIS
+        Succeed to read file ...1y0m.pdb ,  648 atoms found
+        >>> prot_coor.get_aa_DL_seq()
+        {'A': 'TFKSAVKALFDYKAQREDELTFTKSAIIQNVEKQDGGWWRGDYGGKKQLWFPSNYVEEMIN'}
+        >>> prot_coor = Coor(os.path.join(TEST_PATH, '6be9_frame_0.pdb'))\
+        #doctest: +ELLIPSIS
+        Succeed to read file ...6be9_frame_0.pdb ,  104 atoms found
+        >>> prot_coor.get_aa_DL_seq()
+        Residue K2 is in D form
+        Residue N6 is in D form
+        Residue P7 is in D form
+        {'A': 'TkNDTnp'}
+
+        .. warning::
+            If atom chains are not arranged sequentialy (A,A,A,B,B,A,A,A ...),
+            the first atom seq will be overwritten by the last one.
+
+        """
+
+        # Get CA atoms
+        CA_index = self.get_index_select("name CA and not altloc B C D", frame=frame)
+        print(CA_index)
+        N_C_CB_sel = self.select_atoms("name N C CB and not altloc B C D", frame=frame)
+
+        seq_dict = {}
+        aa_num_dict = {}
+
+        for i in CA_index:
+
+            chain = (
+                self.models[frame]
+                .atom_dict["alterloc_chain_insertres"][i, 1]
+                .astype(np.str_)
+            )
+            res_name = (
+                self.models[frame].atom_dict["name_resname"][i, 1].astype(np.str_)
+            )
+            resid = self.models[frame].atom_dict["num_resid_uniqresid"][i, 1]
+            uniq_resid = self.models[frame].atom_dict["num_resid_uniqresid"][i, 2]
+
+            if chain not in seq_dict:
+                seq_dict[chain] = ""
+                aa_num_dict[chain] = resid
+
+            if res_name in AA_DICT:
+                if resid != aa_num_dict[chain] + 1 and len(seq_dict[chain]) != 0:
+                    logger.warning(
+                        f"Residue {chain}:{res_name}:{resid} is "
+                        "not consecutive, there might be missing "
+                        "residues"
+                    )
+                    if gap_in_seq:
+                        seq_dict[chain] += "-" * (resid - aa_num_dict[chain] - 1)
+                if res_name == "GLY":
+                    seq_dict[chain] += "G"
+                else:
+                    N_index = N_C_CB_sel.get_index_select(
+                        f"name N and residue {uniq_resid}", frame=frame
+                    )[0]
+                    C_index = N_C_CB_sel.get_index_select(
+                        f"name C and residue {uniq_resid}", frame=frame
+                    )[0]
+                    CB_index = N_C_CB_sel.get_index_select(
+                        f"name CB and residue {uniq_resid}", frame=frame
+                    )[0]
+                    dihed = geom.atom_dihed_angle(
+                        self.models[frame].atom_dict["xyz"][i],
+                        N_C_CB_sel.models[frame].atom_dict["xyz"][N_index],
+                        N_C_CB_sel.models[frame].atom_dict["xyz"][C_index],
+                        N_C_CB_sel.models[frame].atom_dict["xyz"][CB_index],
+                    )
+                    if dihed > 0:
+                        seq_dict[chain] += AA_DICT[res_name]
+                    else:
+                        logger.warning(
+                            f"Residue {AA_DICT[res_name]}{resid} is in D form"
+                        )
+                        seq_dict[chain] += AA_DICT[res_name].lower()
+                aa_num_dict[chain] = resid
+            else:
+                logger.warning(f"Residue {res_name} in chain {chain} not " "recognized")
+
+        return seq_dict
 
     @property
     def len(self):

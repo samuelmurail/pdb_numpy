@@ -6,192 +6,11 @@ from itertools import permutations
 import logging
 
 from . import analysis
+from . import geom
 from .data.blosum import BLOSUM62
-from .data.aa_dict import AA_DICT
-
-try:
-    from . import geom
-except ImportError:
-    import pdb_numpy.geom as geom
-    import pdb_numpy.analysis as analysis
 
 # Logging
 logger = logging.getLogger(__name__)
-
-
-def get_aa_seq(self, gap_in_seq=True, frame=0):
-    """Get the amino acid sequence from a coor object.
-
-    Parameters
-    ----------
-    self : Coor
-        Coor object
-    gap_in_seq : bool, optional
-        if True, add gaps in the sequence, by default True
-    frame : int
-        Frame number for the selection, default is 0
-   
-    Returns
-    -------
-    dict
-        Dictionary with chain as key and sequence as value.
-    
-    :Example:
-
-    >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))\
-    >>> prot_coor.get_aa_seq()
-    {'A': 'TFKSAVKALFDYKAQREDELTFTKSAIIQNVEKQDGGWWRGDYGGKKQLWFPSNYVEEMIN'}
-
-    .. warning::
-        If atom chains are not arranged sequentialy (A,A,A,B,B,A,A,A ...),
-        the first atom seq will be overwritten by the last one.
-
-    """
-
-    # Get CA atoms
-    CA_sel = self.select_atoms("name CA", frame=frame)
-
-    seq_dict = {}
-    aa_num_dict = {}
-
-    for i in range(CA_sel.len):
-
-        chain = (
-            CA_sel.models[frame]
-            .atom_dict["alterloc_chain_insertres"][i, 1]
-            .astype(np.str_)
-        )
-        res_name = CA_sel.models[frame].atom_dict["name_resname"][i, 1].astype(np.str_)
-        resid = CA_sel.models[frame].atom_dict["num_resid_uniqresid"][i, 1]
-
-        if chain not in seq_dict:
-            seq_dict[chain] = ""
-            aa_num_dict[chain] = resid
-
-        if res_name in AA_DICT:
-            if resid != aa_num_dict[chain] + 1 and len(seq_dict[chain]) != 0:
-                logger.info(
-                    f"Residue {chain}:{res_name}:{resid} is "
-                    f"not consecutive, there might be missing "
-                    f"residues"
-                )
-                if gap_in_seq:
-                    seq_dict[chain] += "-" * (resid - aa_num_dict[chain] - 1)
-            seq_dict[chain] += AA_DICT[res_name]
-            aa_num_dict[chain] = resid
-        else:
-            logger.warning(f"Residue {res_name} in chain {chain} not " "recognized")
-
-    return seq_dict
-
-
-def get_aa_DL_seq(self, gap_in_seq=True, frame=0):
-    """Get the amino acid sequence from a coor object.
-    if amino acid is in D form it will be in lower case.
-
-    L or D form is determined using CA-N-C-CB angle
-    Angle should take values around +34° and -34° for
-    L- and D-amino acid residues.
-    
-    Reference:
-    https://onlinelibrary.wiley.com/doi/full/10.1002/prot.10320
-
-    Parameters
-    ----------
-    self : Coor
-        Coor object
-    gap_in_seq : bool, optional
-        if True, add gaps in the sequence, by default True
-    frame : int
-        Frame number for the selection, default is 0
-    
-    Returns
-    -------
-    dict
-        Dictionary with chain as key and sequence as value.
-    
-    :Example:
-
-    >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))\
-    #doctest: +ELLIPSIS
-    Succeed to read file ...1y0m.pdb ,  648 atoms found
-    >>> prot_coor.get_aa_DL_seq()
-    {'A': 'TFKSAVKALFDYKAQREDELTFTKSAIIQNVEKQDGGWWRGDYGGKKQLWFPSNYVEEMIN'}
-    >>> prot_coor = Coor(os.path.join(TEST_PATH, '6be9_frame_0.pdb'))\
-    #doctest: +ELLIPSIS
-    Succeed to read file ...6be9_frame_0.pdb ,  104 atoms found
-    >>> prot_coor.get_aa_DL_seq()
-    Residue K2 is in D form
-    Residue N6 is in D form
-    Residue P7 is in D form
-    {'A': 'TkNDTnp'}
-
-    .. warning::
-        If atom chains are not arranged sequentialy (A,A,A,B,B,A,A,A ...),
-        the first atom seq will be overwritten by the last one.
-
-    """
-
-    # Get CA atoms
-    CA_index = self.get_index_select("name CA and not altloc B C D", frame=frame)
-    print(CA_index)
-    N_C_CB_sel = self.select_atoms("name N C CB and not altloc B C D", frame=frame)
-
-    seq_dict = {}
-    aa_num_dict = {}
-
-    for i in CA_index:
-
-        chain = (
-            self.models[frame]
-            .atom_dict["alterloc_chain_insertres"][i, 1]
-            .astype(np.str_)
-        )
-        res_name = self.models[frame].atom_dict["name_resname"][i, 1].astype(np.str_)
-        resid = self.models[frame].atom_dict["num_resid_uniqresid"][i, 1]
-        uniq_resid = self.models[frame].atom_dict["num_resid_uniqresid"][i, 2]
-
-        if chain not in seq_dict:
-            seq_dict[chain] = ""
-            aa_num_dict[chain] = resid
-
-        if res_name in AA_DICT:
-            if resid != aa_num_dict[chain] + 1 and len(seq_dict[chain]) != 0:
-                logger.warning(
-                    f"Residue {chain}:{res_name}:{resid} is "
-                    "not consecutive, there might be missing "
-                    "residues"
-                )
-                if gap_in_seq:
-                    seq_dict[chain] += "-" * (resid - aa_num_dict[chain] - 1)
-            if res_name == "GLY":
-                seq_dict[chain] += "G"
-            else:
-                N_index = N_C_CB_sel.get_index_select(
-                    f"name N and residue {uniq_resid}", frame=frame
-                )[0]
-                C_index = N_C_CB_sel.get_index_select(
-                    f"name C and residue {uniq_resid}", frame=frame
-                )[0]
-                CB_index = N_C_CB_sel.get_index_select(
-                    f"name CB and residue {uniq_resid}", frame=frame
-                )[0]
-                dihed = geom.atom_dihed_angle(
-                    self.models[frame].atom_dict["xyz"][i],
-                    N_C_CB_sel.models[frame].atom_dict["xyz"][N_index],
-                    N_C_CB_sel.models[frame].atom_dict["xyz"][C_index],
-                    N_C_CB_sel.models[frame].atom_dict["xyz"][CB_index],
-                )
-                if dihed > 0:
-                    seq_dict[chain] += AA_DICT[res_name]
-                else:
-                    logger.warning(f"Residue {AA_DICT[res_name]}{resid} is in D form")
-                    seq_dict[chain] += AA_DICT[res_name].lower()
-            aa_num_dict[chain] = resid
-        else:
-            logger.warning(f"Residue {res_name} in chain {chain} not " "recognized")
-
-    return seq_dict
 
 
 def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
@@ -711,6 +530,7 @@ def rmsd_seq_based(
         index_2,
     ]
 
+
 def align_chain_permutation(coor_1, coor_2, chain_1=None, chain_2=None):
     """Align two structure based on chain permutation.
 
@@ -724,7 +544,7 @@ def align_chain_permutation(coor_1, coor_2, chain_1=None, chain_2=None):
         List of chain to consider in the first coordinate, by default None
     chain_2 : list, optional
         List of chain to consider in the second coordinate, by default None
-    
+
     Returns
     -------
     rmsd : list
@@ -732,46 +552,47 @@ def align_chain_permutation(coor_1, coor_2, chain_1=None, chain_2=None):
     index : list
         List of index of the first coordinate and the second coordinate
     """
-    
+
     if chain_1 is None:
-        chain_1 = [chain.decode('UTF-8') for chain in np.unique(coor_1.chain)]
+        chain_1 = [chain.decode("UTF-8") for chain in np.unique(coor_1.chain)]
     if chain_2 is None:
-        chain_2 = [chain.decode('UTF-8') for chain in np.unique(coor_2.chain)]
-    
+        chain_2 = [chain.decode("UTF-8") for chain in np.unique(coor_2.chain)]
+
     if len(chain_2) <= len(chain_1):
         chain_1_perm = list(permutations(chain_1, len(chain_2)))
         chain_2_perm = [chain_2] * len(chain_1_perm)
     else:
         chain_2_perm = list(permutations(chain_2, len(chain_1)))
-        chain_1_perm = [chain_1] * len(chain_2_perm)       
+        chain_1_perm = [chain_1] * len(chain_2_perm)
 
     # Compute atoms in common for all chains combination:
     index_common = {}
     for chain_i in chain_1:
         for chain_j in chain_2:
-            logger.info(f'compute  common atoms for {chain_i} and {chain_j}')
+            logger.info(f"compute  common atoms for {chain_i} and {chain_j}")
             index_1, index_2 = get_common_atoms(coor_1, coor_2, chain_i, chain_j)
-            index_common[chain_i, chain_j]= [index_1, index_2]
-    
+            index_common[chain_i, chain_j] = [index_1, index_2]
+
     rmsd_perm = []
     index_perm = []
     for perm_1, perm_2 in zip(chain_1_perm, chain_2_perm):
-        logger.info(f'Trying chains permutation: {" ".join(perm_1)} with {" ".join(perm_2)}')
+        logger.info(
+            f'Trying chains permutation: {" ".join(perm_1)} with {" ".join(perm_2)}'
+        )
         index_all_1 = []
         index_all_2 = []
-        
+
         for chain_i, chain_j in zip(perm_1, perm_2):
-            #index_1, index_2 = get_common_atoms(coor_1, coor_2, chain_i, chain_j)
+            # index_1, index_2 = get_common_atoms(coor_1, coor_2, chain_i, chain_j)
             index_1, index_2 = index_common[chain_i, chain_j]
             index_all_1 += index_1
             index_all_2 += index_2
-        
+
         coor_align(coor_1, coor_2, index_all_1, index_all_2)
         rmsd = analysis.rmsd(coor_1, coor_2, index_list=[index_all_1, index_all_2])
         rmsd_perm.append(rmsd)
-        index_perm.append ([index_all_1, index_all_2])
-    
-    
+        index_perm.append([index_all_1, index_all_2])
+
     min_index = 0
     min_rmsd = rmsd_perm[0][0]
     for i, rmsds in enumerate(rmsd_perm):
@@ -779,5 +600,5 @@ def align_chain_permutation(coor_1, coor_2, chain_1=None, chain_2=None):
             if rmsd < min_rmsd:
                 min_index = i
                 min_rmsd = rmsd
-    
-    return(rmsd_perm[min_index], index_perm[min_index])
+
+    return (rmsd_perm[min_index], index_perm[min_index])

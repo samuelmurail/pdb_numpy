@@ -73,8 +73,8 @@ def test_seq_align(caplog):
 
     assert captured[-4].msg == "Identity seq1: 28.71%"
     assert captured[-3].msg == "Identity seq2: 26.61%"
-    assert captured[-2].msg == "Similarity seq1: 65.30%"
-    assert captured[-1].msg == "Similarity seq2: 60.53%"
+    assert captured[-2].msg == "Similarity seq1: 63.41%"
+    assert captured[-1].msg == "Similarity seq2: 58.77%"
 
     seq_1 = "AQDMVSPPPPIADEPLTVNTGIYLIECYSLDDKAETFKVNAFLSLSWKDRRLAFDPV"
     seq_2 = "AQDMVSPPPPIADEPLTVN"

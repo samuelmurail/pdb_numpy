@@ -193,7 +193,7 @@ def get_aa_DL_seq(self, gap_in_seq=True, frame=0):
     return seq_dict
 
 
-def align_seq(seq_1, seq_2, gap_cost=-8, gap_extension=-2):
+def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     """Align two amino acid sequences using the Waterman - Smith Algorithm.
 
     Parameters
@@ -250,6 +250,127 @@ def align_seq(seq_1, seq_2, gap_cost=-8, gap_extension=-2):
                 prev_line[j] = True
                 prev = False
                 matrix[i, j] = insert
+
+    # Identify the maximum score
+    min_seq = min(len_1, len_2)
+    max_score = np.max(matrix[min_seq:, min_seq:])
+    max_index = np.where(matrix == max_score)
+
+    index_list = []
+    for i in range(len(max_index[0])):
+        if max_index[0][i] >= min_seq and max_index[1][i] >= min_seq:
+            index_list.append([max_index[0][i], max_index[1][i]])
+
+    if len(index_list) > 1:
+        logger.warning(f"Ambigous alignement, {len(index_list)} solutions exists")
+
+    i = index_list[0][0]
+    j = index_list[0][1]
+
+    # Traceback and compute the alignment
+    align_1 = ""
+    align_2 = ""
+
+    if i != len_1:
+        align_2 = (len_1 - i) * "-"
+
+    if j != len_2:
+        align_1 = (len_2 - j) * "-"
+
+    align_1 += seq_1[i:]
+    align_2 += seq_2[j:]
+
+    while i != 0 and j != 0:
+        if (
+            matrix[i, j]
+            == matrix[i - 1, j - 1] + BLOSUM62[(seq_1[i - 1], seq_2[j - 1])]
+        ):
+            align_1 = seq_1[i - 1] + align_1
+            align_2 = seq_2[j - 1] + align_2
+            i -= 1
+            j -= 1
+        elif (
+            matrix[i, j] == matrix[i - 1, j] + gap_cost
+            or matrix[i, j] == matrix[i - 1, j] + gap_extension
+        ):
+            align_1 = seq_1[i - 1] + align_1
+            align_2 = "-" + align_2
+            i -= 1
+        elif (
+            matrix[i, j] == matrix[i, j - 1] + gap_cost
+            or matrix[i, j] == matrix[i, j - 1] + gap_extension
+        ):
+            align_1 = "-" + align_1
+            align_2 = seq_2[j - 1] + align_2
+            j -= 1
+
+    align_1 = seq_1[:i] + align_1
+    align_2 = seq_2[:j] + align_2
+
+    if i != 0:
+        align_2 = i * "-" + align_2
+    elif j != 0:
+        align_1 = j * "-" + align_1
+
+    assert len(align_1) == len(align_2)
+
+    return align_1, align_2
+
+
+def align_seq_WS(seq_1, seq_2, gap_cost=-8):
+    """Align two amino acid sequences using the Waterman - Smith Algorithm.
+    without gap extensions.
+
+    Parameters
+    ----------
+    seq_1 : str
+        First sequence to align
+    seq_2 : str
+        Second sequence to align
+    gap_cost : int, optional
+        Cost of gap, by default -8
+
+    Returns
+    -------
+    str
+        Aligned sequence 1
+    str
+        Aligned sequence 2
+    """
+
+    seq_1 = seq_1.replace("-", "")
+    seq_2 = seq_2.replace("-", "")
+
+    len_1 = len(seq_1)
+    len_2 = len(seq_2)
+
+    # Initialize the matrix
+    matrix = np.zeros((len_1 + 1, len_2 + 1))
+
+    # Fill the matrix
+    for i in range(1, len_1 + 1):
+        # print(i)
+        for j in range(1, len_2 + 1):
+            # Identify the BLOSUM62 score
+            match = matrix[i - 1, j - 1] + BLOSUM62[(seq_2[j - 1], seq_1[i - 1])]
+            delete = matrix[i - 1, j] + gap_cost
+            insert = matrix[i, j - 1] + gap_cost
+
+            matrix[i, j] = max(0, match, delete, insert)
+            #if match > delete and match > insert:
+            #    matrix[i, j] = match
+            #    #print('Match')
+            #elif delete > insert:
+            #    matrix[i, j] = delete
+            #    #print('Delete')
+            #else:
+            #    matrix[i, j] = insert
+            #    #print('Insert')
+
+    for i in range(1, len_1 + 1):
+        for j in range(1, len_2 + 1):
+            print(matrix[i, j], end=' ')
+        print()
 
     # Identify the maximum score
     min_seq = min(len_1, len_2)

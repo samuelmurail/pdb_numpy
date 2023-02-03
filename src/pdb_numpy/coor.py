@@ -85,7 +85,7 @@ class Coor:
             write_pqr,
             get_pqr_string,
         )
-        from ._alignement import get_aa_seq, get_aa_DL_seq
+        from .alignement import get_aa_seq, get_aa_DL_seq
     except ImportError:
         logger.warning("ImportError: pdb_numpy is not installed, using local files")
         from _pdb import (
@@ -96,7 +96,7 @@ class Coor:
             write_pqr,
             get_pqr_string,
         )
-        from _alignement import get_aa_seq, get_aa_DL_seq
+        from pdb_numpy.alignement import get_aa_seq, get_aa_DL_seq
 
     def read_file(self, file_in):
         """Read a pdb/pqr/gro file and return atom informations as a Coor

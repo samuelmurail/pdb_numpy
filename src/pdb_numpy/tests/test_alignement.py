@@ -5,10 +5,10 @@
 Tests for _alignement functions
 """
 
-from .datafiles import PDB_1Y0M, PDB_2RRI, PDB_1U85, PDB_1UBD
+from .datafiles import PDB_1Y0M, PDB_2RRI, PDB_1U85, PDB_1UBD, PDB_2MUS, PDB_2MUS_MODEL
 import pdb_numpy
 from pdb_numpy import Coor
-from pdb_numpy import _alignement as alignement
+from pdb_numpy import alignement
 import logging
 import pytest
 
@@ -132,9 +132,10 @@ def test_seq_align(caplog):
     captured = caplog.records
 
     assert captured[-4].msg == "Identity seq1: 100.00%"
-    assert captured[-3].msg == "Identity seq2: 33.33%"
+    assert captured[-3].msg == "Identity seq2: 49.12%"
     assert captured[-2].msg == "Similarity seq1: 100.00%"
-    assert captured[-1].msg == "Similarity seq2: 33.33%"
+    assert captured[-1].msg == "Similarity seq2: 49.12%"
+
 
 def test_get_common_atoms():
 
@@ -158,27 +159,39 @@ def test_align_seq_based():
     rmsds, _ = alignement.align_seq_based(coor_1, coor_2, chain_1=["A"], chain_2=["C"])
 
     expected_rmsds = [
-        4.551392068864117,
-        3.692734305896772,
-        2.961440392183652,
-        2.918557421940943,
-        2.968167115959881,
-        4.713840805152014,
-        4.905764779023341,
-        3.64433762590341,
-        3.0390811834360276,
-        4.135482660281541,
-        4.756941670520779,
-        5.167595261532749,
-        4.1688244243418,
-        3.696836176306741,
-        4.733270329584532,
-        4.833551346702968,
-        4.879533969775495,
-        2.863993756859103,
-        3.689521386288375,
-        3.3868095168417947,
+        5.120100769714599,
+        4.325464568500979,
+        3.8148381404920126,
+        3.7162291711703683,
+        3.8858135125551483,
+        5.148095052210755,
+        5.29639146595027,
+        4.13561524463467,
+        3.8189144358192837,
+        4.59744983160867,
+        5.271310413581036,
+        5.517576912040037,
+        4.608243763317812,
+        4.209757513114994,
+        4.996842582024359,
+        5.006402154252274,
+        5.256112097498128,
+        3.7419617535551573,
+        4.184792438296152,
+        4.178818177627159,
     ]
 
     for expected_rmsd, rmsd in zip(expected_rmsds, rmsds):
         assert expected_rmsd == pytest.approx(rmsd, 0.0001)
+
+
+def test_multi_chain_permutation():
+
+    coor_1 = Coor(PDB_2MUS_MODEL)
+    coor_1 = coor_1.select_atoms("chain B C D E F")
+    coor_2 = Coor(PDB_2MUS)
+
+    rmsds, index = alignement.align_chain_permutation(coor_1, coor_2)
+
+    assert 5.320970606442723 == pytest.approx(rmsds[0], 0.0001)
+    assert len(index[0]) == 1420

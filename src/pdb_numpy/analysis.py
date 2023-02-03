@@ -7,7 +7,7 @@ import logging
 # Logging
 logger = logging.getLogger(__name__)
 
-from . import _alignement as alignement
+from . import alignement
 from . import select as select
 
 # try:

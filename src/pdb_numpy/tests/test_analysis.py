@@ -17,7 +17,7 @@ from .datafiles import (
 )
 import pdb_numpy
 from pdb_numpy import Coor
-from pdb_numpy import _alignement as alignement
+from pdb_numpy import alignement
 from pdb_numpy import analysis
 import logging
 import pytest
@@ -34,34 +34,34 @@ def test_measure_rmsd():
         coor_1, coor_2, chain_1=["A"], chain_2=["C"]
     )
 
-    assert len(index_1) == len(index_2) == 120
+    assert len(index_1) == len(index_2) == 112
     rmsd = analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2])
-    assert rmsd[0] == pytest.approx(57.14156622525322, 0.0001)
+    assert rmsd[0] == pytest.approx(70.38518415577853, 0.0001)
 
     alignement.coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0)
 
     rmsds = analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2])
     expected_rmsds = [
-        4.551392068864117,
-        3.692734305896772,
-        2.961440392183652,
-        2.918557421940943,
-        2.968167115959881,
-        4.713840805152014,
-        4.905764779023341,
-        3.64433762590341,
-        3.0390811834360276,
-        4.135482660281541,
-        4.756941670520779,
-        5.167595261532749,
-        4.1688244243418,
-        3.696836176306741,
-        4.733270329584532,
-        4.833551346702968,
-        4.879533969775495,
-        2.863993756859103,
-        3.689521386288375,
-        3.3868095168417947,
+        5.120100769714599,
+        4.325464568500979,
+        3.8148381404920126,
+        3.7162291711703683,
+        3.8858135125551483,
+        5.148095052210755,
+        5.29639146595027,
+        4.13561524463467,
+        3.8189144358192837,
+        4.59744983160867,
+        5.271310413581036,
+        5.517576912040037,
+        4.608243763317812,
+        4.209757513114994,
+        4.996842582024359,
+        5.006402154252274,
+        5.256112097498128,
+        3.7419617535551573,
+        4.184792438296152,
+        4.178818177627159,
     ]
 
     for expected_rmsd, rmsd in zip(expected_rmsds, rmsds):
@@ -112,7 +112,7 @@ def test_dockq_bad(tmp_path):
     assert pytest.approx(dockq["DockQ"][0], 0.5) == 0.010
     assert dockq["Fnat"][0] == 0.0
     assert dockq["Fnonnat"][0] == 1.0
-    assert pytest.approx(dockq["LRMS"][0], 0.1) == 59.981
+    assert pytest.approx(dockq["LRMS"][0], 0.1) == 54.0
     assert pytest.approx(dockq["iRMS"][0], 0.5) == 15.631
 
     print(dockq)

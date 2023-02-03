@@ -219,7 +219,7 @@ def remove_incomplete_backbone_residues(coor, back_atom=["CA", "C", "N", "O"]):
         a new Coor object with the selected atoms
     """
 
-    no_alter_loc = coor.select_atoms("not altloc B C D")
+    no_alter_loc = coor.select_atoms("protein and not altloc B C D")
 
     # Get all backbone atoms
     backbone = no_alter_loc.select_atoms(f'name {" ".join(back_atom)}')

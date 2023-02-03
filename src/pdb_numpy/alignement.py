@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import numpy as np
+from itertools import permutations
 import logging
 
 from . import analysis
@@ -69,7 +70,7 @@ def get_aa_seq(self, gap_in_seq=True, frame=0):
 
         if res_name in AA_DICT:
             if resid != aa_num_dict[chain] + 1 and len(seq_dict[chain]) != 0:
-                logger.warning(
+                logger.info(
                     f"Residue {chain}:{res_name}:{resid} is "
                     f"not consecutive, there might be missing "
                     f"residues"
@@ -357,19 +358,19 @@ def align_seq_WS(seq_1, seq_2, gap_cost=-8):
             insert = matrix[i, j - 1] + gap_cost
 
             matrix[i, j] = max(0, match, delete, insert)
-            #if match > delete and match > insert:
+            # if match > delete and match > insert:
             #    matrix[i, j] = match
             #    #print('Match')
-            #elif delete > insert:
+            # elif delete > insert:
             #    matrix[i, j] = delete
             #    #print('Delete')
-            #else:
+            # else:
             #    matrix[i, j] = insert
             #    #print('Insert')
 
     for i in range(1, len_1 + 1):
         for j in range(1, len_2 + 1):
-            print(matrix[i, j], end=' ')
+            print(matrix[i, j], end=" ")
         print()
 
     # Identify the maximum score
@@ -526,20 +527,20 @@ def get_common_atoms(
     """
 
     coor_1_back = coor_1.select_atoms(
-        f"chain {' '.join(chain_1)} and protein and name {' '.join(back_names)}"
+        f"chain {' '.join(chain_1)} and protein and name {' '.join(back_names)} and not altloc B C D E F"
     )
     coor_2_back = coor_2.select_atoms(
-        f"chain {' '.join(chain_2)} and protein and name {' '.join(back_names)}"
+        f"chain {' '.join(chain_2)} and protein and name {' '.join(back_names)} and not altloc B C D E F"
     )
 
     sel_1_seq = coor_1_back.get_aa_seq()
     sel_2_seq = coor_2_back.get_aa_seq()
 
     sel_index_1 = coor_1.get_index_select(
-        f"chain {' '.join(chain_1)} and protein and name {' '.join(back_names)}"
+        f"chain {' '.join(chain_1)} and protein and name {' '.join(back_names)} and not altloc B C D E F"
     )
     sel_index_2 = coor_2.get_index_select(
-        f"chain {' '.join(chain_2)} and protein and name {' '.join(back_names)}"
+        f"chain {' '.join(chain_2)} and protein and name {' '.join(back_names)} and not altloc B C D E F"
     )
 
     seq_1 = ""
@@ -551,10 +552,10 @@ def get_common_atoms(
 
     assert len(sel_index_1) == len(seq_1) * len(
         back_names
-    ), "Incomplete backbone atoms for first Coor object"
+    ), "Incomplete backbone atoms for first Coor object, you might consider using the remove_incomplete_residues method before."
     assert len(sel_index_2) == len(seq_2) * len(
         back_names
-    ), "Incomplete backbone atoms for second Coor object"
+    ), "Incomplete backbone atoms for second Coor object, you might consider using the remove_incomplete_residues method before."
 
     align_seq_1, align_seq_2 = align_seq(seq_1, seq_2)
     print_align_seq(align_seq_1, align_seq_2)
@@ -709,3 +710,74 @@ def rmsd_seq_based(
         index_1,
         index_2,
     ]
+
+def align_chain_permutation(coor_1, coor_2, chain_1=None, chain_2=None):
+    """Align two structure based on chain permutation.
+
+    Parameters
+    ----------
+    coor_1 : Coor
+        First coordinate
+    coor_2 : Coor
+        Second coordinate
+    chain_1 : list, optional
+        List of chain to consider in the first coordinate, by default None
+    chain_2 : list, optional
+        List of chain to consider in the second coordinate, by default None
+    
+    Returns
+    -------
+    rmsd : list
+        minimal RMSDs between the two structure
+    index : list
+        List of index of the first coordinate and the second coordinate
+    """
+    
+    if chain_1 is None:
+        chain_1 = [chain.decode('UTF-8') for chain in np.unique(coor_1.chain)]
+    if chain_2 is None:
+        chain_2 = [chain.decode('UTF-8') for chain in np.unique(coor_2.chain)]
+    
+    if len(chain_2) <= len(chain_1):
+        chain_1_perm = list(permutations(chain_1, len(chain_2)))
+        chain_2_perm = [chain_2] * len(chain_1_perm)
+    else:
+        chain_2_perm = list(permutations(chain_2, len(chain_1)))
+        chain_1_perm = [chain_1] * len(chain_2_perm)       
+
+    # Compute atoms in common for all chains combination:
+    index_common = {}
+    for chain_i in chain_1:
+        for chain_j in chain_2:
+            logger.info(f'compute  common atoms for {chain_i} and {chain_j}')
+            index_1, index_2 = get_common_atoms(coor_1, coor_2, chain_i, chain_j)
+            index_common[chain_i, chain_j]= [index_1, index_2]
+    
+    rmsd_perm = []
+    index_perm = []
+    for perm_1, perm_2 in zip(chain_1_perm, chain_2_perm):
+        logger.info(f'Trying chains permutation: {" ".join(perm_1)} with {" ".join(perm_2)}')
+        index_all_1 = []
+        index_all_2 = []
+        
+        for chain_i, chain_j in zip(perm_1, perm_2):
+            #index_1, index_2 = get_common_atoms(coor_1, coor_2, chain_i, chain_j)
+            index_1, index_2 = index_common[chain_i, chain_j]
+            index_all_1 += index_1
+            index_all_2 += index_2
+        
+        coor_align(coor_1, coor_2, index_all_1, index_all_2)
+        rmsd = analysis.rmsd(coor_1, coor_2, index_list=[index_all_1, index_all_2])
+        rmsd_perm.append(rmsd)
+        index_perm.append ([index_all_1, index_all_2])
+    
+    
+    min_index = 0
+    min_rmsd = rmsd_perm[0][0]
+    for i, rmsds in enumerate(rmsd_perm):
+        for rmsd in rmsds:
+            if rmsd < min_rmsd:
+                min_index = i
+                min_rmsd = rmsd
+    
+    return(rmsd_perm[min_index], index_perm[min_index])

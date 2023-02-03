@@ -24,3 +24,6 @@ PDB_1RXZ_Colabfold = os.path.join(TEST_FILE_PATH, "1rxz_colabfold_model_1.pdb")
 
 DOCKQ_MODEL = os.path.join(TEST_FILE_PATH, "model.pdb")
 DOCKQ_NATIVE = os.path.join(TEST_FILE_PATH, "native.pdb")
+
+PDB_2MUS = os.path.join(TEST_FILE_PATH, "2mus.pdb")
+PDB_2MUS_MODEL = os.path.join(TEST_FILE_PATH, "af_2.2_2mus.pdb")

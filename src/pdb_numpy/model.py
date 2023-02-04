@@ -475,3 +475,51 @@ class Model:
 
         # Retrun column under cutoff_max:
         return dist_mat.min(1) < cutoff
+
+    def add_atom(
+        self,
+        index,
+        name,
+        resname,
+        num,
+        resid,
+        uniq_resid,
+        chain,
+        xyz,
+        bfactor=0,
+        occupancy=0,
+        altloc="",
+        insertres="",
+        elem="",
+    ):
+        """Add an atom to the Model object.
+
+        Parameters
+        ----------
+        self : Model
+            Model object
+        atom : Atom
+            Atom object
+
+        """
+        self.atom_dict["field"] = np.insert(self.atom_dict["field"], index, ["ATOM"], axis=0)
+
+        self.atom_dict["num_resid_uniqresid"] = np.insert(
+            self.atom_dict["num_resid_uniqresid"],
+            index,
+            [num, resid, uniq_resid],
+            axis=0,
+        )
+        self.atom_dict["name_resname"] = np.insert(
+            self.atom_dict["name_resname"], index, [name, resname], axis=0
+        )
+        self.atom_dict["alterloc_chain_insertres"] = np.insert(
+            self.atom_dict["alterloc_chain_insertres"],
+            index,
+            [altloc, chain, insertres, elem],
+            axis=0,
+        )
+        self.atom_dict["occ_beta"] = np.insert(
+            self.atom_dict["occ_beta"], index, [bfactor, occupancy], axis=0
+        )
+        self.atom_dict["xyz"] = np.insert(self.atom_dict["xyz"], index, xyz, axis=0)

@@ -502,7 +502,9 @@ class Model:
             Atom object
 
         """
-        self.atom_dict["field"] = np.insert(self.atom_dict["field"], index, ["ATOM"], axis=0)
+        self.atom_dict["field"] = np.insert(
+            self.atom_dict["field"], index, ["ATOM"], axis=0
+        )
 
         self.atom_dict["num_resid_uniqresid"] = np.insert(
             self.atom_dict["num_resid_uniqresid"],

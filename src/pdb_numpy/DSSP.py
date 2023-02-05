@@ -9,8 +9,11 @@ import logging
 # Logging
 logger = logging.getLogger(__name__)
 
+
 def add_NH(coor):
     """Add NH atoms to a protein.
+
+    TO FIX IS SHOULD RETURN A NEW COOR OBJECT
 
     Parameters
     ----------
@@ -55,7 +58,8 @@ def add_NH(coor):
             NH = (NH / np.linalg.norm(NH)) * 1.01  # ?
             NH += N
 
-            model.add_atom(N_index + 1, 
+            model.add_atom(
+                N_index + 1,
                 "H",
                 model.resname[N_index],
                 model.num[N_index],
@@ -67,7 +71,9 @@ def add_NH(coor):
                 model.beta[N_index],
                 model.alterloc[N_index],
                 model.insertres[N_index],
-                model.elem[N_index],)
+                model.elem[N_index],
+            )
+
 
 def hbond_energy(vec_N, vec_H, vec_O, vec_C):
     """Compute HBond energy based on ON, CH, OH and CN distances.
@@ -96,7 +102,7 @@ def hbond_energy(vec_N, vec_H, vec_O, vec_C):
         Oxygen coordinates.
     vec_C : numpy.ndarray
         Carbon coordinates.
-    
+
     Returns
     -------
     energy : float
@@ -108,9 +114,10 @@ def hbond_energy(vec_N, vec_H, vec_O, vec_C):
     rOH = np.linalg.norm(vec_H - vec_O)
     rCN = np.linalg.norm(vec_N - vec_C)
     # 27.888 = 332 * (0.42 * 0.20)
-    energy = 27.888 * (1 / rON + 1 / rCH - 1 / rOH - 1 / rCN)   
+    energy = 27.888 * (1 / rON + 1 / rCH - 1 / rOH - 1 / rCN)
 
     return energy
+
 
 def compute_bend(CA_sel):
     """Compute bend for a protein.
@@ -141,15 +148,18 @@ def compute_bend(CA_sel):
         vec_i_1 = vec_i_1 / np.linalg.norm(vec_i_1)
         vec_i_2 = vec_i_2 / np.linalg.norm(vec_i_2)
 
-        #print(i, np.degrees(geom.angle_vec(vec_i_1, vec_i_2)))
-        if np.degrees(geom.angle_vec(vec_i_1, vec_i_2)) > 70.:
+        # print(i, np.degrees(geom.angle_vec(vec_i_1, vec_i_2)))
+        if np.degrees(geom.angle_vec(vec_i_1, vec_i_2)) > 70.0:
             bend[i] = True
 
     return bend
 
+
 def compute_DSSP(coor):
     """Compute DSSP for a protein.
 
+    - 96 % accuracy compared to DSSP (3eam)
+    - omitted β-bulge annotation
 
     Code:
     ----------
@@ -175,6 +185,8 @@ def compute_DSSP(coor):
 
     max_dist = 0
 
+    SS_list = []
+
     for model in coor.models:
         # Compute distance matrix between all residues
         dist_mat = distance_matrix(CA_sel.xyz, CA_sel.xyz)
@@ -184,28 +196,44 @@ def compute_DSSP(coor):
         for i in range(n_res):
 
             res_i = unique_residues[i]
-            O_i = model.xyz[np.logical_and(model.name == b"O", model.uniq_resid == res_i)]
-            N_i = model.xyz[np.logical_and(model.name == b"N", model.uniq_resid == res_i)]
-            C_i = model.xyz[np.logical_and(model.name == b"C", model.uniq_resid == res_i)]
-            H_i = model.xyz[np.logical_and(model.name == b"H", model.uniq_resid == res_i)]
+            O_i = model.xyz[
+                np.logical_and(model.name == b"O", model.uniq_resid == res_i)
+            ]
+            N_i = model.xyz[
+                np.logical_and(model.name == b"N", model.uniq_resid == res_i)
+            ]
+            C_i = model.xyz[
+                np.logical_and(model.name == b"C", model.uniq_resid == res_i)
+            ]
+            H_i = model.xyz[
+                np.logical_and(model.name == b"H", model.uniq_resid == res_i)
+            ]
 
             for j in range(i + 1, len(unique_residues)):
                 res_j = unique_residues[j]
 
                 if dist_mat[i, j] > cutoff:
                     continue
-                    
-                O_j = model.xyz[np.logical_and(model.name == b"O", model.uniq_resid == res_j)]
-                N_j = model.xyz[np.logical_and(model.name == b"N", model.uniq_resid == res_j)]
-                C_j = model.xyz[np.logical_and(model.name == b"C", model.uniq_resid == res_j)]
-                H_j = model.xyz[np.logical_and(model.name == b"H", model.uniq_resid == res_j)]
+
+                O_j = model.xyz[
+                    np.logical_and(model.name == b"O", model.uniq_resid == res_j)
+                ]
+                N_j = model.xyz[
+                    np.logical_and(model.name == b"N", model.uniq_resid == res_j)
+                ]
+                C_j = model.xyz[
+                    np.logical_and(model.name == b"C", model.uniq_resid == res_j)
+                ]
+                H_j = model.xyz[
+                    np.logical_and(model.name == b"H", model.uniq_resid == res_j)
+                ]
 
                 # Compute HBond energies
                 if len(O_i) == 1 and len(N_j) == 1 and len(C_i) == 1 and len(H_j) == 1:
                     energy = hbond_energy(N_j, H_j, O_i, C_i)
                     if energy < -0.5:
                         Hbond_mat[i, j] = True
-                
+
                 if len(O_j) == 1 and len(N_i) == 1 and len(C_j) == 1 and len(H_i) == 1:
                     energy = hbond_energy(N_i, H_i, O_j, C_j)
                     if energy < -0.5:
@@ -218,7 +246,7 @@ def compute_DSSP(coor):
         I_seq = np.array([False for i in range(n_res)])
         E_seq = np.array([False for i in range(n_res)])
         S_seq = compute_bend(CA_sel)
-    
+
         # N-turn
         for i in range(n_res - 3):
             if i < n_res - 4 and Hbond_mat[i, i + 4]:
@@ -227,24 +255,29 @@ def compute_DSSP(coor):
                 G_seq[i] = True
             if i < n_res - 5 and Hbond_mat[i, i + 5]:
                 I_seq[i] = True
-        
+
         # Beta sheet
-        for i in range(1, n_res-1):
-            for j in range(i+3, n_res-1):
-                if ((Hbond_mat[i-1, j] and Hbond_mat[j, i+1]) or (Hbond_mat[j-1, i] and Hbond_mat[i, j+1])) or\
-                   ((Hbond_mat[i, j] and Hbond_mat[j, i]) or (Hbond_mat[i-1, j+1] and Hbond_mat[j-1, i+1])):
+        for i in range(1, n_res - 1):
+            for j in range(i + 3, n_res - 1):
+                if (
+                    (Hbond_mat[i - 1, j] and Hbond_mat[j, i + 1])
+                    or (Hbond_mat[j - 1, i] and Hbond_mat[i, j + 1])
+                ) or (
+                    (Hbond_mat[i, j] and Hbond_mat[j, i])
+                    or (Hbond_mat[i - 1, j + 1] and Hbond_mat[j - 1, i + 1])
+                ):
                     E_seq[i] = True
                     E_seq[j] = True
-                
+
         # Assign secondary structure sequence (order follows the list above)
         # Bend
         for i in range(n_res):
             if S_seq[i]:
                 SS_seq[i] = "S"
-        
+
         for i in range(n_res - 1):
             if I_seq[i]:
-                SS_seq[i +1 : i + 5] = "T"
+                SS_seq[i + 1 : i + 5] = "T"
             if H_seq[i]:
                 SS_seq[i + 1 : i + 4] = "T"
             if G_seq[i]:
@@ -252,52 +285,36 @@ def compute_DSSP(coor):
 
         # A minimal helix is defined by two consecutive n-turns
 
-        for i in range(1, n_res-3):
+        for i in range(1, n_res - 3):
             if G_seq[i] and G_seq[i - 1]:
-                SS_seq[i: i + 3] = "G"
+                SS_seq[i : i + 3] = "G"
 
-        for i in range(1, n_res-1):
+        for i in range(1, n_res - 1):
             if E_seq[i] and E_seq[i - 1]:
-                SS_seq[i - 1: i + 1] = "E"
+                SS_seq[i - 1 : i + 1] = "E"
             elif E_seq[i] and not (E_seq[i + 1] and E_seq[i - 1]):
                 SS_seq[i] = "B"
-        
 
-
-        for i in range(1, n_res-4):
+        for i in range(1, n_res - 4):
             # A minimal helix is defined by two consecutive n-turns
             if H_seq[i] and H_seq[i - 1]:
-                SS_seq[i: i + 4] = "H"
+                SS_seq[i : i + 4] = "H"
         #  In 2012, DSSP was rewritten so that the assignment of π helices
         #  was given preference over α helices, resulting in better detection of π helices.
-        for i in range(1, n_res-5):
+        for i in range(1, n_res - 5):
             if I_seq[i] and I_seq[i - 1]:
-                SS_seq[i: i + 5] = "I"
+                SS_seq[i : i + 5] = "I"
 
         # Two overlapping minimal helices offset by two or three residues are joined
         # into one helix:
-        for i in range(1, n_res-2):
-            if SS_seq[i -1] == "H" and (SS_seq[i + 1] == "H" or SS_seq[i + 2] == "H"):
+        for i in range(1, n_res - 2):
+            if SS_seq[i - 1] == "H" and (SS_seq[i + 1] == "H" or SS_seq[i + 2] == "H"):
                 SS_seq[i] = "H"
 
-        for i in range(1, n_res-1):
-            if SS_seq[i -1] in ["E", "B"] and (SS_seq[i +1] in ["E", "B"]):
-                SS_seq[i-1:i+2] = "E"
-        #for i in range(n_res - 2, 1, -1):
-        #    if SS_seq[i] == "G" and SS_seq[i-1] == "G":
-        #        SS_seq[i + 1: i + 3] = "G"
-        #        if SS_seq[i - 2] != "G":
-        #            SS_seq[i - 1] = " "
+        for i in range(1, n_res - 1):
+            if SS_seq[i - 1] in ["E", "B"] and (SS_seq[i + 1] in ["E", "B"]):
+                SS_seq[i - 1 : i + 2] = "E"
 
-        # Fix Helix with 1/2 gaps
-        #for i in range(1, n_res - 2):
-        #    if SS_seq[i] == " " and SS_seq[i - 1] == "H" and (SS_seq[i + 1] == "H" or SS_seq[i + 2] == "H"):
-        #        SS_seq[i] = "H"
-        SS_seq = "".join(SS_seq)
+        SS_list.append("".join(SS_seq))
 
-        print(SS_seq)
-        print(len(SS_seq))
-    print(max_dist)
-
-
-    return (Hbond_mat)
+    return SS_list

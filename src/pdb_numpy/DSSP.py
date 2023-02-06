@@ -252,7 +252,9 @@ def compute_DSSP(coor):
         assert len(C_array) == n_res
         assert len(H_array) == n_res
 
+        # Get indexes to check
         mask = dist_mat < cutoff
+        # Remove lower triangle and i, i+1 (k=1)
         mask[np.tril_indices_from(mask, k=1)] = False
         indexes = np.argwhere(mask)
 
@@ -297,6 +299,7 @@ def compute_DSSP(coor):
                 I_seq[i] = True
 
         # Beta sheet
+        # PART TO ACCELERATE
         for i in range(1, n_res - 1):
             for j in range(i + 3, n_res - 1):
                 if (

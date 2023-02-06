@@ -42,9 +42,10 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     len_2 = len(seq_2)
 
     # Initialize the matrix
-    matrix = np.zeros((len_1 + 1, len_2 + 1))
+    matrix = np.zeros((len_1 + 1, len_2 + 1), dtype=int)
 
     prev_line = np.zeros((len_2 + 1), dtype=bool)
+    choices = np.zeros((3), dtype=int)
 
     # Fill the matrix
     for i in range(1, len_1 + 1):
@@ -52,24 +53,22 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
         prev = False  # insertion matrix[i, j - 1]
         for j in range(1, len_2 + 1):
             # Identify the BLOSUM62 score
-            match = matrix[i - 1, j - 1] + BLOSUM62[(seq_2[j - 1], seq_1[i - 1])]
-            gap_delete = gap_extension if prev else gap_cost
-            gap_insert = gap_extension if prev_line[j] else gap_cost
-            delete = matrix[i - 1, j] + gap_delete
-            insert = matrix[i, j - 1] + gap_insert
+            # Match
+            choices[0] = matrix[i - 1, j - 1] + BLOSUM62[(seq_2[j - 1], seq_1[i - 1])]
+            # Delete
+            choices[1] = matrix[i - 1, j] + (gap_extension if prev else gap_cost)
+            # Insert
+            choices[2] = matrix[i, j - 1] + (gap_extension if prev_line[j] else gap_cost)
 
-            if match > delete and match > insert:
-                prev_line[j] = False
-                prev = False
-                matrix[i, j] = match
-            elif delete > insert:
-                prev_line[j] = False
+            max_index = np.argmax(choices)
+            matrix[i, j] = choices[max_index]
+            prev_line[j] = False
+            prev = False
+
+            if max_index == 1:
                 prev = True
-                matrix[i, j] = delete
-            else:
+            elif max_index == 2:
                 prev_line[j] = True
-                prev = False
-                matrix[i, j] = insert
 
     # Identify the maximum score
     min_seq = min(len_1, len_2)
@@ -81,8 +80,8 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
         if max_index[0][i] >= min_seq and max_index[1][i] >= min_seq:
             index_list.append([max_index[0][i], max_index[1][i]])
 
-    if len(index_list) > 1:
-        logger.warning(f"Ambigous alignement, {len(index_list)} solutions exists")
+    #if len(index_list) > 1:
+    #    logger.warning(f"Ambigous alignement, {len(index_list)} solutions exists")
 
     i = index_list[0][0]
     j = index_list[0][1]
@@ -377,7 +376,7 @@ def get_common_atoms(
     ), "Incomplete backbone atoms for second Coor object, you might consider using the remove_incomplete_residues method before."
 
     align_seq_1, align_seq_2 = align_seq(seq_1, seq_2)
-    print_align_seq(align_seq_1, align_seq_2)
+    #print_align_seq(align_seq_1, align_seq_2)
 
     align_sel_1 = []
     align_sel_2 = []
@@ -423,6 +422,9 @@ def coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0):
     -------
     None
     """
+
+    from scipy.spatial.transform import Rotation as R
+
     assert len(index_1) != 0, "No atom selected in the first structure"
     assert len(index_1) == len(index_2), "Two structure don't have the same atom number"
 
@@ -434,7 +436,7 @@ def coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0):
         centroid_1 = model.xyz[index_1].mean(axis=0)
         model.xyz -= centroid_1
 
-        rot_mat = geom.quaternion_rotate(model.xyz[index_1], ref_coor)
+        rot_mat = R.align_vectors(model.xyz[index_1], ref_coor)[0].as_matrix()
 
         model.xyz = np.dot(model.xyz, rot_mat)
         model.xyz += centroid_2

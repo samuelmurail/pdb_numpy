@@ -200,6 +200,57 @@ def compute_bend(CA_sel):
 
     return bend
 
+def compute_Hbond_matrix(model):
+    """Compute Hbond matrix for a protein.
+    """
+    cutoff = 8.0
+
+    CA_array = model.select_atoms("protein and name CA and not altloc B C D E").xyz
+    n_res = len(CA_array)
+
+    dist_mat = distance_matrix(CA_array, CA_array)
+    Hbond_mat = np.zeros_like(dist_mat, dtype=bool)
+
+    O_array = model.select_atoms("protein and name O and not altloc B C D E").xyz
+    N_array = model.select_atoms("protein and name N and not altloc B C D E").xyz
+    C_array = model.select_atoms("protein and name C and not altloc B C D E").xyz
+    H_array = get_NH_xyz(model)
+
+    assert len(O_array) == n_res
+    assert len(N_array) == n_res
+    assert len(C_array) == n_res
+    assert len(H_array) == n_res
+
+    # Get indexes to check
+    mask = dist_mat < cutoff
+    # Remove lower triangle and i, i+1 (k=1)
+    mask[np.tril_indices_from(mask, k=1)] = False
+    indexes = np.argwhere(mask)
+
+    for i, j in indexes:
+
+        O_i = O_array[i]
+        C_i = C_array[i]
+        N_i = N_array[i]
+        H_i = H_array[i]
+
+        O_j = O_array[j]
+        C_j = C_array[j]
+        N_j = N_array[j]
+        H_j = H_array[j]
+
+        # Compute HBond energies
+        if H_j[0] is not None:
+            energy = hbond_energy(N_j, H_j, O_i, C_i)
+            if energy < -0.5:
+                Hbond_mat[i, j] = True
+
+        if H_i[0] is not None:
+            energy = hbond_energy(N_i, H_i, O_j, C_j)
+            if energy < -0.5:
+                Hbond_mat[j, i] = True
+
+    return Hbond_mat
 
 def compute_DSSP(coor):
     """Compute DSSP for a protein.
@@ -236,50 +287,9 @@ def compute_DSSP(coor):
 
     SS_list = []
 
-    for model in coor.models:
+    for i, model in enumerate(coor.models):
         # Compute distance matrix between all residues
-        dist_mat = distance_matrix(CA_sel.xyz, CA_sel.xyz)
-        Hbond_mat = np.zeros_like(dist_mat, dtype=bool)
-
-        O_array = model.select_atoms("protein and name O and not altloc B C D E").xyz
-        N_array = model.select_atoms("protein and name N and not altloc B C D E").xyz
-        C_array = model.select_atoms("protein and name C and not altloc B C D E").xyz
-        H_array = get_NH_xyz(model)
-
-        assert CA_sel.len == n_res, "CA_sel.len != len(unique_residues)"
-        assert len(O_array) == n_res
-        assert len(N_array) == n_res
-        assert len(C_array) == n_res
-        assert len(H_array) == n_res
-
-        # Get indexes to check
-        mask = dist_mat < cutoff
-        # Remove lower triangle and i, i+1 (k=1)
-        mask[np.tril_indices_from(mask, k=1)] = False
-        indexes = np.argwhere(mask)
-
-        for i, j in indexes:
-
-            O_i = O_array[i]
-            C_i = C_array[i]
-            N_i = N_array[i]
-            H_i = H_array[i]
-
-            O_j = O_array[j]
-            C_j = C_array[j]
-            N_j = N_array[j]
-            H_j = H_array[j]
-
-            # Compute HBond energies
-            if H_j[0] is not None:
-                energy = hbond_energy(N_j, H_j, O_i, C_i)
-                if energy < -0.5:
-                    Hbond_mat[i, j] = True
-
-            if H_i[0] is not None:
-                energy = hbond_energy(N_i, H_i, O_j, C_j)
-                if energy < -0.5:
-                    Hbond_mat[j, i] = True
+        Hbond_mat = compute_Hbond_matrix(model)
 
         # Compute secondary structure
         SS_seq = np.array([" " for i in range(n_res)])
@@ -287,7 +297,7 @@ def compute_DSSP(coor):
         G_seq = np.array([False for i in range(n_res)])
         I_seq = np.array([False for i in range(n_res)])
         E_seq = np.array([False for i in range(n_res)])
-        S_seq = compute_bend(CA_sel)
+        S_seq = compute_bend(CA_sel.models[i])
 
         # N-turn
         for i in range(n_res - 3):

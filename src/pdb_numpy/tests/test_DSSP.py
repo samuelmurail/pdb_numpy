@@ -29,34 +29,33 @@ def test_multiple_dssp():
 
     SS_expected = [
         "      SEE SSS  EESSHHHHHHHHHHHH  ",
-        "      SEE SSS  EESSHHHHHHHSGGGS  ",
-        "      SEE TTT  EESSHHHHHHHHHHHHT ",
-        "      SEE SSS  EESSHHHHHHHHHHHHT ",
-        "      SEE TTT  EESSHHHHHHHHHHHHT ",
+        "      SEE SSS  EESSHHHHHHHSGGG   ",
+        "   SS SEE TTT  EES HHHHHHHHHHHHT ",
+        "    S SEE SSS  EES HHHHHHHHHHHHT ",
+        "   SS SEE TTT  EESSHHHHHHHHHHHHT ",
+        "      SEE SSS  EESSHHHHHHHGGGG   ",
         "      SEE SSS  EESSHHHHHHHGGGGS  ",
-        "      SEE SSS  EESSHHHHHHHGGGGS  ",
-        "      SEE TTT  EESSHHHHHHHGGGGS  ",
-        "      SEE TTT  EESSHHHHHHHHSGGGT ",
-        "      SEE SSS  EESSHHHHHHHHGGGS  ",
+        "   SS SEE TTT  EES HHHHHHHGGGGS  ",
+        "  SSS SEE TTT  EESSHHHHHHHHSGGGT ",
+        " TT   SEE SSS  EESSHHHHHHHHGGGS  ",
         "      SEE TTT  EESSHHHHHHHHGGGS  ",
-        "      SEE SSS  EESSHHHHHHHGGGGS  ",
-        "      SEE TTT  EESSHHHHHHHHGGSS  ",
-        "      SEE TTT  EESSHHHHHHHHHHHH  ",
+        "      SEE SSS  EES HHHHHHHGGGG   ",
+        " TTTS SEE TTT  EESSHHHHHHHHGG    ",
+        "   SS SEE TTT  EESSHHHHHHHHHHHH  ",
         "      SEE TTT  EESSHHHHHHHHGGTTT ",
         "      SEE SSS  EESSHHHHHHHGGGGS  ",
-        "      SEE TTT  EESSHHHHHHHSTGGG  ",
-        "      SEE TTT  EESSHHHHHHHHTGGGT ",
-        "      SEE TTT  EESSHHHHHHHHHHHH  ",
-        "      SEE SSS  EESSHHHHHHHGGGSS  ",
+        "      SEE TTT  EES HHHHHHHSTGGG  ",
+        "   SS SEE TTT  EESSHHHHHHHHTGGGT ",
+        "      SEE TTT  EESSHHHHHHHHHHHHT ",
+        "   SS SEE SSS  EESSHHHHHHHGGGSS  ",
     ]
 
     assert len(SS_list) == len(SS_expected)
 
-    for i in range(len(SS_list)):
-        print(SS_list[i]['A'])
+    #for i in range(len(SS_list)):
+    #    print(f"\"{SS_list[i]['A']}\",")
 
     for i in range(len(SS_list)):
-        print(i)
         assert SS_list[i]['A'] == SS_expected[i]    
 
     assert (

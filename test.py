@@ -1,4 +1,5 @@
 import sys
+import time
 sys.path.insert(0, './src')
 
 import pdb_numpy.coor
@@ -8,17 +9,14 @@ import pdb_numpy.DSSP as DSSP
 test = pdb_numpy.Coor(pdb_id="3eam")
 test.write_pdb("./tmp.pdb", check_file_out=False)
 
-print(test.len)
-
-print('Adding NH')
-DSSP.add_NH(test)
-print('NH added')
-
 # run dssp:
 # sudo apt install dssp
-# dssp -i tmp.pdb -o dssp.txt
+# time dssp -i tmp.pdb -o tmp_dssp.txt
+# real    0m0,239s
+# user    0m0,559s
+# sys     0m0,040s
 
-with open("./dssp.txt") as f:
+with open("./tmp_dssp.txt") as f:
     lines = f.readlines()
 
 start_read = False
@@ -33,10 +31,10 @@ for line in lines:
 print(dssp_seq)
 print(len(dssp_seq))
 
-
+start_time = time.time()
 print('Computing DSSP')
 SS_list = DSSP.compute_DSSP(test)
-print('DSSP computed')
+print(f'DSSP computed in {time.time() - start_time:.3f} ms')
 
 
 def print_align_seq(seq_1, seq_2, line_len=80):

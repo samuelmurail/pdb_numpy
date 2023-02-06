@@ -90,4 +90,4 @@ def print_align_seq(seq_1, seq_2, line_len=80):
 
     return
 
-print_align_seq(SS_list[0], dssp_seq, line_len=80)
+print_align_seq(SS_list[0]['A'], dssp_seq, line_len=80)

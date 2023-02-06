@@ -75,6 +75,52 @@ def add_NH(coor):
             )
 
 
+def get_NH_xyz(model):
+    """Compute and Return NH coordinates of protein.
+
+    Parameters
+    ----------
+    coor : Coor
+        Protein coordinates.
+
+    """
+
+    protein = model.select_atoms("protein and not altloc B C D E")
+    unique_residues = np.unique(protein.uniq_resid)
+
+    C_array = model.select_atoms("protein and name C and not altloc B C D E").xyz
+    CA_array = model.select_atoms("protein and name CA and not altloc B C D E").xyz
+    N_array = model.select_atoms("protein and name N and not altloc B C D E").xyz
+
+    resname_array = model.select_atoms("protein and name CA and not altloc B C D E").resname
+
+    NH_list = []
+    # Add first NH
+    NH_list.append([None, None, None])
+    for i in range(len(unique_residues) - 1):
+
+        if resname_array[i + 1] == b"PRO":
+            NH_list.append([None, None, None])
+            continue
+
+        C = C_array[i]
+        CA = CA_array[i+1]
+        N = N_array[i+1]
+
+        C_N = N - C
+        C_N = C_N / np.linalg.norm(C_N)
+        CA_N = N - CA
+        CA_N = CA_N / np.linalg.norm(CA_N)
+
+        NH = C_N + CA_N
+        # NH = (NH / np.linalg.norm(NH)) * 0.9970  # Charmm36
+        NH = (NH / np.linalg.norm(NH)) * 1.01  # ?
+        NH += N
+
+        NH_list.append(NH)
+
+    return np.array(NH_list)
+
 def hbond_energy(vec_N, vec_H, vec_O, vec_C):
     """Compute HBond energy based on ON, CH, OH and CN distances.
 
@@ -145,8 +191,8 @@ def compute_bend(CA_sel):
         vec_i_1 = CA_i - CA_i_minus_2
         vec_i_2 = CA_i_plus_2 - CA_i
 
-        vec_i_1 = vec_i_1 / np.linalg.norm(vec_i_1)
-        vec_i_2 = vec_i_2 / np.linalg.norm(vec_i_2)
+        vec_i_1 /= np.linalg.norm(vec_i_1)
+        vec_i_2 /= np.linalg.norm(vec_i_2)
 
         # print(i, np.degrees(geom.angle_vec(vec_i_1, vec_i_2)))
         if np.degrees(geom.angle_vec(vec_i_1, vec_i_2)) > 70.0:
@@ -177,11 +223,14 @@ def compute_DSSP(coor):
 
     cutoff = 8
 
-    CA_sel = coor.select_atoms("protein and name CA")
+    # Add hydrogens atoms
+    # Find a way to deal with PRO
+
+    CA_sel = coor.select_atoms("protein and name CA and not altloc B C D E")
     unique_residues = np.unique(CA_sel.uniq_resid)
+    chain_array = CA_sel.chain
     n_res = len(unique_residues)
 
-    assert CA_sel.len == len(unique_residues), "CA_sel.len != len(unique_residues)"
 
     max_dist = 0
 
@@ -192,52 +241,43 @@ def compute_DSSP(coor):
         dist_mat = distance_matrix(CA_sel.xyz, CA_sel.xyz)
         Hbond_mat = np.zeros_like(dist_mat, dtype=bool)
 
-        # Compute HBond matrix
-        for i in range(n_res):
+        O_array = model.select_atoms("protein and name O and not altloc B C D E").xyz
+        N_array = model.select_atoms("protein and name N and not altloc B C D E").xyz
+        C_array = model.select_atoms("protein and name C and not altloc B C D E").xyz
+        H_array = get_NH_xyz(model)
 
-            res_i = unique_residues[i]
-            O_i = model.xyz[
-                np.logical_and(model.name == b"O", model.uniq_resid == res_i)
-            ]
-            N_i = model.xyz[
-                np.logical_and(model.name == b"N", model.uniq_resid == res_i)
-            ]
-            C_i = model.xyz[
-                np.logical_and(model.name == b"C", model.uniq_resid == res_i)
-            ]
-            H_i = model.xyz[
-                np.logical_and(model.name == b"H", model.uniq_resid == res_i)
-            ]
+        assert CA_sel.len == n_res, "CA_sel.len != len(unique_residues)"
+        assert len(O_array) == n_res
+        assert len(N_array) == n_res
+        assert len(C_array) == n_res
+        assert len(H_array) == n_res
 
-            for j in range(i + 1, len(unique_residues)):
-                res_j = unique_residues[j]
+        mask = dist_mat < cutoff
+        mask[np.tril_indices_from(mask, k=1)] = False
+        indexes = np.argwhere(mask)
 
-                if dist_mat[i, j] > cutoff:
-                    continue
+        for i, j in indexes:
 
-                O_j = model.xyz[
-                    np.logical_and(model.name == b"O", model.uniq_resid == res_j)
-                ]
-                N_j = model.xyz[
-                    np.logical_and(model.name == b"N", model.uniq_resid == res_j)
-                ]
-                C_j = model.xyz[
-                    np.logical_and(model.name == b"C", model.uniq_resid == res_j)
-                ]
-                H_j = model.xyz[
-                    np.logical_and(model.name == b"H", model.uniq_resid == res_j)
-                ]
+            O_i = O_array[i]
+            C_i = C_array[i]
+            N_i = N_array[i]
+            H_i = H_array[i]
 
-                # Compute HBond energies
-                if len(O_i) == 1 and len(N_j) == 1 and len(C_i) == 1 and len(H_j) == 1:
-                    energy = hbond_energy(N_j, H_j, O_i, C_i)
-                    if energy < -0.5:
-                        Hbond_mat[i, j] = True
+            O_j = O_array[j]
+            C_j = C_array[j]
+            N_j = N_array[j]
+            H_j = H_array[j]
 
-                if len(O_j) == 1 and len(N_i) == 1 and len(C_j) == 1 and len(H_i) == 1:
-                    energy = hbond_energy(N_i, H_i, O_j, C_j)
-                    if energy < -0.5:
-                        Hbond_mat[j, i] = True
+            # Compute HBond energies
+            if H_j[0] is not None:
+                energy = hbond_energy(N_j, H_j, O_i, C_i)
+                if energy < -0.5:
+                    Hbond_mat[i, j] = True
+
+            if H_i[0] is not None:
+                energy = hbond_energy(N_i, H_i, O_j, C_j)
+                if energy < -0.5:
+                    Hbond_mat[j, i] = True
 
         # Compute secondary structure
         SS_seq = np.array([" " for i in range(n_res)])
@@ -315,6 +355,15 @@ def compute_DSSP(coor):
             if SS_seq[i - 1] in ["E", "B"] and (SS_seq[i + 1] in ["E", "B"]):
                 SS_seq[i - 1 : i + 2] = "E"
 
-        SS_list.append("".join(SS_seq))
+        seq_dict = {}
+
+
+        for SS, chain in zip(SS_seq, [chain.decode('UTF-8') for chain in chain_array]):
+            if chain not in seq_dict:
+                seq_dict[chain] = SS
+            else:
+                seq_dict[chain] += SS
+
+        SS_list.append(seq_dict)
 
     return SS_list

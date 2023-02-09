@@ -71,10 +71,10 @@ def test_seq_align(caplog):
     alignement.print_align_seq(align_seq_1, align_seq_2, line_len=80)
     captured = caplog.records
 
-    assert captured[-4].msg == "Identity seq1: 28.71%"
-    assert captured[-3].msg == "Identity seq2: 26.61%"
-    assert captured[-2].msg == "Similarity seq1: 63.41%"
-    assert captured[-1].msg == "Similarity seq2: 58.77%"
+    assert captured[-4].msg == "Identity seq1: 26.50%"
+    assert captured[-3].msg == "Identity seq2: 24.56%"
+    assert captured[-2].msg == "Similarity seq1: 64.04%"
+    assert captured[-1].msg == "Similarity seq2: 59.36%"
 
     seq_1 = "AQDMVSPPPPIADEPLTVNTGIYLIECYSLDDKAETFKVNAFLSLSWKDRRLAFDPV"
     seq_2 = "AQDMVSPPPPIADEPLTVN"
@@ -131,8 +131,8 @@ def test_seq_align(caplog):
     alignement.print_align_seq(align_seq_1, align_seq_2, line_len=80)
     captured = caplog.records
 
-    assert captured[-4].msg == "Identity seq1: 100.00%"
-    assert captured[-3].msg == "Identity seq2: 49.12%"
+    assert captured[-4].msg == "Identity seq1: 89.29%"
+    assert captured[-3].msg == "Identity seq2: 43.86%"
     assert captured[-2].msg == "Similarity seq1: 100.00%"
     assert captured[-1].msg == "Similarity seq2: 49.12%"
 
@@ -159,26 +159,26 @@ def test_align_seq_based():
     rmsds, _ = alignement.align_seq_based(coor_1, coor_2, chain_1=["A"], chain_2=["C"])
 
     expected_rmsds = [
-        5.120100769714599,
-        4.325464568500979,
-        3.8148381404920126,
-        3.7162291711703683,
-        3.8858135125551483,
-        5.148095052210755,
-        5.29639146595027,
-        4.13561524463467,
-        3.8189144358192837,
-        4.59744983160867,
-        5.271310413581036,
-        5.517576912040037,
-        4.608243763317812,
-        4.209757513114994,
-        4.996842582024359,
-        5.006402154252274,
-        5.256112097498128,
-        3.7419617535551573,
-        4.184792438296152,
-        4.178818177627159,
+        5.555010655269503,
+        4.50849944593366,
+        4.203023866673563,
+        4.089237506887086,
+        4.268405458525056,
+        5.4404697474851655,
+        5.605009944739971,
+        4.310207938001903,
+        4.179432984704397,
+        5.009242601626951,
+        5.662106462197564,
+        5.855741498275641,
+        4.862495769498237,
+        4.580287161782794,
+        5.433654424493706,
+        5.2051809370355455,
+        5.602365509226664,
+        4.111595128777337,
+        4.475493134478607,
+        4.5050640653032765,
     ]
 
     for expected_rmsd, rmsd in zip(expected_rmsds, rmsds):

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+import os
 import numpy as np
 from itertools import permutations
 import logging
@@ -11,6 +12,53 @@ from .data.blosum import BLOSUM62
 
 # Logging
 logger = logging.getLogger(__name__)
+
+
+def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
+    import ctypes
+
+    dir_path = os.path.dirname(os.path.abspath(__file__))
+    so_file = os.path.join(dir_path, "_align.so")
+
+    my_functions = ctypes.CDLL(so_file)
+
+    class test(ctypes.Structure):
+        _fields_ = [
+            ('seq1', ctypes.c_char_p),
+            ('seq2', ctypes.c_char_p),
+            ('score', ctypes.c_int)
+        ]
+    
+    align = my_functions.align
+    align.restype = ctypes.POINTER(test)
+    align.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int]
+
+    seq_1_bytes = seq_1.encode('ascii')
+    seq_2_bytes = seq_2.encode('ascii')
+    blosum_file = os.path.join(dir_path, "data/blosum62.txt")
+
+    print('seq1bytes', seq_1_bytes)
+    print('seq2bytes', seq_2_bytes)
+    print('blosum', blosum_file)
+
+    alignement_res = align(
+        ctypes.c_char_p(seq_1_bytes),
+        ctypes.c_char_p(seq_2_bytes), 
+        ctypes.c_char_p(blosum_file.encode('ascii')),
+        ctypes.c_int(-11),
+        ctypes.c_int(-1)
+    )
+
+    seq_1_aligned = alignement_res.contents.seq1.decode('ascii')
+    seq_2_aligned = alignement_res.contents.seq2.decode('ascii')
+
+    free_align = my_functions.free_align
+    free_align.argtypes = [ctypes.POINTER(test)]
+    free_align(alignement_res)
+
+    print('YO', seq_1_aligned)
+
+    return seq_1_aligned, seq_2_aligned
 
 
 def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
@@ -77,6 +125,8 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     max_score = np.max(matrix[min_seq:, min_seq:])
     max_index = np.where(matrix == max_score)
 
+    print(max_score, max_index)
+
     index_list = []
     for i in range(len(max_index[0])):
         if max_index[0][i] >= min_seq and max_index[1][i] >= min_seq:
@@ -101,25 +151,28 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     align_1 += seq_1[i:]
     align_2 += seq_2[j:]
 
+    i -= 1
+    j -= 1
+
     while i != 0 and j != 0:
         if (
-            matrix[i, j]
-            == matrix[i - 1, j - 1] + BLOSUM62[(seq_1[i - 1], seq_2[j - 1])]
+            matrix[i+1, j+1]
+            == matrix[i, j] + BLOSUM62[(seq_1[i], seq_2[j])]
         ):
             align_1 = seq_1[i - 1] + align_1
             align_2 = seq_2[j - 1] + align_2
             i -= 1
             j -= 1
         elif (
-            matrix[i, j] == matrix[i - 1, j] + gap_cost
-            or matrix[i, j] == matrix[i - 1, j] + gap_extension
+            matrix[i+1, j+1] == matrix[i, j+1] + gap_cost
+            or matrix[i+1, j+1] == matrix[i, j+1] + gap_extension
         ):
             align_1 = seq_1[i - 1] + align_1
             align_2 = "-" + align_2
             i -= 1
         elif (
-            matrix[i, j] == matrix[i, j - 1] + gap_cost
-            or matrix[i, j] == matrix[i, j - 1] + gap_extension
+            matrix[i+1, j+1] == matrix[i+1, j] + gap_cost
+            or matrix[i+1, j+1] == matrix[i+1, j] + gap_extension
         ):
             align_1 = "-" + align_1
             align_2 = seq_2[j - 1] + align_2

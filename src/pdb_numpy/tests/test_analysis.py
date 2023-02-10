@@ -30,6 +30,12 @@ def test_measure_rmsd():
     coor_1 = Coor(PDB_1U85)
     coor_2 = Coor(PDB_1UBD)
 
+    seq_1 = coor_1.get_aa_seq()
+    seq_2 = coor_2.get_aa_seq()
+    align_seq_1, align_seq_2 = alignement.align_seq(seq_1['A'], seq_2['C'])
+    alignement.print_align_seq(align_seq_1, align_seq_2, line_len=80)
+    captured = caplog.records
+
     index_1, index_2 = alignement.get_common_atoms(
         coor_1, coor_2, chain_1=["A"], chain_2=["C"]
     )
@@ -43,6 +49,7 @@ def test_measure_rmsd():
     rmsds = analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2])
     print(rmsds)
     expected_rmsds = [
+        10,
         5.555010655269503,
         4.50849944593366,
         4.203023866673563,

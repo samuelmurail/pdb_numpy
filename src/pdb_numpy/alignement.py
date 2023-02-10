@@ -58,7 +58,9 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
             # Delete
             choices[1] = matrix[i - 1, j] + (gap_extension if prev else gap_cost)
             # Insert
-            choices[2] = matrix[i, j - 1] + (gap_extension if prev_line[j] else gap_cost)
+            choices[2] = matrix[i, j - 1] + (
+                gap_extension if prev_line[j] else gap_cost
+            )
 
             max_index = np.argmax(choices)
             matrix[i, j] = choices[max_index]
@@ -80,7 +82,7 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
         if max_index[0][i] >= min_seq and max_index[1][i] >= min_seq:
             index_list.append([max_index[0][i], max_index[1][i]])
 
-    #if len(index_list) > 1:
+    # if len(index_list) > 1:
     #    logger.warning(f"Ambigous alignement, {len(index_list)} solutions exists")
 
     i = index_list[0][0]
@@ -376,7 +378,7 @@ def get_common_atoms(
     ), "Incomplete backbone atoms for second Coor object, you might consider using the remove_incomplete_residues method before."
 
     align_seq_1, align_seq_2 = align_seq(seq_1, seq_2)
-    #print_align_seq(align_seq_1, align_seq_2)
+    # print_align_seq(align_seq_1, align_seq_2)
 
     align_sel_1 = []
     align_sel_2 = []

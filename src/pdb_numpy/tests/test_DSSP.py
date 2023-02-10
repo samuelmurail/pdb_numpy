@@ -16,11 +16,12 @@ def test_dssp():
     SS_list = DSSP.compute_DSSP(coor)
 
     assert (
-        SS_list[0]['A']
+        SS_list[0]["A"]
         == " EEEEE HHHHHHHHHHHTTT SSEEEEE SSEEEEEEE TTSSEEEEEEEEGGGSS EE SS EEEEE HHHHHHHHTTS SSS EEEEESSSSEEEEEETTEEEEEEEE GGGS           SEEEEEEHHHHHHHHHHHHHH SEEEEEEETTEEEEEEE SS EEEEEE TTTSSEE    EEEEEEHHHHHHHGGG  TTSEEEEEE SSS EEEEEEHHHHTEEEEEEE  EEESS"
     )
 
-    assert SS_list[0]['B'] == "SEEE  GGGT "
+    assert SS_list[0]["B"] == "SEEE  GGGT "
+
 
 def test_multiple_dssp():
     coor = pdb_numpy.Coor(PDB_1U85)
@@ -52,14 +53,10 @@ def test_multiple_dssp():
 
     assert len(SS_list) == len(SS_expected)
 
-    #for i in range(len(SS_list)):
+    # for i in range(len(SS_list)):
     #    print(f"\"{SS_list[i]['A']}\",")
 
     for i in range(len(SS_list)):
-        assert SS_list[i]['A'] == SS_expected[i]    
+        assert SS_list[i]["A"] == SS_expected[i]
 
-    assert (
-        SS_list[0]['A']
-        == "      SEE SSS  EESSHHHHHHHHHHHH  "
-    )
-
+    assert SS_list[0]["A"] == "      SEE SSS  EESSHHHHHHHHHHHH  "

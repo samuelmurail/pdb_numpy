@@ -92,7 +92,9 @@ def get_NH_xyz(model):
     CA_array = model.select_atoms("protein and name CA and not altloc B C D E").xyz
     N_array = model.select_atoms("protein and name N and not altloc B C D E").xyz
 
-    resname_array = model.select_atoms("protein and name CA and not altloc B C D E").resname
+    resname_array = model.select_atoms(
+        "protein and name CA and not altloc B C D E"
+    ).resname
 
     NH_list = []
     # Add first NH
@@ -104,8 +106,8 @@ def get_NH_xyz(model):
             continue
 
         C = C_array[i]
-        CA = CA_array[i+1]
-        N = N_array[i+1]
+        CA = CA_array[i + 1]
+        N = N_array[i + 1]
 
         C_N = N - C
         C_N = C_N / np.linalg.norm(C_N)
@@ -120,6 +122,7 @@ def get_NH_xyz(model):
         NH_list.append(NH)
 
     return np.array(NH_list)
+
 
 def hbond_energy(vec_N, vec_H, vec_O, vec_C):
     """Compute HBond energy based on ON, CH, OH and CN distances.
@@ -200,9 +203,9 @@ def compute_bend(CA_sel):
 
     return bend
 
+
 def compute_Hbond_matrix(model):
-    """Compute Hbond matrix for a protein.
-    """
+    """Compute Hbond matrix for a protein."""
     cutoff = 8.0
 
     CA_array = model.select_atoms("protein and name CA and not altloc B C D E").xyz
@@ -252,6 +255,7 @@ def compute_Hbond_matrix(model):
 
     return Hbond_mat
 
+
 def compute_DSSP(coor):
     """Compute DSSP for a protein.
 
@@ -281,7 +285,6 @@ def compute_DSSP(coor):
     unique_residues = np.unique(CA_sel.uniq_resid)
     chain_array = CA_sel.chain
     n_res = len(unique_residues)
-
 
     max_dist = 0
 
@@ -370,8 +373,7 @@ def compute_DSSP(coor):
 
         seq_dict = {}
 
-
-        for SS, chain in zip(SS_seq, [chain.decode('UTF-8') for chain in chain_array]):
+        for SS, chain in zip(SS_seq, [chain.decode("UTF-8") for chain in chain_array]):
             if chain not in seq_dict:
                 seq_dict[chain] = SS
             else:

@@ -16,7 +16,7 @@ typedef struct {
 } Alignment;
 
 
-int* seq_to_num (char *seq)
+int* seq_to_num (const char *seq)
 {
     int seq_len = strlen(seq);
     int *seq_num = malloc(seq_len * sizeof(int));
@@ -108,7 +108,7 @@ void print_alignment(Alignment alignment)
         printf("\n");
         for (int i = line * line_len; (i < (line + 1) * line_len) && (i < align_len); i++)
         {
-            printf("%s",  (alignment.seq1[i] == alignment.seq2[i] ? "*" : " "));
+            printf("%c",  (alignment.seq1[i] == alignment.seq2[i] ? '*' : ' '));
         }
         printf("\n");
         for (int i = line * line_len; (i < (line + 1) * line_len) && (i < align_len); i++)
@@ -124,15 +124,53 @@ void print_alignment(Alignment alignment)
     return ;
 }
 
-Alignment align(char *seq1, char *seq2, short int subs_matrix[MATRIX_SIZE][MATRIX_SIZE])
+void read_matrix(const char *matrix_file, short int matrix[MATRIX_SIZE][MATRIX_SIZE])
 {
+    FILE *fp;
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    //short int matrix[MATRIX_SIZE][MATRIX_SIZE];
+    char *ptr;
+    char delim[] = " ";
+
+    fp = fopen(matrix_file, "r");
+    if (fp == NULL)
+        exit(EXIT_FAILURE);
+
+    int i = 0, j;
+    while (((read = getline(&line, &len, fp)) != -1) && (i < MATRIX_SIZE)) {
+        if (line[0] == '#' || line[0] == ' ' || line[0] == '*')
+            continue;
+        if (i >= 0) {
+            ptr = strtok(line, delim);
+            ptr = strtok(NULL, delim);
+            for (j = 0; (ptr != NULL) && (j < MATRIX_SIZE); j++)
+            {
+                matrix[i][j] = atoi(ptr);
+                ptr = strtok(NULL, delim);
+            }
+        }
+        i++;
+    }
+}
+
+
+Alignment align(const char *seq1, const char *seq2, const char *matrix_file)
+{
+    short int subs_matrix[MATRIX_SIZE][MATRIX_SIZE];
     int seq1_len = strlen(seq1), seq2_len = strlen(seq2);
     int score_matrix [seq1_len + 1][seq2_len + 1];
     int prev_score_line [seq2_len];
     int prev_score = FALSE;
     int i, j, counter;
-
     Alignment alignment;
+
+    printf ("Sequence 1: %s\n", seq1);
+    printf ("Sequence 2: %s\n", seq2);
+    printf ("Reading matrix file %s:\n", matrix_file);
+    read_matrix(matrix_file, subs_matrix);
+    printf ("Reading matrix file:\n");
 
     for (i = 0; i < seq1_len + 1; i++) score_matrix[i][0] = 0;
     for (i = 0; i < seq2_len + 1; i++) score_matrix[0][i] = 0;
@@ -241,9 +279,14 @@ Alignment align(char *seq1, char *seq2, short int subs_matrix[MATRIX_SIZE][MATRI
     alignment.seq1 = malloc(max_len * sizeof(char));
     alignment.seq2 = malloc(max_len * sizeof(char));
 
+    for (int i = 0; i < max_len; i++) {
+        alignment.seq1[i] = 0;
+        alignment.seq2[i] = 0;
+    }
+
     int rev_i = 0;
     for (int i = counter; i >= 0; i--) {
-        if (align_seq_1[i] == '\0')
+        if ((align_seq_1[i] == '\0') || (align_seq_2[i] == '\0'))
             continue;
         alignment.seq1[rev_i] = align_seq_1[i];    
         alignment.seq2[rev_i] = align_seq_2[i];
@@ -255,38 +298,9 @@ Alignment align(char *seq1, char *seq2, short int subs_matrix[MATRIX_SIZE][MATRI
     free(align_seq_1);
     free(align_seq_2);
 
+    print_alignment(alignment);
+
     return alignment;
-}
-
-void read_matrix(char *matrix_file, short int matrix[MATRIX_SIZE][MATRIX_SIZE])
-{
-    FILE *fp;
-    char *line = NULL;
-    size_t len = 0;
-    ssize_t read;
-    //short int matrix[MATRIX_SIZE][MATRIX_SIZE];
-    char *ptr;
-    char delim[] = " ";
-
-    fp = fopen(matrix_file, "r");
-    if (fp == NULL)
-        exit(EXIT_FAILURE);
-
-    int i = 0, j;
-    while (((read = getline(&line, &len, fp)) != -1) && (i < MATRIX_SIZE)) {
-        if (line[0] == '#' || line[0] == ' ' || line[0] == '*')
-            continue;
-        if (i >= 0) {
-            ptr = strtok(line, delim);
-            ptr = strtok(NULL, delim);
-            for (j = 0; (ptr != NULL) && (j < MATRIX_SIZE); j++)
-            {
-                matrix[i][j] = atoi(ptr);
-                ptr = strtok(NULL, delim);
-            }
-        }
-        i++;
-    }
 }
 
 int main(int argc, char *argv[])
@@ -323,7 +337,7 @@ SEDIHKQ";
     }
 
     Alignment alignment;
-    alignment = align(seq_1, seq_2, sub_matrix);
+    alignment = align(seq_1, seq_2, "data/blosum62.txt");
     printf ("Alignment:\n%s:\n%s:\n", alignment.seq1, alignment.seq2);
 
     print_alignment(alignment);

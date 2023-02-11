@@ -76,11 +76,6 @@ def test_seq_align(caplog):
     assert captured[-2].msg == "Similarity seq1: 64.04%"
     assert captured[-1].msg == "Similarity seq2: 59.36%"
 
-    #assert captured[-4].msg == "Identity seq1: 26.50%"
-    #assert captured[-3].msg == "Identity seq2: 24.56%"
-    #assert captured[-2].msg == "Similarity seq1: 64.04%"
-    #assert captured[-1].msg == "Similarity seq2: 59.36%"
-
     seq_1 = "AQDMVSPPPPIADEPLTVNTGIYLIECYSLDDKAETFKVNAFLSLSWKDRRLAFDPV"
     seq_2 = "AQDMVSPPPPIADEPLTVN"
 
@@ -206,28 +201,9 @@ def test_align_seq_based():
 
     rmsds, _ = alignement.align_seq_based(coor_1, coor_2, chain_1=["A"], chain_2=["C"])
 
-    expected_rmsds = [
-        5.555010655269503,
-        4.50849944593366,
-        4.203023866673563,
-        4.089237506887086,
-        4.268405458525056,
-        5.4404697474851655,
-        5.605009944739971,
-        4.310207938001903,
-        4.179432984704397,
-        5.009242601626951,
-        5.662106462197564,
-        5.855741498275641,
-        4.862495769498237,
-        4.580287161782794,
-        5.433654424493706,
-        5.2051809370355455,
-        5.602365509226664,
-        4.111595128777337,
-        4.475493134478607,
-        4.5050640653032765,
-    ]
+    print(rmsds)
+
+    expected_rmsds = [5.1201007697145995, 4.325464568500979, 3.814838140492011, 3.7162291711703648, 3.885813512555148, 5.148095052210754, 5.296391465950272, 4.135615244634669, 3.8189144358192806, 4.597449831608669, 5.271310413581032, 5.517576912040033, 4.6082437633178115, 4.2097575131149885, 4.996842582024358, 5.006402154252272, 5.256112097498127, 3.7419617535551613, 4.184792438296149, 4.178818177627158]
 
     for expected_rmsd, rmsd in zip(expected_rmsds, rmsds):
         assert expected_rmsd == pytest.approx(rmsd, 0.0001)
@@ -239,7 +215,7 @@ def test_multi_chain_permutation():
     coor_1 = coor_1.select_atoms("chain B C D E F")
     coor_2 = Coor(PDB_2MUS)
 
-    rmsds, index = alignement.align_chain_permutation(coor_1, coor_2)
+    rmsds, index = alignement.align_chain_permutation(coor_1, coor_2, back_names=['CA', 'C', 'N', 'O'])
 
     assert 5.320970606442723 == pytest.approx(rmsds[0], 0.0001)
     assert len(index[0]) == 1420

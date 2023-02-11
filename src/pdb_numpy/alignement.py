@@ -37,16 +37,12 @@ def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     seq_2_bytes = seq_2.encode('ascii')
     blosum_file = os.path.join(dir_path, "data/blosum62.txt")
 
-    #print('seq1bytes', seq_1_bytes)
-    #print('seq2bytes', seq_2_bytes)
-    #print('blosum', blosum_file)
-
     alignement_res = align(
         ctypes.c_char_p(seq_1_bytes),
         ctypes.c_char_p(seq_2_bytes), 
         ctypes.c_char_p(blosum_file.encode('ascii')),
-        ctypes.c_int(-11),
-        ctypes.c_int(-1)
+        ctypes.c_int(gap_cost),
+        ctypes.c_int(gap_extension)
     )
 
     seq_1_aligned = alignement_res.contents.seq1.decode('ascii')
@@ -55,8 +51,6 @@ def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     free_align = my_functions.free_align
     free_align.argtypes = [ctypes.POINTER(test)]
     free_align(alignement_res)
-
-    #print('YO', seq_1_aligned)
 
     return seq_1_aligned, seq_2_aligned
 
@@ -126,9 +120,9 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     max_index = np.where(matrix == max_score)
 
     show_num = 10
-    print(matrix[:show_num, :show_num])
+    #print(matrix[:show_num, :show_num])
 
-    print("Max score:", max_score, max_index)
+    #print("Max score:", max_score, max_index)
 
     index_list = []
     for i in range(len(max_index[0])):
@@ -433,7 +427,7 @@ def get_common_atoms(
         back_names
     ), "Incomplete backbone atoms for second Coor object, you might consider using the remove_incomplete_residues method before."
 
-    align_seq_1, align_seq_2 = align_seq(seq_1, seq_2)
+    align_seq_1, align_seq_2 = align_seq_C(seq_1, seq_2)
     # print_align_seq(align_seq_1, align_seq_2)
 
     align_sel_1 = []
@@ -591,7 +585,7 @@ def rmsd_seq_based(
     ]
 
 
-def align_chain_permutation(coor_1, coor_2, chain_1=None, chain_2=None):
+def align_chain_permutation(coor_1, coor_2, chain_1=None, chain_2=None, back_names=["CA"]):
     """Align two structure based on chain permutation.
 
     Parameters
@@ -630,7 +624,7 @@ def align_chain_permutation(coor_1, coor_2, chain_1=None, chain_2=None):
     for chain_i in chain_1:
         for chain_j in chain_2:
             logger.info(f"compute  common atoms for {chain_i} and {chain_j}")
-            index_1, index_2 = get_common_atoms(coor_1, coor_2, chain_i, chain_j)
+            index_1, index_2 = get_common_atoms(coor_1, coor_2, chain_i, chain_j, back_names=back_names)
             index_common[chain_i, chain_j] = [index_1, index_2]
 
     rmsd_perm = []

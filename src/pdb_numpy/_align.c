@@ -199,16 +199,10 @@ Alignment *align(const char *seq1, const char *seq2, const char *matrix_file, in
     assert(alignment != NULL);
 
     // clean input sequences
-    printf ("Checking input sequences 1:\n");
     check_seq(seq1);
-    printf ("Checking input sequences 2:\n");
     check_seq(seq2);
 
-    printf ("Sequence 1: %s\n", seq1);
-    printf ("Sequence 2: %s\n", seq2);
-    printf ("Reading matrix file %s:\n", matrix_file);
     read_matrix(matrix_file, subs_matrix);
-    printf ("Reading matrix file:\n");
 
     for (i = 0; i < seq1_len + 1; i++) score_matrix[i][0] = 0;
     for (i = 0; i < seq2_len + 1; i++) score_matrix[0][i] = 0;
@@ -220,9 +214,8 @@ Alignment *align(const char *seq1, const char *seq2, const char *matrix_file, in
 
     int match, insert, delete;
 
-    printf("Aligning: \n%s \nwith:\n%s\n", seq1, seq2);
 
-    for (int i = 1; i < seq1_len + 1; i++)
+    for (int i = 1; i <= seq1_len; i++)
     {
         prev_score = FALSE;
         for (int j = 1; j <= seq2_len; j++)
@@ -251,19 +244,41 @@ Alignment *align(const char *seq1, const char *seq2, const char *matrix_file, in
     int min_len = (seq1_len < seq2_len) ? seq1_len : seq2_len;
     int min_i=0, min_j=0, max_score = score_matrix[0][0];
 
-    for (int i = min_len; i < seq1_len + 1; i++)
+    //int show_num = 15;
+    //for (int i = 0; i < show_num; i++)
+    //{
+    //    for (int j = 0; j < show_num; j++)
+    //    {
+    //        printf ("%3d ", score_matrix[i][j]);
+    //    }
+    //    printf("\n");
+    //}
+
+    //int show_num = 10;
+    //for (int i = seq1_len-show_num; i <= seq1_len; i++)
+    //{
+    //    for (int j = seq2_len-show_num; j <= seq2_len; j++)
+    //    {
+    //        printf ("%3d ", score_matrix[i][j]);
+    //    }
+    //    printf("\n");
+    //}
+    //printf ("Get max \n");
+    for (int i = min_len; i <= seq1_len; i++)
     {
-        for (int j = min_len; j < seq2_len + 1; j++)
+        for (int j = min_len; j <= seq2_len; j++)
         {
+            //printf ("%3d ", score_matrix[i][j]);
             if (score_matrix[i][j] > max_score) {
                 max_score = score_matrix[i][j];
                 min_i = i;
                 min_j = j;
             }
         }
+        //printf("\n");
     }
 
-    printf ("Max score: %d at %d, %d\n", max_score, min_i, min_j);
+    //printf ("Max score: %d at %d, %d\n", max_score, min_i, min_j);
 
     alignment->score = max_score;
 
@@ -297,12 +312,12 @@ Alignment *align(const char *seq1, const char *seq2, const char *matrix_file, in
     align_seq_1[counter] = '\0';
     align_seq_2[counter] = '\0';
 
-    printf ("B Checking align sequences 1 len = %ld:\n", strlen(align_seq_1));
-    check_seq(align_seq_1);
-    printf ("B Checking align sequences 2 len = %ld:\n", strlen(align_seq_2));
-    check_seq(align_seq_2);
+    //printf ("B Checking align sequences 1 len = %ld:\n", strlen(align_seq_1));
+    //check_seq(align_seq_1);
+    //printf ("B Checking align sequences 2 len = %ld:\n", strlen(align_seq_2));
+    //check_seq(align_seq_2);
 
-    printf ("Start matrix backtrack i=%d, j=%d, counter=%d\n", i, j, counter);
+    //printf ("Start matrix backtrack i=%d, j=%d, counter=%d\n", i, j, counter);
     do {
         if (score_matrix[i+1][j+1] == score_matrix[i][j] + subs_matrix[seq_1_num[i]][seq_2_num[j]]) {
             align_seq_1[counter] = seq1[i--];
@@ -326,10 +341,10 @@ Alignment *align(const char *seq1, const char *seq2, const char *matrix_file, in
     align_seq_1[counter] = '\0';
     align_seq_2[counter] = '\0';
 
-    printf ("C Checking align sequences 1 len = %ld:\n", strlen(align_seq_1));
-    check_seq(align_seq_1);
-    printf ("C Checking align sequences 2 len = %ld:\n", strlen(align_seq_2));
-    check_seq(align_seq_2);
+    //printf ("C Checking align sequences 1 len = %ld:\n", strlen(align_seq_1));
+    //check_seq(align_seq_1);
+    //printf ("C Checking align sequences 2 len = %ld:\n", strlen(align_seq_2));
+    //check_seq(align_seq_2);
 
     for (i = i + 1; i > 0; i--) {
         align_seq_1[counter] = seq1[i - 1];
@@ -345,10 +360,10 @@ Alignment *align(const char *seq1, const char *seq2, const char *matrix_file, in
     align_seq_2[counter] = '\0';
 
 
-    printf ("D Checking align sequences 1 len = %ld:\n", strlen(align_seq_1));
-    check_seq(align_seq_1);
-    printf ("D Checking align sequences 2 len = %ld:\n", strlen(align_seq_2));
-    check_seq(align_seq_2);
+    //printf ("D Checking align sequences 1 len = %ld:\n", strlen(align_seq_1));
+    //check_seq(align_seq_1);
+    //printf ("D Checking align sequences 2 len = %ld:\n", strlen(align_seq_2));
+    //check_seq(align_seq_2);
     // Get size of the alignment
     int align_len = 0;
     for (int i = 0; i < max_len; i++) {
@@ -363,7 +378,7 @@ Alignment *align(const char *seq1, const char *seq2, const char *matrix_file, in
     alignment->seq2 = calloc((align_len + 1), sizeof(char));
     assert(alignment->seq1 != NULL);
     assert(alignment->seq2 != NULL);
-    printf ("Alignment len align_len: %d\n", align_len + 1);
+    //printf ("Alignment len align_len: %d\n", align_len + 1);
 
     int rev_i = 0;
     for (int i = counter; i >= 0; i--) {
@@ -378,14 +393,14 @@ Alignment *align(const char *seq1, const char *seq2, const char *matrix_file, in
     alignment->seq1[rev_i] = '\0';
     alignment->seq2[rev_i] = '\0';
 
-    printf ("Alignment len %d\n", rev_i);
+    //printf ("Alignment len %d\n", rev_i);
 
     free(seq_1_num);
     free(seq_2_num);
     check_seq(alignment->seq1);
     check_seq(alignment->seq2);
 
-    print_alignment(alignment);
+    //print_alignment(alignment);
 
     return alignment;
 }
@@ -397,14 +412,14 @@ void free_align(Alignment *align)
         return;
     }
 
-    printf("Freeing alignment seq1: %s\n", align->seq1);
+    //printf("Freeing alignment seq1: %s\n", align->seq1);
     if (align->seq1 != NULL) {
         free(align->seq1); 
         align->seq1 = NULL;
     } else {
         printf("Warning: seq1 is NULL\n");
     }
-    printf("Freeing alignment seq2: %s\n", align->seq2);
+    //printf("Freeing alignment seq2: %s\n", align->seq2);
     if (align->seq2 != NULL) {
         free(align->seq2);
         align->seq2 = NULL;

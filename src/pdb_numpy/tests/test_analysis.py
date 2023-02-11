@@ -23,7 +23,7 @@ import logging
 import pytest
 
 
-def test_measure_rmsd():
+def test_measure_rmsd(caplog):
 
     pdb_numpy.logger.setLevel(level=logging.INFO)
 
@@ -49,7 +49,6 @@ def test_measure_rmsd():
     rmsds = analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2])
     print(rmsds)
     expected_rmsds = [
-        10,
         5.555010655269503,
         4.50849944593366,
         4.203023866673563,

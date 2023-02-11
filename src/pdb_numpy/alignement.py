@@ -37,9 +37,9 @@ def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     seq_2_bytes = seq_2.encode('ascii')
     blosum_file = os.path.join(dir_path, "data/blosum62.txt")
 
-    print('seq1bytes', seq_1_bytes)
-    print('seq2bytes', seq_2_bytes)
-    print('blosum', blosum_file)
+    #print('seq1bytes', seq_1_bytes)
+    #print('seq2bytes', seq_2_bytes)
+    #print('blosum', blosum_file)
 
     alignement_res = align(
         ctypes.c_char_p(seq_1_bytes),
@@ -56,7 +56,7 @@ def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     free_align.argtypes = [ctypes.POINTER(test)]
     free_align(alignement_res)
 
-    print('YO', seq_1_aligned)
+    #print('YO', seq_1_aligned)
 
     return seq_1_aligned, seq_2_aligned
 
@@ -125,7 +125,10 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     max_score = np.max(matrix[min_seq:, min_seq:])
     max_index = np.where(matrix == max_score)
 
-    print(max_score, max_index)
+    show_num = 10
+    print(matrix[:show_num, :show_num])
+
+    print("Max score:", max_score, max_index)
 
     index_list = []
     for i in range(len(max_index[0])):
@@ -151,28 +154,28 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     align_1 += seq_1[i:]
     align_2 += seq_2[j:]
 
-    i -= 1
-    j -= 1
+    #i -= 1
+    #j -= 1
 
     while i != 0 and j != 0:
         if (
-            matrix[i+1, j+1]
-            == matrix[i, j] + BLOSUM62[(seq_1[i], seq_2[j])]
+            matrix[i, j]
+            == matrix[i - 1, j - 1] + BLOSUM62[(seq_1[i - 1], seq_2[j - 1])]
         ):
             align_1 = seq_1[i - 1] + align_1
             align_2 = seq_2[j - 1] + align_2
             i -= 1
             j -= 1
         elif (
-            matrix[i+1, j+1] == matrix[i, j+1] + gap_cost
-            or matrix[i+1, j+1] == matrix[i, j+1] + gap_extension
+            matrix[i, j] == matrix[i - 1, j] + gap_cost
+            or matrix[i, j] == matrix[i - 1, j] + gap_extension
         ):
             align_1 = seq_1[i - 1] + align_1
             align_2 = "-" + align_2
             i -= 1
         elif (
-            matrix[i+1, j+1] == matrix[i+1, j] + gap_cost
-            or matrix[i+1, j+1] == matrix[i+1, j] + gap_extension
+            matrix[i, j] == matrix[i, j - 1] + gap_cost
+            or matrix[i, j] == matrix[i, j - 1] + gap_extension
         ):
             align_1 = "-" + align_1
             align_2 = seq_2[j - 1] + align_2

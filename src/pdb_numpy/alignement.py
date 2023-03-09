@@ -655,4 +655,4 @@ def align_chain_permutation(coor_1, coor_2, chain_1=None, chain_2=None, back_nam
                 min_index = i
                 min_rmsd = rmsd
 
-    return (rmsd_perm[min_index], index_perm[min_index])
+    return (rmsd_perm[min_index], index_perm[min_index], )

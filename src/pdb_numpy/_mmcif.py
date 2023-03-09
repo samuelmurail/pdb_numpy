@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 FIELD_DICT = {b"A": "ATOM  ", b"H": "HETATM"}
 
 
-def parse_raw_mmcif_lines(mmcif_lines):
+def parse_mmcif_lines(self, mmcif_lines):
     """Parse the mmcif lines and return atom information as a dictionary
 
     Parameters
@@ -40,6 +40,50 @@ def parse_raw_mmcif_lines(mmcif_lines):
     """
 
     data_mmCIF = parse_raw_mmcif_lines(mmcif_lines)
+
+    model_index = data_mmCIF['_atom_site']['col_names'].index('pdbx_PDB_model_num')
+    model_list = [int(i) for i in set(data_mmCIF['_atom_site']['value'][model_index])]
+
+    """
+    ['group_PDB',       field
+    'id',               num
+    'type_symbol',      
+    'label_atom_id',
+    'label_alt_id',
+    'label_comp_id',
+    'label_asym_id',
+    'label_entity_id',
+    'label_seq_id',
+    'pdbx_PDB_ins_code',
+    'Cartn_x',
+    'Cartn_y',
+    'Cartn_z',
+    'occupancy',
+    'B_iso_or_equiv',
+    'pdbx_formal_charge',
+    'auth_seq_id',
+    'auth_comp_id',
+    'auth_asym_id',
+    'auth_atom_id',
+    'pdbx_PDB_model_num']
+    """
+
+    field_index = data_mmCIF['_atom_site']['col_names'].index('pdbx_PDB_model_num')
+
+    for model in model_list:
+        local_model = Model()
+        index_model == model
+        local_model.atom_dict = {
+                    "field": np.array(field_list, dtype="|S1"),
+                    "num_resid_uniqresid": np.array(num_resid_uniqresid_list),
+                    "name_resname": np.array(name_resname_list, dtype="|S4"),
+                    "alterloc_chain_insertres": np.array(
+                        alter_chain_insert_elem_list, dtype="|S1"
+                    ),
+                    "xyz": np.array(xyz_list),
+                    "occ_beta": np.array(occ_beta_list),
+                }
+
 
 
 def get_PDB_mmcif(self, pdb_ID):
@@ -70,7 +114,7 @@ def get_PDB_mmcif(self, pdb_ID):
     ) as response:
         pdb_lines = response.read().decode("utf-8").splitlines(True)
 
-    self.parse_mmcif_lines(pdb_lines)
+    mmcif_dict = parse_raw_mmcif_lines(pdb_lines)
 
 
 

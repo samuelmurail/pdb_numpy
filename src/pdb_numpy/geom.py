@@ -2,6 +2,10 @@
 # coding: utf-8
 
 import numpy as np
+import logging
+
+# Logging
+logger = logging.getLogger(__name__)
 
 
 def angle_vec(vec_a, vec_b):
@@ -147,6 +151,87 @@ def cryst_convert(crystal_pack, format_out="pdb"):
                 / 10,
                 v / (a * b * np.sin(gamma)) / 10,
             ]
+        new_line = (
+            "{:10.5f}{:10.5f}{:10.5f}{:10.5f}{:10.5f}"
+            "{:10.5f}{:10.5f}{:10.5f}{:10.5f}\n".format(
+                v1[0], v2[1], v3[2], v1[1], v1[2], v2[0], v2[2], v3[0], v3[1]
+            )
+        )
+    return new_line
+
+
+def cryst_convert_mmCIF(data_mmCIF, format_out="pdb"):
+    """
+    PDB format:
+    https://www.wwpdb.org/documentation/file-format-content/format33/sect8.html
+    Gro to pdb:
+    https://mailman-1.sys.kth.se/pipermail/gromacs.org_gmx-users/2008-May/033944.html
+    https://en.wikipedia.org/wiki/Fractional_coordinates
+
+    Parameters
+    ----------
+    crystal_pack : str
+        line of the pdb file containing the crystal information
+    format_out : str, optional
+        format of the output, by default 'pdb'
+    
+    Returns
+    -------
+    str
+        line of the pdb/gro file containing the crystal information
+    
+    >>> prot_coor = Coor()
+    >>> prot_coor.read_file(os.path.join(TEST_PATH, '1y0m.gro'))\
+    >>> prot_coor.cryst_convert(format_out='pdb')
+    'CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P \
+        1\\n'
+
+    """
+    if '_cell' not in data_mmCIF:
+        logger.warning("No cell information in mmCIF file")
+        return ''
+
+    a = float(data_mmCIF['_cell']['length_a'])
+    b = float(data_mmCIF['_cell']['length_b'])
+    c = float(data_mmCIF['_cell']['length_c'])
+    alpha = float(data_mmCIF['_cell']['angle_alpha'])
+    beta = float(data_mmCIF['_cell']['angle_beta'])
+    gamma = float(data_mmCIF['_cell']['angle_gamma'])
+    sGroup = "1"
+    z = int(data_mmCIF['_cell']['Z_PDB'])
+
+    # Convert:
+    if format_out == "pdb":
+        new_line = (
+            f"CRYST1{a:9.3f}{b:9.3f}{c:9.3f}{alpha:7.2f}{beta:7.2f}"
+            f"{gamma:7.2f} P {sGroup:8} {z:3d}\n"
+        )
+    elif format_out == "gro":
+        alpha = np.deg2rad(alpha)
+        beta = np.deg2rad(beta)
+        gamma = np.deg2rad(gamma)
+        v1 = [a / 10, 0.0, 0.0]
+        v2 = [b * np.cos(gamma) / 10, b * np.sin(gamma) / 10, 0.0]
+        v = (
+            (
+                1.0
+                - np.cos(alpha) ** 2
+                - np.cos(beta) ** 2
+                - np.cos(gamma) ** 2
+                + 2.0 * np.cos(alpha) * np.cos(beta) * np.cos(gamma)
+            )
+            ** 0.5
+            * a
+            * b
+            * c
+        )
+        v3 = [
+            c * np.cos(beta) / 10,
+            (c / np.sin(gamma))
+            * (np.cos(alpha) - np.cos(beta) * np.cos(gamma))
+            / 10,
+            v / (a * b * np.sin(gamma)) / 10,
+        ]
         new_line = (
             "{:10.5f}{:10.5f}{:10.5f}{:10.5f}{:10.5f}"
             "{:10.5f}{:10.5f}{:10.5f}{:10.5f}\n".format(

@@ -70,6 +70,7 @@ class Coor:
         self.active_model = 0
         self.models = []
         self.crystal_pack = None
+        self.data_mmCIF = None
 
         if coor_in is not None:
             self.read_file(coor_in)
@@ -177,9 +178,9 @@ class Coor:
 
         keyword_dict = {
             "num": ["num_resid_uniqresid", 0],
-            "resname": ["name_resname", 1],
+            "resname": ["name_resname_elem", 1],
             "chain": ["alterloc_chain_insertres", 1],
-            "name": ["name_resname", 0],
+            "name": ["name_resname_elem", 0],
             "altloc": ["alterloc_chain_insertres", 0],
             "resid": ["num_resid_uniqresid", 1],
             "resid": ["num_resid_uniqresid", 2],
@@ -219,7 +220,7 @@ class Coor:
         for model in self.models:
             for key in [
                 "alterloc_chain_insertres",
-                "name_resname",
+                "name_resname_elem",
                 "num_resid_uniqresid",
                 "xyz",
                 "occ_beta",
@@ -358,7 +359,7 @@ class Coor:
                 .astype(np.str_)
             )
             res_name = (
-                CA_sel.models[frame].atom_dict["name_resname"][i, 1].astype(np.str_)
+                CA_sel.models[frame].atom_dict["name_resname_elem"][i, 1].astype(np.str_)
             )
             resid = CA_sel.models[frame].atom_dict["num_resid_uniqresid"][i, 1]
 
@@ -445,7 +446,7 @@ class Coor:
                 .astype(np.str_)
             )
             res_name = (
-                self.models[frame].atom_dict["name_resname"][i, 1].astype(np.str_)
+                self.models[frame].atom_dict["name_resname_elem"][i, 1].astype(np.str_)
             )
             resid = self.models[frame].atom_dict["num_resid_uniqresid"][i, 1]
             uniq_resid = self.models[frame].atom_dict["num_resid_uniqresid"][i, 2]
@@ -512,11 +513,11 @@ class Coor:
 
     @property
     def name(self):
-        return self.models[self.active_model].atom_dict["name_resname"][:, 0]
+        return self.models[self.active_model].atom_dict["name_resname_elem"][:, 0]
 
     @property
     def resname(self):
-        return self.models[self.active_model].atom_dict["name_resname"][:, 1]
+        return self.models[self.active_model].atom_dict["name_resname_elem"][:, 1]
 
     @property
     def alterloc(self):
@@ -538,8 +539,8 @@ class Coor:
 
     @property
     def elem(self):
-        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][
-            :, 3
+        return self.models[self.active_model].atom_dict["name_resname_elem"][
+            :, 2
         ]
 
     @property

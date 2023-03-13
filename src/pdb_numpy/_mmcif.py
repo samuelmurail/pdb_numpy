@@ -51,24 +51,28 @@ def parse_mmcif_lines(self, mmcif_lines):
 
     # "num_resid_uniqresid"
     col_index = data_mmCIF['_atom_site']['col_names'].index('id')
-    num_array = np.array(data_mmCIF['_atom_site']['value'][col_index]).astype(np.int16)
+    num_array = np.array(data_mmCIF['_atom_site']['value'][col_index]).astype(np.int32)
     # check that num_array is consecutive (Maybe useless)
     assert np.array_equal(num_array, np.arange(1, len(num_array) + 1)), "Atom numbering is not consecutive"
 
     col_index = data_mmCIF['_atom_site']['col_names'].index('auth_seq_id')
-    resid_array = np.array(data_mmCIF['_atom_site']['value'][col_index]).astype(np.int16)
+    resid_array = np.array(data_mmCIF['_atom_site']['value'][col_index]).astype(np.int32)
     uniq_resid_list = []
     uniq_resid = 0
     prev_resid = resid_array[0]
-    for i in resid_array:
-        if i != prev_resid:
+    prev_model = model_array[0]
+    for resid, model in zip(resid_array, model_array):
+        if model != prev_model:
+            uniq_resid = 0
+            prev_model = model
+        if resid != prev_resid:
             uniq_resid += 1
             uniq_resid_list.append(uniq_resid)
-            prev_resid = i
+            prev_resid = resid
         else:
             uniq_resid_list.append(uniq_resid)
 
-    uniq_resid_array = np.array(uniq_resid_list).astype(np.int16)
+    uniq_resid_array = np.array(uniq_resid_list).astype(np.int32)
 
     num_resid_uniqresid_array = np.column_stack((num_array, resid_array, uniq_resid_array))
 
@@ -77,21 +81,23 @@ def parse_mmcif_lines(self, mmcif_lines):
     name_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="|S4")
     col_index = data_mmCIF['_atom_site']['col_names'].index('label_comp_id')
     resname_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="|S4")
+    col_index = data_mmCIF['_atom_site']['col_names'].index('type_symbol')
+    ele_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="|S1")
 
-    name_resname_array = np.column_stack((name_array, resname_array, uniq_resid_array))
+
+    name_resname_array = np.column_stack((name_array, resname_array, ele_array))
 
 
     # "alterloc_chain_insertres"
     col_index = data_mmCIF['_atom_site']['col_names'].index('label_alt_id')
     alterloc_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="|S1")
+    alterloc_array[alterloc_array == b"."] = ""
     col_index = data_mmCIF['_atom_site']['col_names'].index('label_asym_id')
     chain_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="|S1")
     col_index = data_mmCIF['_atom_site']['col_names'].index('pdbx_PDB_ins_code')
     insertres_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="|S1")
-    col_index = data_mmCIF['_atom_site']['col_names'].index('type_symbol')
-    ele_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="|S1")
-
-    alterloc_chain_insertres_array = np.column_stack((alterloc_array, chain_array, insertres_array, ele_array))
+    insertres_array[insertres_array == b"?"] = ""
+    alterloc_chain_insertres_array = np.column_stack((alterloc_array, chain_array, insertres_array))
 
     # "xyz"
     col_index = data_mmCIF['_atom_site']['col_names'].index('Cartn_x')
@@ -121,7 +127,7 @@ def parse_mmcif_lines(self, mmcif_lines):
         local_model.atom_dict = {
                     "field": field_array[model_index],
                     "num_resid_uniqresid": num_resid_uniqresid_array[model_index],
-                    "name_resname": name_resname_array[model_index],
+                    "name_resname_elem": name_resname_array[model_index],
                     "alterloc_chain_insertres": alterloc_chain_insertres_array[model_index],
                     "xyz": xyz_array[model_index],
                     "occ_beta": occ_beta_array[model_index],

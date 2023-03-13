@@ -22,7 +22,7 @@ def test_get_mmcif(tmp_path):
     assert test.len == 648
     assert test.model_num == 1
 
-    assert test.models[0].atom_dict["name_resname"][0, 1] == b"THR"
+    assert test.models[0].atom_dict["name_resname_elem"][0, 1] == b"THR"
     assert test.models[0].resname[0] == b"THR"
     assert test.models[0].resid[0] == 791
     assert test.models[0].uniq_resid[0] == 0
@@ -31,7 +31,7 @@ def test_get_mmcif(tmp_path):
     assert test.models[0].x[0] == pytest.approx(-1.432, 0.000001)
     assert test.models[0].y[0] == pytest.approx(9.759, 0.000001)
     assert test.models[0].z[0] == pytest.approx(11.436, 0.000001)
-    assert list(test.models[0].atom_dict["xyz"][0, :]) == [pytest.approx(-1.432, 0.000001), pytest.approx(9.759, 0.000001), pytest.approx(11.436, 0.000001)]
+    assert (test.models[0].atom_dict["xyz"][0, :] == np.array([-1.432, 9.759, 11.436], dtype=np.float32)).all()
     assert test.data_mmCIF['_cell']['length_a'] == '28.748'
     assert test.data_mmCIF['_cell']['length_b'] == '30.978'
     assert test.data_mmCIF['_cell']['length_c'] == '29.753'
@@ -57,7 +57,7 @@ def test_read_write_pdb(tmp_path, caplog):
 
     test2 = Coor(os.path.join(tmp_path, "test.pdb"))
     assert test2.len == test.len
-    assert test2.crystal_pack.strip() == test.crystal_pack.strip()
+    assert test2.crystal_pack.strip() == "CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P 1          2"
 
     for key in test.models[0].atom_dict:
         # Atom index can differ
@@ -83,7 +83,7 @@ def test_read_write_pdb(tmp_path, caplog):
 
 def test_read_write_pdb_models(tmp_path):
     """Test read and write pdb function with several models."""
-    test = Coor(PDB_2RRI)
+    test = Coor(MMCIF_2RRI)
 
     assert test.model_num == 20
 
@@ -96,7 +96,7 @@ def test_read_write_pdb_models(tmp_path):
     for model, model_2 in zip(test.models, test_2.models):
         for key in model.atom_dict:
             # Atom index can differ
-            if key == "num_resnum_uniqresid":
+            if key == "num_resid_uniqresid":
                 assert (
                     model.atom_dict[key][:, 1:] == model_2.atom_dict[key][:, 1:]
                 ).all()

@@ -81,11 +81,11 @@ class Model:
 
     @property
     def name(self):
-        return self.atom_dict["name_resname"][:, 0]
+        return self.atom_dict["name_resname_elem"][:, 0]
 
     @property
     def resname(self):
-        return self.atom_dict["name_resname"][:, 1]
+        return self.atom_dict["name_resname_elem"][:, 1]
 
     @property
     def alterloc(self):
@@ -101,7 +101,7 @@ class Model:
 
     @property
     def elem(self):
-        return self.atom_dict["alterloc_chain_insertres"][:, 3]
+        return self.atom_dict["name_resname_elem"][:, 2]
 
     @property
     def resid(self):
@@ -236,9 +236,9 @@ class Model:
 
         keyword_dict = {
             "num": ["num_resid_uniqresid", 0],
-            "resname": ["name_resname", 1],
+            "resname": ["name_resname_elem", 1],
             "chain": ["alterloc_chain_insertres", 1],
-            "name": ["name_resname", 0],
+            "name": ["name_resname_elem", 0],
             "altloc": ["alterloc_chain_insertres", 0],
             "resid": ["num_resid_uniqresid", 1],
             "residue": ["num_resid_uniqresid", 2],

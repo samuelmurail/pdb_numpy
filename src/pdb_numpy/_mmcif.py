@@ -64,6 +64,7 @@ def parse_mmcif_lines(self, mmcif_lines):
     for resid, model in zip(resid_array, model_array):
         if model != prev_model:
             uniq_resid = 0
+            prev_resid = resid
             prev_model = model
         if resid != prev_resid:
             uniq_resid += 1

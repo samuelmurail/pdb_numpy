@@ -27,10 +27,10 @@ def test_get_pdb(tmp_path):
     assert test.models[0].uniq_resid[0] == 0
     assert test.models[0].name[0] == b"N"
     assert test.models[0].num[0] == 1
-    assert test.models[0].x[0] == -1.432
-    assert test.models[0].y[0] == 9.759
-    assert test.models[0].z[0] == 11.436
-    assert list(test.models[0].atom_dict["xyz"][0, :]) == [-1.432, 9.759, 11.436]
+    assert test.models[0].x[0] == pytest.approx(-1.432, 0.000001)
+    assert test.models[0].y[0] == pytest.approx(9.759, 0.000001)
+    assert test.models[0].z[0] == pytest.approx(11.436, 0.000001)
+    assert (test.models[0].atom_dict["xyz"][0, :] == np.array([-1.432, 9.759, 11.436], dtype=np.float32)).all()
     assert (
         test.crystal_pack
         == "CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P 1 21 1      2          \n"
@@ -52,10 +52,10 @@ def test_get_pdb_models(tmp_path):
     assert test.resid[0] == 1
     assert test.name[0] == b"N"
     assert test.num[0] == 1
-    assert test.x[0] == -11.432
-    assert test.y[0] == 14.757
-    assert test.z[0] == -14.63
-    assert list(test.xyz[0, :]) == [-11.432, 14.757, -14.63]
+    assert test.x[0] == pytest.approx(-11.432, 0.000001)
+    assert test.y[0] == pytest.approx(14.757, 0.000001)
+    assert test.z[0] == pytest.approx(-14.63, 0.000001)
+    assert (test.xyz[0, :] == np.array([-11.432, 14.757, -14.63], dtype=np.float32)).all()
 
     test.active_model = 19
     assert test.active_model == 19
@@ -66,10 +66,10 @@ def test_get_pdb_models(tmp_path):
     assert test.models[19].name[0] == b"N"
     assert test.name[0] == b"N"
     assert test.models[19].num[0] == 1
-    assert test.models[19].x[0] == 1.574
-    assert test.models[19].y[0] == 17.66
-    assert test.models[19].z[0] == -0.301
-    assert list(test.xyz[0, :]) == [1.574, 17.66, -0.301]
+    assert test.models[19].x[0] == pytest.approx(1.574, 0.000001)
+    assert test.models[19].y[0] == pytest.approx(17.66, 0.000001)
+    assert test.models[19].z[0] == pytest.approx(-0.301, 0.000001)
+    assert (test.xyz[0, :] == np.array([1.574, 17.66, -0.301], dtype=np.float32)).all()
     assert (
         test.crystal_pack
         == "CRYST1    1.000    1.000    1.000  90.00  90.00  90.00 P 1           1          \n"

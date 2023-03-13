@@ -10,8 +10,10 @@ TEST_FILE_PATH = os.path.join(PYTEST_DIR, "input/")
 
 PDB_1Y0M = os.path.join(TEST_FILE_PATH, "1y0m.pdb")
 PQR_1Y0M = os.path.join(TEST_FILE_PATH, "1y0m.pqr")
+MMCIF_1Y0M = os.path.join(TEST_FILE_PATH, "1y0m.cif")
 
 PDB_2RRI = os.path.join(TEST_FILE_PATH, "2rri.pdb")
+MMCIF_2RRI = os.path.join(TEST_FILE_PATH, "2rri.cif")
 
 PDB_1U85 = os.path.join(TEST_FILE_PATH, "1u85.pdb")
 PDB_1UBD = os.path.join(TEST_FILE_PATH, "1ubd.pdb")

@@ -87,8 +87,11 @@ class Coor:
             write_pqr,
             get_pqr_string,
         )
-
-        # from .alignement import get_aa_seq, get_aa_DL_seq
+        from ._mmcif import (
+            parse_mmcif_lines,
+            get_PDB_mmcif,
+            write_mmcif,
+        )
     except ImportError:
         logger.warning("ImportError: pdb_numpy is not installed, using local files")
         from _pdb import (
@@ -99,8 +102,11 @@ class Coor:
             write_pqr,
             get_pqr_string,
         )
-
-        # from pdb_numpy.alignement import get_aa_seq, get_aa_DL_seq
+        from _mmcif import (
+            parse_mmcif_lines,
+            get_PDB_mmcif,
+            write_mmcif,
+        )
 
     def read_file(self, file_in):
         """Read a pdb/pqr/gro file and return atom informations as a Coor
@@ -136,6 +142,8 @@ class Coor:
             self.parse_pdb_lines(lines, pqr_format=True)
         elif str(file_in).endswith(".pdb"):
             self.parse_pdb_lines(pdb_lines=lines, pqr_format=False)
+        elif str(file_in).endswith(".cif"):
+            self.parse_mmcif_lines(mmcif_lines=lines)
         else:
             logger.warning(
                 "File name doesn't finish with .pdb" " read it as .pdb anyway"

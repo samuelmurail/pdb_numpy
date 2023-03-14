@@ -267,6 +267,7 @@ def get_mmcif_string_from_dict(mmcif_dict):
     old_category = ""
 
     for category in mmcif_dict:
+        print(category)
         if category == 'title':
             str_out += f"{mmcif_dict[category]['title']}\n"
         else:
@@ -298,7 +299,6 @@ def get_mmcif_string_from_dict(mmcif_dict):
     return str_out
 
 
-
 def write_mmcif(self, mmcif_out, check_file_out=True):
     """Write a mmcif file.
 
@@ -325,8 +325,39 @@ def write_mmcif(self, mmcif_out, check_file_out=True):
         logger.info(f"MMCIF file {mmcif_out} already exist, file not saved")
         return
 
+    """
+    _atom_site.group_PDB 
+    _atom_site.id 
+    _atom_site.type_symbol 
+    _atom_site.label_atom_id 
+    _atom_site.label_alt_id 
+    _atom_site.label_comp_id 
+    _atom_site.label_asym_id 
+    _atom_site.label_entity_id 
+    _atom_site.label_seq_id 
+    _atom_site.pdbx_PDB_ins_code 
+    _atom_site.Cartn_x 
+    _atom_site.Cartn_y 
+    _atom_site.Cartn_z 
+    _atom_site.occupancy 
+    _atom_site.B_iso_or_equiv 
+    _atom_site.pdbx_formal_charge 
+    _atom_site.auth_seq_id 
+    _atom_site.auth_comp_id 
+    _atom_site.auth_asym_id 
+    _atom_site.auth_atom_id 
+    _atom_site.pdbx_PDB_model_num 
+    """
+
+    # Get total length of the pdb file
+    atom_num = self.total_len
+    self.data_mmCIF["_atom_site"]["group_PDB"] = np.chararray(atom_num, itemsize=6)
+
+    self.data_mmCIF["_atom_site"]["group_PDB"] = np.empty(atom_num)
+
+
     filout = open(mmcif_out, "w")
-    filout.write(self.get_mmcif_string())
+    filout.write(get_mmcif_string_from_dict(self.data_mmCIF))
     filout.close()
     logger.info(f"Succeed to save file {os.path.relpath(mmcif_out)}")
     return

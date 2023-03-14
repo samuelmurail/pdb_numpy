@@ -15,7 +15,7 @@ from pdb_numpy import Coor
 from .datafiles import MMCIF_1Y0M, MMCIF_2RRI
 
 
-def test_get_mmcif(tmp_path):
+def test_get_PDB_mmcif(tmp_path):
     """Test get_pdb function."""
     test = Coor()
     test.get_PDB_mmcif(pdb_ID="1y0m")
@@ -41,7 +41,7 @@ def test_get_mmcif(tmp_path):
     assert test.data_mmCIF['_cell']['Z_PDB'] == '2'
 
 
-def test_read_write_pdb(tmp_path, caplog):
+def test_read_mmcif_write_pdb(tmp_path, caplog):
     """Test read_file function."""
 
     pdb_numpy.logger.setLevel(level=logging.INFO)
@@ -80,8 +80,46 @@ def test_read_write_pdb(tmp_path, caplog):
     assert captured[-1].msg.endswith("test.pdb already exist, file not saved")
 
 
+def test_read_mmcif_write_mmcif(tmp_path, caplog):
+    """Test read_file function."""
 
-def test_read_write_pdb_models(tmp_path):
+    pdb_numpy.logger.setLevel(level=logging.INFO)
+
+    test = Coor(MMCIF_1Y0M)
+    assert test.len == 648
+
+    test.write_mmcif(os.path.join(tmp_path, "test.cif"))
+    captured = caplog.records
+
+    assert captured[-1].msg.startswith("Succeed to save file ")
+    assert captured[-1].msg.endswith("test.cif")
+
+    test2 = Coor(os.path.join(tmp_path, "test.cif"))
+    assert test2.len == test.len
+    assert test2.crystal_pack.strip() == "CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P 1          2"
+
+    for key in test.models[0].atom_dict:
+        # Atom index can differ
+        if key == "num_resid_uniqresid":
+            assert (
+                test.models[0].atom_dict[key][:, 1:]
+                == test2.models[0].atom_dict[key][:, 1:]
+            ).all()
+        else:
+            assert (
+                test.models[0].atom_dict[key] == test2.models[0].atom_dict[key]
+            ).all()
+
+    # Test if overwritting file is prevent
+    test2.write_pdb(os.path.join(tmp_path, "test.pdb"))
+
+    # captured = caplog.records
+
+    assert captured[-1].msg.startswith("PDB file ")
+    assert captured[-1].msg.endswith("test.pdb already exist, file not saved")
+
+
+def test_read_mmcif_write_pdb_models(tmp_path):
     """Test read and write pdb function with several models."""
     test = Coor(MMCIF_2RRI)
 

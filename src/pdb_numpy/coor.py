@@ -500,6 +500,13 @@ class Coor:
         return self.models[self.active_model].len
 
     @property
+    def total_len(self):
+        total_len = 0
+        for model in self.models:
+            total_len += model.len
+        return total_len
+
+    @property
     def model_num(self):
         return len(self.models)
 

@@ -21,11 +21,11 @@ def test_get_pdb(tmp_path):
     assert test.len == 648
     assert test.model_num == 1
 
-    assert test.models[0].atom_dict["name_resname_elem"][0, 1] == b"THR"
-    assert test.models[0].resname[0] == b"THR"
+    assert test.models[0].atom_dict["name_resname_elem"][0, 1] == "THR"
+    assert test.models[0].resname[0] == "THR"
     assert test.models[0].resid[0] == 791
     assert test.models[0].uniq_resid[0] == 0
-    assert test.models[0].name[0] == b"N"
+    assert test.models[0].name[0] == "N"
     assert test.models[0].num[0] == 1
     assert test.models[0].x[0] == pytest.approx(-1.432, 0.000001)
     assert test.models[0].y[0] == pytest.approx(9.759, 0.000001)
@@ -46,11 +46,11 @@ def test_get_pdb_models(tmp_path):
     assert test.len == 479
     assert test.active_model == 0
 
-    assert test.models[0].atom_dict["name_resname_elem"][0, 1] == b"HIS"
-    assert test.resname[0] == b"HIS"
-    assert test.models[0].resname[0] == b"HIS"
+    assert test.models[0].atom_dict["name_resname_elem"][0, 1] == "HIS"
+    assert test.resname[0] == "HIS"
+    assert test.models[0].resname[0] == "HIS"
     assert test.resid[0] == 1
-    assert test.name[0] == b"N"
+    assert test.name[0] == "N"
     assert test.num[0] == 1
     assert test.x[0] == pytest.approx(-11.432, 0.000001)
     assert test.y[0] == pytest.approx(14.757, 0.000001)
@@ -60,11 +60,11 @@ def test_get_pdb_models(tmp_path):
     test.active_model = 19
     assert test.active_model == 19
 
-    assert test.models[19].atom_dict["name_resname_elem"][0, 1] == b"HIS"
-    assert test.resname[0] == b"HIS"
+    assert test.models[19].atom_dict["name_resname_elem"][0, 1] == "HIS"
+    assert test.resname[0] == "HIS"
     assert test.models[19].resid[0] == 1
-    assert test.models[19].name[0] == b"N"
-    assert test.name[0] == b"N"
+    assert test.models[19].name[0] == "N"
+    assert test.name[0] == "N"
     assert test.models[19].num[0] == 1
     assert test.models[19].x[0] == pytest.approx(1.574, 0.000001)
     assert test.models[19].y[0] == pytest.approx(17.66, 0.000001)

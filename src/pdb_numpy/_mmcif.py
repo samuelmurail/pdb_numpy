@@ -18,7 +18,7 @@ except ImportError:
 # Logging
 logger = logging.getLogger(__name__)
 
-FIELD_DICT = {b"A": "ATOM  ", b"H": "HETATM"}
+FIELD_DICT = {"A": "ATOM  ", "H": "HETATM"}
 
 
 def parse_mmcif_lines(self, mmcif_lines):
@@ -47,7 +47,7 @@ def parse_mmcif_lines(self, mmcif_lines):
 
     # field list
     col_index = data_mmCIF['_atom_site']['col_names'].index('group_PDB')
-    field_array = np.array([field[0] for field in data_mmCIF['_atom_site']['value'][col_index]], dtype="|S1")
+    field_array = np.array([field[0] for field in data_mmCIF['_atom_site']['value'][col_index]], dtype="|U1")
 
     # "num_resid_uniqresid"
     col_index = data_mmCIF['_atom_site']['col_names'].index('id')
@@ -79,11 +79,12 @@ def parse_mmcif_lines(self, mmcif_lines):
 
     # "name_resname"
     col_index = data_mmCIF['_atom_site']['col_names'].index('label_atom_id')
-    name_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="|S4")
+    # dtype set to U5 to avoid truncation of long atom names like "O5\'"
+    name_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="U")
     col_index = data_mmCIF['_atom_site']['col_names'].index('label_comp_id')
-    resname_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="|S4")
+    resname_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="U")
     col_index = data_mmCIF['_atom_site']['col_names'].index('type_symbol')
-    ele_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="|S1")
+    ele_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="U")
 
 
     name_resname_array = np.column_stack((name_array, resname_array, ele_array))
@@ -91,12 +92,12 @@ def parse_mmcif_lines(self, mmcif_lines):
 
     # "alterloc_chain_insertres"
     col_index = data_mmCIF['_atom_site']['col_names'].index('label_alt_id')
-    alterloc_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="|S1")
+    alterloc_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="|U1")
     alterloc_array[alterloc_array == b"."] = ""
     col_index = data_mmCIF['_atom_site']['col_names'].index('label_asym_id')
-    chain_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="|S1")
+    chain_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="|U1")
     col_index = data_mmCIF['_atom_site']['col_names'].index('pdbx_PDB_ins_code')
-    insertres_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="|S1")
+    insertres_array = np.array(data_mmCIF['_atom_site']['value'][col_index], dtype="|U1")
     insertres_array[insertres_array == b"?"] = ""
     alterloc_chain_insertres_array = np.column_stack((alterloc_array, chain_array, insertres_array))
 
@@ -298,6 +299,27 @@ def get_mmcif_string_from_dict(mmcif_dict):
 
     return str_out
 
+def get_float_format_size(array, dec_num=3):
+    """Return the float format size for a given array.
+
+    Parameters
+    ----------
+    array : numpy.ndarray
+        array to format
+
+    Returns
+    -------
+    str
+        float format size
+
+    """
+
+    min_array = np.min(array)
+    max_array = np.max(array)
+
+    size = max(len(f"{min_array:.{dec_num}f}"), len(f"{max_array:.{dec_num}f}"))
+
+    return(size)
 
 def write_mmcif(self, mmcif_out, check_file_out=True):
     """Write a mmcif file.
@@ -324,40 +346,113 @@ def write_mmcif(self, mmcif_out, check_file_out=True):
     if check_file_out and os.path.exists(mmcif_out):
         logger.info(f"MMCIF file {mmcif_out} already exist, file not saved")
         return
-
-    """
-    _atom_site.group_PDB 
-    _atom_site.id 
-    _atom_site.type_symbol 
-    _atom_site.label_atom_id 
-    _atom_site.label_alt_id 
-    _atom_site.label_comp_id 
-    _atom_site.label_asym_id 
-    _atom_site.label_entity_id 
-    _atom_site.label_seq_id 
-    _atom_site.pdbx_PDB_ins_code 
-    _atom_site.Cartn_x 
-    _atom_site.Cartn_y 
-    _atom_site.Cartn_z 
-    _atom_site.occupancy 
-    _atom_site.B_iso_or_equiv 
-    _atom_site.pdbx_formal_charge 
-    _atom_site.auth_seq_id 
-    _atom_site.auth_comp_id 
-    _atom_site.auth_asym_id 
-    _atom_site.auth_atom_id 
-    _atom_site.pdbx_PDB_model_num 
-    """
-
-    # Get total length of the pdb file
-    atom_num = self.total_len
-    self.data_mmCIF["_atom_site"]["group_PDB"] = np.chararray(atom_num, itemsize=6)
-
-    self.data_mmCIF["_atom_site"]["group_PDB"] = np.empty(atom_num)
-
-
+    
     filout = open(mmcif_out, "w")
-    filout.write(get_mmcif_string_from_dict(self.data_mmCIF))
+
+    old_category = ""
+
+    for category in self.data_mmCIF:
+        if category == 'title':
+            filout.write(f"{self.data_mmCIF[category]['title']}\n")
+        elif category == '_atom_site':
+            atom_num = self.total_len
+            model_num = 1
+            filout.write(
+                "# \n"
+                "loop_\n"
+                "_atom_site.group_PDB \n"
+                "_atom_site.id \n"
+                "_atom_site.type_symbol \n"
+                "_atom_site.label_atom_id \n"
+                "_atom_site.label_alt_id \n"
+                "_atom_site.label_comp_id \n"
+                "_atom_site.label_asym_id \n"
+                "_atom_site.label_entity_id \n"
+                "_atom_site.label_seq_id \n"
+                "_atom_site.pdbx_PDB_ins_code \n"
+                "_atom_site.Cartn_x \n"
+                "_atom_site.Cartn_y \n"
+                "_atom_site.Cartn_z \n"
+                "_atom_site.occupancy \n"
+                "_atom_site.B_iso_or_equiv \n"
+                "_atom_site.pdbx_formal_charge \n"
+                "_atom_site.auth_seq_id \n"
+                "_atom_site.auth_comp_id \n"
+                "_atom_site.auth_asym_id \n"
+                "_atom_site.auth_atom_id \n"
+                "_atom_site.pdbx_PDB_model_num \n"
+            )
+            atom_num_size = len(str(self.models[-1].atom_dict["num_resid_uniqresid"][-1, 0]))
+            resnum_size = len(str(self.models[-1].atom_dict["num_resid_uniqresid"][-1, 1]))
+            name_size = len(max(self.models[0].atom_dict["name_resname_elem"][:, 0], key=len))
+            resname_size = len(max(self.models[0].atom_dict["name_resname_elem"][:, 1], key=len))
+            elem_size = len(max(self.models[0].atom_dict["name_resname_elem"][:, 2], key=len))
+            x_size = get_float_format_size(self.models[0].atom_dict["xyz"][:, 0])
+            y_size = get_float_format_size(self.models[0].atom_dict["xyz"][:, 1])
+            z_size = get_float_format_size(self.models[0].atom_dict["xyz"][:, 2])
+            for model in self.models:
+                for i in range(model.len):
+                    alt_pos = "." if model.atom_dict["alterloc_chain_insertres"][i, 0] == b"" else model.atom_dict["alterloc_chain_insertres"][i, 0].astype(np.str_)
+                    insert_res = "?" if model.atom_dict["alterloc_chain_insertres"][i, 2] == b"" else model.atom_dict["alterloc_chain_insertres"][i, 2].astype(np.str_)
+                    filout.write(
+                        "{:6s} {:<{atom_num_size}d} {:{elem_size}s} {:{name_size}s} {:1s} {:{resname_size}s} {:1s} 1 {:<{resnum_size}d} {:1s}"
+                        " {:<{x_size}.3f} {:<{y_size}.3f} {:<{z_size}.3f} {:<4.2f} {:<4.2f} {:1s} {:<4d}"
+                        " {:{resname_size}s} {:{elem_size}s} {:{name_size}s} {:1d}\n".format(
+                            FIELD_DICT[model.atom_dict["field"][i]],
+                            model.atom_dict["num_resid_uniqresid"][i, 0],
+                            model.atom_dict["name_resname_elem"][i, 2].astype(np.str_),
+                            model.atom_dict["name_resname_elem"][i, 0].astype(np.str_),
+                            alt_pos,
+                            model.atom_dict["name_resname_elem"][i, 1].astype(np.str_),
+                            model.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_),
+                            model.atom_dict["num_resid_uniqresid"][i, 2] + 1,
+                            insert_res,
+                            model.atom_dict["xyz"][i, 0],
+                            model.atom_dict["xyz"][i, 1],
+                            model.atom_dict["xyz"][i, 2],
+                            model.atom_dict["occ_beta"][i, 0],
+                            model.atom_dict["occ_beta"][i, 1],
+                            insert_res,
+                            model.atom_dict["num_resid_uniqresid"][i, 1],
+                            model.atom_dict["name_resname_elem"][i, 1].astype(np.str_),
+                            model.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_),
+                            model.atom_dict["name_resname_elem"][i, 0].astype(np.str_),
+                            model_num,
+                            atom_num_size=atom_num_size,
+                            name_size=name_size,
+                            resname_size=resname_size,
+                            x_size=x_size,
+                            y_size=y_size,
+                            z_size=z_size,
+                            elem_size=elem_size,
+                            resnum_size=resnum_size,
+                        )
+                    )
+                model_num += 1
+        else:
+            if category != old_category:
+                filout.write("# \n")
+                old_category = category
+            if 'col_names' in self.data_mmCIF[category]:
+                filout.write("loop_\n")
+                raw_width = []
+                for i, col_name in enumerate(self.data_mmCIF[category]['col_names']):
+                    filout.write(f"{category}.{col_name} \n")
+                    max_len = len(max(self.data_mmCIF[category]['value'][i], key=len))
+                    raw_width.append(max_len)
+                for i in range(len(self.data_mmCIF[category]['value'][0])):
+                    for j in range(len(self.data_mmCIF[category]['col_names'])):
+                        filout.write(f"{self.data_mmCIF[category]['value'][j][i]:{raw_width[j]}} ")
+                    filout.write("\n")
+            else:
+                max_len = len(max(self.data_mmCIF[category], key=len)) + len(category) + 3
+                for attribute in self.data_mmCIF[category]:
+                    local_str = f"{'.'.join([category, attribute]):{max_len}} {self.data_mmCIF[category][attribute]} \n"
+                    if len(local_str) > 125:
+                        filout.write(f"{'.'.join([category, attribute]):{max_len}} \n{self.data_mmCIF[category][attribute]} \n")
+                    else:
+                        filout.write(local_str)
+
     filout.close()
     logger.info(f"Succeed to save file {os.path.relpath(mmcif_out)}")
     return

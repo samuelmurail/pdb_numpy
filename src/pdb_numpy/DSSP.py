@@ -373,7 +373,7 @@ def compute_DSSP(coor):
 
         seq_dict = {}
 
-        for SS, chain in zip(SS_seq, [chain.decode("UTF-8") for chain in chain_array]):
+        for SS, chain in zip(SS_seq, chain_array):
             if chain not in seq_dict:
                 seq_dict[chain] = SS
             else:

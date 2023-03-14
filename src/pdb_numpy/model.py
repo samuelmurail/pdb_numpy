@@ -257,7 +257,7 @@ class Model:
 
         if isinstance(values, list):
             if column in ["resname", "chain", "name", "altloc"]:
-                values = np.array(values, dtype="|S4")
+                values = np.array(values, dtype="U")
             elif column in ["resid", "residue"]:
                 values = np.array(values, dtype=int)
             elif column in ["beta", "occupancy", "x", "y", "z"]:
@@ -279,7 +279,7 @@ class Model:
                 else:
                     values = float(values)
             else:
-                values = np.array([values], dtype="|S4")
+                values = np.array([values], dtype="U")
 
         if operator == "==":
             bool_val = self.atom_dict[col][:, index] == values

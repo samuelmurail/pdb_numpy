@@ -199,7 +199,7 @@ class Coor:
 
             field_uniqs = np.unique(self.models[0].atom_dict[keyword][:, index])
             if isinstance(order_list[0], str):
-                order_list = np.array(order_list, dtype="|S4")
+                order_list = np.array(order_list, dtype="U")
 
             for field_uniq in field_uniqs:
                 if field_uniq not in order_list:

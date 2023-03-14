@@ -33,6 +33,7 @@ def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     align.restype = ctypes.POINTER(test)
     align.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int]
 
+
     seq_1_bytes = seq_1.encode('ascii')
     seq_2_bytes = seq_2.encode('ascii')
     blosum_file = os.path.join(dir_path, "data/blosum62.txt")
@@ -45,14 +46,17 @@ def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
         ctypes.c_int(gap_extension)
     )
 
-    seq_1_aligned = alignement_res.contents.seq1.decode('ascii')
-    seq_2_aligned = alignement_res.contents.seq2.decode('ascii')
+    seq_1_aligned = alignement_res.contents.seq1
+    seq_2_aligned = alignement_res.contents.seq2
+
+    print(seq_1_aligned)
 
     free_align = my_functions.free_align
     free_align.argtypes = [ctypes.POINTER(test)]
     free_align(alignement_res)
 
-    return seq_1_aligned, seq_2_aligned
+
+    return seq_1_aligned.decode("ascii"), seq_2_aligned.decode("ascii")
 
 
 def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
@@ -337,6 +341,7 @@ def print_align_seq(seq_1, seq_2, line_len=80):
             if (seq_1[i], seq_2[i]) in BLOSUM62:
                 mut_score = BLOSUM62[seq_1[i], seq_2[i]]
             else:
+                print(seq_1[i], seq_2[i])
                 mut_score = BLOSUM62[seq_2[i], seq_1[i]]
             if mut_score >= 0:
                 sim_seq += "|"
@@ -608,9 +613,9 @@ def align_chain_permutation(coor_1, coor_2, chain_1=None, chain_2=None, back_nam
     """
 
     if chain_1 is None:
-        chain_1 = [chain.decode("UTF-8") for chain in np.unique(coor_1.chain)]
+        chain_1 = np.unique(coor_1.chain)
     if chain_2 is None:
-        chain_2 = [chain.decode("UTF-8") for chain in np.unique(coor_2.chain)]
+        chain_2 = np.unique(coor_2.chain)
 
     if len(chain_2) <= len(chain_1):
         chain_1_perm = list(permutations(chain_1, len(chain_2)))

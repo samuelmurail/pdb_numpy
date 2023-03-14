@@ -138,3 +138,26 @@ def test_read_mmcif_write_pdb_models(tmp_path):
                 ).all()
             else:
                 assert (model.atom_dict[key] == model_2.atom_dict[key]).all()
+
+
+def test_read_mmcif_write_mmcif_models(tmp_path):
+    """Test read and write pdb function with several models."""
+    test = Coor(MMCIF_2RRI)
+
+    assert test.model_num == 20
+
+    test.write_mmcif(os.path.join(tmp_path, "test_2rri.cif"))
+
+    test_2 = Coor(os.path.join(tmp_path, "test_2rri.cif"))
+
+    assert test_2.model_num == 20
+
+    for model, model_2 in zip(test.models, test_2.models):
+        for key in model.atom_dict:
+            # Atom index can differ
+            if key == "num_resid_uniqresid":
+                assert (
+                    model.atom_dict[key][:, 1:] == model_2.atom_dict[key][:, 1:]
+                ).all()
+            else:
+                assert (model.atom_dict[key] == model_2.atom_dict[key]).all()

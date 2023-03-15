@@ -228,16 +228,21 @@ def parse_raw_mmcif_lines(mmcif_lines):
                 if len(token) == 2:
                     data_mmCIF[category][attribute] = token[1]
         
+        # Fix the issue with token between 2 ";"
+        # Opening ";"
         elif line.startswith(";") and not mutli_line:
             mutli_line += line
         
+        # Closing ";"
         elif line.startswith(";") and mutli_line:
             mutli_line += line
             if tabular:
                 final_token += [mutli_line]
-                print(len(final_token), len(data_mmCIF[category]['col_names']), final_token)
+                # print(len(final_token), len(data_mmCIF[category]['col_names']), final_token)
                 if len(final_token) == len(data_mmCIF[category]['col_names']):
-                    print("finished")
+                    # print("finished", final_token)
+                    # remove the last "\n"
+                    final_token[-1] = final_token[-1][:-1]
                     for i in range(len(data_mmCIF[category]['col_names'])):
                         data_mmCIF[category]['value'][i].append(final_token[i])
                     final_token = []
@@ -251,18 +256,21 @@ def parse_raw_mmcif_lines(mmcif_lines):
         elif tabular:
             token = shlex.split(line, posix=False)
             token_complete = True
-            print(final_token, len(final_token), token, len(token), len(data_mmCIF[category]['col_names']))
+            # print(final_token, len(final_token), token, len(token), len(data_mmCIF[category]['col_names']))
 
             # TO FIX !!
             if len(token) != len(data_mmCIF[category]['col_names']):
                 if len(final_token) == len(data_mmCIF[category]['col_names']):
                     token = final_token
+                elif len(final_token) + len(token) == len(data_mmCIF[category]['col_names']):
+                    # print("token complete", final_token, token)
+                    token = final_token + token
                 else:
                     token_complete = False
                     final_token += token
             
             if token_complete:
-                print("token complete")
+                # print("token complete")
                 for i in range(len(data_mmCIF[category]['col_names'])):
                     data_mmCIF[category]['value'][i].append(token[i])
                 final_token = []
@@ -306,19 +314,30 @@ def get_mmcif_string_from_dict(mmcif_dict):
                 raw_width = []
                 for i, col_name in enumerate(mmcif_dict[category]['col_names']):
                     str_out += f"{category}.{col_name} \n"
-                    max_len = len(max(mmcif_dict[category]['value'][i], key=len))
+                    list_no_column = [elem for elem in mmcif_dict[category]['value'][i] if elem.find(';')]
+                    max_len = len(max(list_no_column, key=len))
                     raw_width.append(max_len)
                 for i in range(len(mmcif_dict[category]['value'][0])):
                     for j in range(len(mmcif_dict[category]['col_names'])):
-                        str_out += f"{mmcif_dict[category]['value'][j][i]:{raw_width[j]}} "
+                        word = mmcif_dict[category]['value'][j][i]
+                        print("#", word, "#")
+                        if word[0] == ";":
+                            print("here ;")
+                            if str_out[-1] == "\n":
+                                print("here /n", word)
+                                str_out += f"{word}"
+                            else:
+                                str_out += f"\n{word}"
+                        else:
+                            str_out += f"{word:{raw_width[j]}} "
                     str_out += f"\n"
             else:
                 max_len = len(max(mmcif_dict[category], key=len)) + len(category) + 3
                 #print(max_len, mmcif_dict[category].keys())
                 for attribute in mmcif_dict[category]:
-                    local_str = f"{'.'.join([category, attribute]):{max_len}} {mmcif_dict[category][attribute]} \n"
+                    local_str = f"{'.'.join([category, attribute])} {mmcif_dict[category][attribute]} \n"
                     if len(local_str) > 125:
-                        str_out += f"{'.'.join([category, attribute]):{max_len}} \n{mmcif_dict[category][attribute]} \n"
+                        str_out += f"{'.'.join([category, attribute])} \n{mmcif_dict[category][attribute]} \n"
                     else:
                         str_out += local_str
     str_out += f"# \n"
@@ -370,7 +389,7 @@ def write_mmcif(self, mmcif_out, check_file_out=True):
         return
     
     filout = open(mmcif_out, "w")
-
+    line_max_len = 135
     old_category = ""
 
     for category in self.data_mmCIF:
@@ -466,23 +485,40 @@ def write_mmcif(self, mmcif_out, check_file_out=True):
                 raw_width = []
                 for i, col_name in enumerate(self.data_mmCIF[category]['col_names']):
                     filout.write(f"{category}.{col_name} \n")
-                    max_len = len(max(self.data_mmCIF[category]['value'][i], key=len))
+                    list_no_column = [elem for elem in self.data_mmCIF[category]['value'][i] if elem.find(';')]
+                    max_len = len(max(list_no_column, key=len))
                     raw_width.append(max_len)
+                tot_width = 0
+                break_list = []
+                for i, width in enumerate(raw_width):
+                    tot_width += width + 1
+                    if tot_width > line_max_len:
+                        break_list.append(i)
+                        tot_width = 0
                 for i in range(len(self.data_mmCIF[category]['value'][0])):
+                    str_out = ""
                     for j in range(len(self.data_mmCIF[category]['col_names'])):
-                        if self.data_mmCIF[category]['value'][j][i].startswith(";"):
-                            filout.write(f"\n{self.data_mmCIF[category]['value'][j][i]}")
+                        word = self.data_mmCIF[category]['value'][j][i]
+                        if word[0] == ";":
+                            if str_out[-1] == "\n":
+                                str_out += f"{word}"
+                            else:
+                                str_out += f"\n{word}"
                         else:
-                            filout.write(f"{self.data_mmCIF[category]['value'][j][i]:{raw_width[j]}} ")
-                    filout.write("\n")
+                            if j in break_list:
+                                str_out += f"\n{word:{raw_width[j]}} "
+                            else:
+                                str_out += f"{word:{raw_width[j]}} "
+                    str_out += f"\n"
+                    filout.write(str_out)
             else:
                 max_len = len(max(self.data_mmCIF[category], key=len)) + len(category) + 3
                 for attribute in self.data_mmCIF[category]:
                     if self.data_mmCIF[category][attribute].startswith(";"):
-                        filout.write(f"\n{'.'.join([category, attribute]):{max_len}} {self.data_mmCIF[category][attribute]}\n")
+                        filout.write(f"{'.'.join([category, attribute]):{max_len}} \n{self.data_mmCIF[category][attribute]}")
                     else:
                         local_str = f"{'.'.join([category, attribute]):{max_len}} {self.data_mmCIF[category][attribute]} \n"
-                        if len(local_str) > 125:
+                        if len(local_str) > line_max_len:
                             filout.write(f"{'.'.join([category, attribute]):{max_len}} \n{self.data_mmCIF[category][attribute]} \n")
                         else:
                             filout.write(local_str)

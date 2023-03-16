@@ -66,7 +66,9 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
                 local_model = Model()
                 local_model.atom_dict = {
                     "field": np.array(field_list, dtype="|U1"),
-                    "num_resid_uniqresid": np.array(num_resid_uniqresid_list, dtype="int32"),
+                    "num_resid_uniqresid": np.array(
+                        num_resid_uniqresid_list, dtype="int32"
+                    ),
                     "name_resname_elem": np.array(name_resname_elem_list, dtype="U"),
                     "alterloc_chain_insertres": np.array(
                         alter_chain_insert_list, dtype="|U1"
@@ -126,9 +128,7 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
             num_resid_uniqresid_list.append([atom_num, resid, uniq_resid])
             index_list.append(atom_index)
             name_resname_elem_list.append([atom_name, res_name, elem_symbol])
-            alter_chain_insert_list.append(
-                [alter_loc, chain, insert_res]
-            )
+            alter_chain_insert_list.append([alter_loc, chain, insert_res])
             xyz_list.append(xyz)
             occ_beta_list.append([occ, beta])
             atom_index += 1
@@ -140,9 +140,7 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
             "field": np.array(field_list, dtype="|U1"),
             "num_resid_uniqresid": np.array(num_resid_uniqresid_list, dtype="int32"),
             "name_resname_elem": np.array(name_resname_elem_list, dtype="U"),
-            "alterloc_chain_insertres": np.array(
-                alter_chain_insert_list, dtype="|U1"
-            ),
+            "alterloc_chain_insertres": np.array(alter_chain_insert_list, dtype="|U1"),
             "xyz": np.array(xyz_list, dtype="float32"),
             "occ_beta": np.array(occ_beta_list, dtype="float32"),
         }

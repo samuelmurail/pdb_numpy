@@ -22,4 +22,4 @@ with open(file_blosum, "r") as f:
                 BLOSUM62[(line[0], aa)] = int(line[i + 1])
                 BLOSUM62[(aa, line[0])] = int(line[i + 1])
 
-#print(BLOSUM62)
+# print(BLOSUM62)

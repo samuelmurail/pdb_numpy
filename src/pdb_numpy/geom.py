@@ -187,18 +187,18 @@ def cryst_convert_mmCIF(data_mmCIF, format_out="pdb"):
         1\\n'
 
     """
-    if '_cell' not in data_mmCIF:
+    if "_cell" not in data_mmCIF:
         logger.warning("No cell information in mmCIF file")
-        return ''
+        return ""
 
-    a = float(data_mmCIF['_cell']['length_a'])
-    b = float(data_mmCIF['_cell']['length_b'])
-    c = float(data_mmCIF['_cell']['length_c'])
-    alpha = float(data_mmCIF['_cell']['angle_alpha'])
-    beta = float(data_mmCIF['_cell']['angle_beta'])
-    gamma = float(data_mmCIF['_cell']['angle_gamma'])
+    a = float(data_mmCIF["_cell"]["length_a"])
+    b = float(data_mmCIF["_cell"]["length_b"])
+    c = float(data_mmCIF["_cell"]["length_c"])
+    alpha = float(data_mmCIF["_cell"]["angle_alpha"])
+    beta = float(data_mmCIF["_cell"]["angle_beta"])
+    gamma = float(data_mmCIF["_cell"]["angle_gamma"])
     sGroup = "1"
-    z = int(data_mmCIF['_cell']['Z_PDB'])
+    z = int(data_mmCIF["_cell"]["Z_PDB"])
 
     # Convert:
     if format_out == "pdb":
@@ -227,9 +227,7 @@ def cryst_convert_mmCIF(data_mmCIF, format_out="pdb"):
         )
         v3 = [
             c * np.cos(beta) / 10,
-            (c / np.sin(gamma))
-            * (np.cos(alpha) - np.cos(beta) * np.cos(gamma))
-            / 10,
+            (c / np.sin(gamma)) * (np.cos(alpha) - np.cos(beta) * np.cos(gamma)) / 10,
             v / (a * b * np.sin(gamma)) / 10,
         ]
         new_line = (

@@ -32,7 +32,10 @@ sys.path.insert(0, os.path.abspath('../../src/'))
 #    'nbsphinx',
 #]
 
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage', 'numpydoc']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.coverage',
+    'numpydoc']
 
 templates_path = ['_templates']
 exclude_patterns = []

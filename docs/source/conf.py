@@ -20,6 +20,9 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../../src/'))
 
+# This command doesn't get any sense for me (previous one should be enough)
+sys.path.insert(0, os.path.abspath('../../src/pdb_numpy/'))
+
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
@@ -35,6 +38,10 @@ sys.path.insert(0, os.path.abspath('../../src/'))
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
+    'sphinx.ext.todo',
+    'sphinx.ext.githubpages',
+    'sphinxarg.ext',
+    'sphinx.ext.mathjax',
     'numpydoc']
 
 templates_path = ['_templates']
@@ -65,3 +72,5 @@ man_pages = [
      'PDB Numpy Documentation',
      [author], 1)
 ]
+
+autodoc_mock_imports = ["numpy", "scipy", "pytest"]

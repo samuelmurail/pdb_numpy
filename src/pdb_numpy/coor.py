@@ -359,7 +359,9 @@ class Coor:
                 .astype(np.str_)
             )
             res_name = (
-                CA_sel.models[frame].atom_dict["name_resname_elem"][i, 1].astype(np.str_)
+                CA_sel.models[frame]
+                .atom_dict["name_resname_elem"][i, 1]
+                .astype(np.str_)
             )
             resid = CA_sel.models[frame].atom_dict["num_resid_uniqresid"][i, 1]
 
@@ -546,9 +548,7 @@ class Coor:
 
     @property
     def elem(self):
-        return self.models[self.active_model].atom_dict["name_resname_elem"][
-            :, 2
-        ]
+        return self.models[self.active_model].atom_dict["name_resname_elem"][:, 2]
 
     @property
     def resid(self):

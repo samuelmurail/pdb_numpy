@@ -166,7 +166,6 @@ def test_seq_align_C(caplog):
     assert captured[-2].msg == "Similarity seq1: 63.41%"
     assert captured[-1].msg == "Similarity seq2: 58.77%"
 
-
     seq_1 = "AQDMVSPPPPIADEPLTVNSLSWKDRRL"
     seq_2 = "AQDMVSPPPPIADEPLTVNTGIYLIECYSLDDKAETFKVNAFLSLSWKDRRLAFDPV"
 
@@ -203,7 +202,28 @@ def test_align_seq_based():
 
     print(rmsds)
 
-    expected_rmsds = [5.1201007697145995, 4.325464568500979, 3.814838140492011, 3.7162291711703648, 3.885813512555148, 5.148095052210754, 5.296391465950272, 4.135615244634669, 3.8189144358192806, 4.597449831608669, 5.271310413581032, 5.517576912040033, 4.6082437633178115, 4.2097575131149885, 4.996842582024358, 5.006402154252272, 5.256112097498127, 3.7419617535551613, 4.184792438296149, 4.178818177627158]
+    expected_rmsds = [
+        5.1201007697145995,
+        4.325464568500979,
+        3.814838140492011,
+        3.7162291711703648,
+        3.885813512555148,
+        5.148095052210754,
+        5.296391465950272,
+        4.135615244634669,
+        3.8189144358192806,
+        4.597449831608669,
+        5.271310413581032,
+        5.517576912040033,
+        4.6082437633178115,
+        4.2097575131149885,
+        4.996842582024358,
+        5.006402154252272,
+        5.256112097498127,
+        3.7419617535551613,
+        4.184792438296149,
+        4.178818177627158,
+    ]
 
     for expected_rmsd, rmsd in zip(expected_rmsds, rmsds):
         assert expected_rmsd == pytest.approx(rmsd, 0.0001)
@@ -215,7 +235,9 @@ def test_multi_chain_permutation():
     coor_1 = coor_1.select_atoms("chain B C D E F")
     coor_2 = Coor(PDB_2MUS)
 
-    rmsds, index = alignement.align_chain_permutation(coor_1, coor_2, back_names=['CA', 'C', 'N', 'O'])
+    rmsds, index = alignement.align_chain_permutation(
+        coor_1, coor_2, back_names=["CA", "C", "N", "O"]
+    )
 
     assert 5.320970606442723 == pytest.approx(rmsds[0], 0.0001)
     assert len(index[0]) == 1420

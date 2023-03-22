@@ -31,14 +31,17 @@ def test_get_PDB_mmcif(tmp_path):
     assert test.models[0].x[0] == pytest.approx(-1.432, 0.000001)
     assert test.models[0].y[0] == pytest.approx(9.759, 0.000001)
     assert test.models[0].z[0] == pytest.approx(11.436, 0.000001)
-    assert (test.models[0].atom_dict["xyz"][0, :] == np.array([-1.432, 9.759, 11.436], dtype=np.float32)).all()
-    assert test.data_mmCIF['_cell']['length_a'] == '28.748'
-    assert test.data_mmCIF['_cell']['length_b'] == '30.978'
-    assert test.data_mmCIF['_cell']['length_c'] == '29.753'
-    assert test.data_mmCIF['_cell']['angle_alpha'] == '90.00'
-    assert test.data_mmCIF['_cell']['angle_beta'] == '92.12'
-    assert test.data_mmCIF['_cell']['angle_gamma'] == '90.00'
-    assert test.data_mmCIF['_cell']['Z_PDB'] == '2'
+    assert (
+        test.models[0].atom_dict["xyz"][0, :]
+        == np.array([-1.432, 9.759, 11.436], dtype=np.float32)
+    ).all()
+    assert test.data_mmCIF["_cell"]["length_a"] == "28.748"
+    assert test.data_mmCIF["_cell"]["length_b"] == "30.978"
+    assert test.data_mmCIF["_cell"]["length_c"] == "29.753"
+    assert test.data_mmCIF["_cell"]["angle_alpha"] == "90.00"
+    assert test.data_mmCIF["_cell"]["angle_beta"] == "92.12"
+    assert test.data_mmCIF["_cell"]["angle_gamma"] == "90.00"
+    assert test.data_mmCIF["_cell"]["Z_PDB"] == "2"
 
 
 def test_read_mmcif_write_pdb(tmp_path, caplog):
@@ -57,7 +60,10 @@ def test_read_mmcif_write_pdb(tmp_path, caplog):
 
     test2 = Coor(os.path.join(tmp_path, "test.pdb"))
     assert test2.len == test.len
-    assert test2.crystal_pack.strip() == "CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P 1          2"
+    assert (
+        test2.crystal_pack.strip()
+        == "CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P 1          2"
+    )
 
     for key in test.models[0].atom_dict:
         # Atom index can differ
@@ -96,7 +102,7 @@ def test_read_mmcif_write_mmcif(tmp_path, caplog):
 
     test2 = Coor(os.path.join(tmp_path, "test.cif"))
     assert test2.len == test.len
-    #assert test2.crystal_pack.strip() == "CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P 1          2"
+    # assert test2.crystal_pack.strip() == "CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P 1          2"
 
     for key in test.models[0].atom_dict:
         # Atom index can differ

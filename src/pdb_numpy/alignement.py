@@ -24,26 +24,31 @@ def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
 
     class test(ctypes.Structure):
         _fields_ = [
-            ('seq1', ctypes.c_char_p),
-            ('seq2', ctypes.c_char_p),
-            ('score', ctypes.c_int)
+            ("seq1", ctypes.c_char_p),
+            ("seq2", ctypes.c_char_p),
+            ("score", ctypes.c_int),
         ]
-    
+
     align = my_functions.align
     align.restype = ctypes.POINTER(test)
-    align.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int]
+    align.argtypes = [
+        ctypes.c_char_p,
+        ctypes.c_char_p,
+        ctypes.c_char_p,
+        ctypes.c_int,
+        ctypes.c_int,
+    ]
 
-
-    seq_1_bytes = seq_1.encode('ascii')
-    seq_2_bytes = seq_2.encode('ascii')
+    seq_1_bytes = seq_1.encode("ascii")
+    seq_2_bytes = seq_2.encode("ascii")
     blosum_file = os.path.join(dir_path, "data/blosum62.txt")
 
     alignement_res = align(
         ctypes.c_char_p(seq_1_bytes),
-        ctypes.c_char_p(seq_2_bytes), 
-        ctypes.c_char_p(blosum_file.encode('ascii')),
+        ctypes.c_char_p(seq_2_bytes),
+        ctypes.c_char_p(blosum_file.encode("ascii")),
         ctypes.c_int(gap_cost),
-        ctypes.c_int(gap_extension)
+        ctypes.c_int(gap_extension),
     )
 
     seq_1_aligned = alignement_res.contents.seq1
@@ -54,7 +59,6 @@ def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     free_align = my_functions.free_align
     free_align.argtypes = [ctypes.POINTER(test)]
     free_align(alignement_res)
-
 
     return seq_1_aligned.decode("ascii"), seq_2_aligned.decode("ascii")
 
@@ -124,9 +128,9 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     max_index = np.where(matrix == max_score)
 
     show_num = 10
-    #print(matrix[:show_num, :show_num])
+    # print(matrix[:show_num, :show_num])
 
-    #print("Max score:", max_score, max_index)
+    # print("Max score:", max_score, max_index)
 
     index_list = []
     for i in range(len(max_index[0])):
@@ -152,8 +156,8 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     align_1 += seq_1[i:]
     align_2 += seq_2[j:]
 
-    #i -= 1
-    #j -= 1
+    # i -= 1
+    # j -= 1
 
     while i != 0 and j != 0:
         if (
@@ -590,7 +594,9 @@ def rmsd_seq_based(
     ]
 
 
-def align_chain_permutation(coor_1, coor_2, chain_1=None, chain_2=None, back_names=["CA"]):
+def align_chain_permutation(
+    coor_1, coor_2, chain_1=None, chain_2=None, back_names=["CA"]
+):
     """Align two structure based on chain permutation.
 
     Parameters
@@ -629,7 +635,9 @@ def align_chain_permutation(coor_1, coor_2, chain_1=None, chain_2=None, back_nam
     for chain_i in chain_1:
         for chain_j in chain_2:
             logger.info(f"compute  common atoms for {chain_i} and {chain_j}")
-            index_1, index_2 = get_common_atoms(coor_1, coor_2, chain_i, chain_j, back_names=back_names)
+            index_1, index_2 = get_common_atoms(
+                coor_1, coor_2, chain_i, chain_j, back_names=back_names
+            )
             index_common[chain_i, chain_j] = [index_1, index_2]
 
     rmsd_perm = []
@@ -660,4 +668,7 @@ def align_chain_permutation(coor_1, coor_2, chain_1=None, chain_2=None, back_nam
                 min_index = i
                 min_rmsd = rmsd
 
-    return (rmsd_perm[min_index], index_perm[min_index], )
+    return (
+        rmsd_perm[min_index],
+        index_perm[min_index],
+    )

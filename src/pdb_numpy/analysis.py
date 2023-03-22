@@ -83,7 +83,7 @@ def interface_rmsd(
     float
         Interface RMSD value
 
-    Note:
+    Notes
     -----
     Both coor object must have equivalent residues number in both chains.
     Chain order must also be equivalent.

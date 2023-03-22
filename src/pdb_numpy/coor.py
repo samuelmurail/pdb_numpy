@@ -123,8 +123,8 @@ class Coor:
         None
 
 
-        :Example:
-
+        Examples
+        --------
         >>> prot_coor = Coor()
         >>> prot_coor.read_file(os.path.join(TEST_PATH, '1y0m.pdb'))\
         #doctest: +ELLIPSIS
@@ -172,6 +172,7 @@ class Coor:
             Change the order of the atoms in the model
 
         Examples
+        --------
         >>> test = Coor(pdb_id='1jd4')
         >>> test.change_order('chain', ['B', 'C', 'A'])
         """
@@ -333,8 +334,8 @@ class Coor:
         dict
             Dictionary with chain as key and sequence as value.
         
-        :Example:
-
+        Examples
+        --------
         >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))\
         >>> prot_coor.get_aa_seq()
         {'A': 'TFKSAVKALFDYKAQREDELTFTKSAIIQNVEKQDGGWWRGDYGGKKQLWFPSNYVEEMIN'}
@@ -410,8 +411,8 @@ class Coor:
         dict
             Dictionary with chain as key and sequence as value.
         
-        :Example:
-
+        Examples
+        --------   
         >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))\
         #doctest: +ELLIPSIS
         Succeed to read file ...1y0m.pdb ,  648 atoms found

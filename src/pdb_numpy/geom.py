@@ -23,7 +23,8 @@ def angle_vec(vec_a, vec_b):
     float
         angle between vec_a and vec_b in radians
 
-    :Example:
+    Examples
+    --------
     >>> angle = Coor.angle_vec([1, 0, 0], [0, 1, 0])
     >>> print(f'angle = {np.degrees(angle):.2f}')
     angle = 90.00
@@ -68,6 +69,8 @@ def cryst_convert(crystal_pack, format_out="pdb"):
     str
         line of the pdb/gro file containing the crystal information
     
+    Examples
+    --------   
     >>> prot_coor = Coor()
     >>> prot_coor.read_file(os.path.join(TEST_PATH, '1y0m.gro'))\
     >>> prot_coor.cryst_convert(format_out='pdb')
@@ -258,8 +261,8 @@ def atom_dihed_angle(atom_a, atom_b, atom_c, atom_d):
     float
         Diheral angle in degrees
 
-    :Example:
-
+    Examples
+    --------
     >>> atom_1 = {'xyz': np.array([0.0, -1.0, 0.0])}
     >>> atom_2 = {'xyz': np.array([0.0, 0.0, 0.0])}
     >>> atom_3 = {'xyz': np.array([1.0, 0.0, 0.0])}

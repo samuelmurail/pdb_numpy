@@ -168,7 +168,8 @@ def get_PDB(self, pdb_ID):
         self.atom_dict modified as a dictionnary with atom informations
         self.crystal_pack modified as a string with crystal informations
 
-    :Example:
+    Examples
+    --------
     >>> prot_coor = Coor()
     >>> prot_coor.get_PDB('3EAM')
     """
@@ -195,7 +196,8 @@ def get_pdb_string(self):
     str
         Coor object as a pdb string
     
-    :Example:
+    Examples
+    --------
     >>> prot_coor = Coor()
     >>> prot_coor.read_file(os.path.join(TEST_PATH, '1y0m.pdb'))\
     #doctest: +ELLIPSIS
@@ -263,8 +265,8 @@ def get_pqr_string(self):
     str
         Coor object as a pqr string
     
-    :Example:
-
+    Examples
+    --------
     >>> prot_coor = Coor()
     >>> prot_coor.read_pdb(os.path.join(TEST_PATH, '1y0m.pdb'))\
     #doctest: +ELLIPSIS
@@ -330,7 +332,8 @@ def write_pdb(self, pdb_out, check_file_out=True):
     -------
     None
 
-    :Example:
+    Examples
+    --------
     >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))
     >>> prot_coor.write_pdb(os.path.join(TEST_OUT, 'tmp.pdb'))
     Succeed to save file tmp.pdb
@@ -363,8 +366,8 @@ def write_pqr(self, pqr_out, check_file_out=True):
     -------
     None
 
-    :Example:
-
+    Examples
+    --------
     >>> TEST_OUT = str(getfixture('tmpdir'))
     >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))\
     #doctest: +ELLIPSIS

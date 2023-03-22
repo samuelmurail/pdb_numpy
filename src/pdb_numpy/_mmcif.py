@@ -205,7 +205,8 @@ def get_PDB_mmcif(self, pdb_ID):
         self.atom_dict modified as a dictionnary with atom informations
         self.crystal_pack modified as a string with crystal informations
 
-    :Example:
+    Examples
+    --------
     >>> prot_coor = Coor()
     >>> prot_coor.get_PDB_mmcif('3EAM')
     """

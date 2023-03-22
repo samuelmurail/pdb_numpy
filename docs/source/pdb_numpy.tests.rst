@@ -12,6 +12,14 @@ pdb\_numpy.tests.datafiles module
    :undoc-members:
    :show-inheritance:
 
+pdb\_numpy.tests.test\_DSSP module
+----------------------------------
+
+.. automodule:: pdb_numpy.tests.test_DSSP
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pdb\_numpy.tests.test\_alignement module
 ----------------------------------------
 
@@ -32,6 +40,14 @@ pdb\_numpy.tests.test\_geom module
 ----------------------------------
 
 .. automodule:: pdb_numpy.tests.test_geom
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pdb\_numpy.tests.test\_mmcif module
+-----------------------------------
+
+.. automodule:: pdb_numpy.tests.test_mmcif
    :members:
    :undoc-members:
    :show-inheritance:

@@ -12,22 +12,29 @@ from . import select as select
 
 
 def rmsd(coor_1, coor_2, selection="name CA", index_list=None):
-    r"""Compute RMSD between two atom_dict
-    Then return the RMSD value.
-    
+    r"""Compute RMSD between two sets of coordinates.
+
+    The RMSD (Root Mean Square Deviation) measures the similarity between two sets of coordinates by calculating the
+    average distance between the corresponding atoms. It is given by the formula:
+
     .. math::
         RMSD(v,w) = \sqrt{ \frac{1}{N} \sum_{i=1}^{N} (v_i - w_i)^2 }
-    
+
+    where `v` and `w` are the two sets of coordinates, and `N` is the total number of atoms.
+
     Parameters
     ----------
     coor_1 : Coor
-        First coordinates
+        First set of coordinates.
     coor_2 : Coor
-        Second coordinates
-    selection : str, default="name CA"
-        Selection string
-    index_list : list, default=None
-        List of index to use for the RMSD calculation
+        Second set of coordinates.
+    selection : str, optional
+        A selection string specifying which atoms to include in the RMSD calculation. By default, it selects the alpha
+        carbon atoms ('name CA').
+    index_list : list, optional
+        A list of two arrays containing the indices of the atoms to include in the RMSD calculation. This option is
+        provided as an alternative to the `selection` argument, and can be used if you need to calculate the RMSD for a
+        custom set of atoms. If this argument is provided, the `selection` argument is ignored.
 
     Returns
     -------
@@ -124,6 +131,24 @@ def native_contact(
     cutoff=5.0,
 ):
     """Compute the native contact score between a model and a native structure.
+
+    The function returns two lists: `fnat_list` and `fnonnat_list`. `fnat_list`
+    contains the fraction of native contacts, and `fnonnat_list` contains the
+    fraction of non-native contacts.
+
+    The function first selects the atoms within the cutoff distance from the
+    native receptor-ligand interface in the native structure, and then selects
+    the atoms within the cutoff distance from the receptor-ligand interface in
+    the model structure. It then compares the selected atoms in the model
+    structure with the native atoms to determine the native contacts and
+    non-native contacts.
+
+    The function uses the `np.unique()` function to get unique residue numbers,
+    and then iterates over these residue numbers to compute the native contacts.
+    It then computes the fraction of native contacts and non-native contacts
+    for each model and adds them to the respective lists.
+
+    Finally, the function returns the `fnat_list` and `fnonnat_list`.
 
     Parameters
     ----------
@@ -228,11 +253,38 @@ def dockQ(
     native_lig_chain=None,
     back_atom=["CA", "N", "C", "O"],
 ):
-    """Compute docking quality score between a model and a native structure.
-    The score is computed as follow:
+    """The dockQ function computes the docking quality score between a model
+    and a native structure. It takes as input the Cartesian coordinates of the
+    model (`coor`) and the native structure (`native_coor`) and various
+    optional parameters such as the receptor chain (`rec_chain`), the ligand
+    chain (`lig_chain`), the native receptor chain (`native_rec_chain`),
+    the native ligand chain (`native_lig_chain`) and the list of backbone atoms
+    (`back_atom`).
+
+    The docking quality score is computed as follows:
+
     1. Align the receptor on the native receptor using the backbone atoms
     2. Compute the RMSD between the ligand and the native ligand
     3. Compute the RMSD between the receptor and the native receptor
+
+    The function returns the docking quality score as a float value.
+
+    The function first gets the shortest chain's sequence to identify the
+    peptide and receptor chains for both the model and native structure. It
+    then removes hydrogens and non-protein atoms as well as alternate
+    locations from the coordinates of both the model and the native structure.
+
+    The function then removes incomplete backbone residues from both the model
+    and native structure coordinates. The ligand chain is then put at the end
+    of the dictionary. The model is then aligned on the native structure using
+    the model back atoms. The function computes the RMSD between the ligand and
+    the native ligand and the RMSD between the receptor and the native
+    receptor.
+
+    The same residue in common is set and the interface coordinates and
+    interface native coordinates are selected. Finally, the docking quality
+    score is returned.
+
 
     Parameters
     ----------

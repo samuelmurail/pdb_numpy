@@ -17,7 +17,7 @@ class Coor:
     like pdb or gro files. It has attributes such as 'models', 'crystal_pack',
     and 'active_model' that store a list of Model objects, the crystal packing
     as a string, and the index of the active model, respectively.
-    
+
     The class provides methods to read pdb, pqr, mmcif files, parse pdb lines,
     download pdb files from the PDB database, and write pdb and pqr files.
     Additionally, it has methods to select atoms, retrieve amino acid sequences,
@@ -635,4 +635,3 @@ class Coor:
                 logger.warning(f"Residue {res_name} in chain {chain} not " "recognized")
 
         return seq_dict
-

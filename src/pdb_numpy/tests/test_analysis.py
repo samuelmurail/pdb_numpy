@@ -81,7 +81,7 @@ def test_dockq_bad(tmp_path):
     Raw DockQ results:
 
     .. code-block:: bash
-        
+
         ****************************************************************
         *                       DockQ                                  *
         *   Scoring function for protein-protein docking models        *
@@ -165,7 +165,7 @@ def test_dockq_good(tmp_path):
         LRMS 1.050
         DockQ 0.934
 
-            
+
     """
 
     pdb_numpy.logger.setLevel(level=logging.INFO)

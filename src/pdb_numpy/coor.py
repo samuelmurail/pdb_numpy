@@ -551,13 +551,11 @@ class Coor:
         
         Examples
         --------   
-        >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))\
-        #doctest: +ELLIPSIS
+        >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))
         Succeed to read file ...1y0m.pdb ,  648 atoms found
         >>> prot_coor.get_aa_DL_seq()
         {'A': 'TFKSAVKALFDYKAQREDELTFTKSAIIQNVEKQDGGWWRGDYGGKKQLWFPSNYVEEMIN'}
-        >>> prot_coor = Coor(os.path.join(TEST_PATH, '6be9_frame_0.pdb'))\
-        #doctest: +ELLIPSIS
+        >>> prot_coor = Coor(os.path.join(TEST_PATH, '6be9_frame_0.pdb'))
         Succeed to read file ...6be9_frame_0.pdb ,  104 atoms found
         >>> prot_coor.get_aa_DL_seq()
         Residue K2 is in D form

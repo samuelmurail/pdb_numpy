@@ -14,7 +14,10 @@
 Pdb Numpy
 ==============
 
-Pdb_Numpy is a python library allowing simple operations on pdb coor files.
+`pdb_numpy` is a Python library that provides a set of functions for analyzing
+and manipulating data in PDB format. It is built on top of the NumPy library,
+making it fast and memory-efficient.
+
 
 * Source code repository:
    https://github.com/samuelmurail/pdb_numpy
@@ -23,9 +26,23 @@ Pdb_Numpy is a python library allowing simple operations on pdb coor files.
 Main features:
 --------------
 
-* Basic pdb operations
-   - pdb wrapper
-   - selection tools
+- Reading and writing PDB/MMCIF files
+- Selecting atoms
+- Superimposing structures
+- Aligning sequences
+- RMSD calculation
+- DockQ calculation
+
+For more examples and documentation, see the pdb_numpy documentation at
+https://pdb-numpy.readthedocs.io/en/latest/readme.html.
+
+Contributing
+------------
+
+`pdb_numpy`` is an open-source project and contributions are welcome. If
+you find a bug or have a feature request, please open an issue on the GitHub
+repository at https://github.com/samuelmurail/pdb_numpy. If you would like
+to contribute code, please fork the repository and submit a pull request.
 
 Author
 --------------

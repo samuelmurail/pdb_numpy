@@ -14,9 +14,17 @@
 Pdb Numpy
 ==============
 
-`pdb_numpy` is a Python library that provides a set of functions for analyzing
-and manipulating data in PDB format. It is built on top of the NumPy library,
-making it fast and memory-efficient.
+`pdb_numpy`` is a Python library designed to facilitate working with PDB files
+in the context of structural bioinformatics. The library builds upon the
+powerful `numpy`` library to provide efficient and easy-to-use tools for
+reading, manipulating, and analyzing PDB files.
+
+The library includes a number of functions for working with PDB files,
+including functions for parsing PDB files and extracting relevant information,
+such as atomic coordinates, residue identities, and structural information.
+Additionally, pdb_numpy provides a range of functions for performing common
+manipulations on PDB structures, such as aligning structures, superimposing
+structures, and calculating RMSD values.
 
 
 * Source code repository:

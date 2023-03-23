@@ -10,16 +10,14 @@ logger = logging.getLogger(__name__)
 from . import alignement
 from . import select as select
 
-# try:
-#    from ._select import remove_incomplete_backbone_residues
-# except ImportError:
-#    from _select import remove_incomplete_backbone_residues
-
 
 def rmsd(coor_1, coor_2, selection="name CA", index_list=None):
-    """Compute RMSD between two atom_dict
+    r"""Compute RMSD between two atom_dict
     Then return the RMSD value.
-
+    
+    .. math::
+        RMSD(v,w) = \sqrt{ \frac{1}{N} \sum_{i=1}^{N} (v_i - w_i)^2 }
+    
     Parameters
     ----------
     coor_1 : Coor

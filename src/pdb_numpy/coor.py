@@ -13,8 +13,15 @@ logger = logging.getLogger(__name__)
 
 
 class Coor:
-    """Coordinate and topologie object based on coordinates
-    like pdb or gro files.
+    """The Coor class is a coordinate and topology object based on coordinates
+    like pdb or gro files. It has attributes such as 'models', 'crystal_pack',
+    and 'active_model' that store a list of Model objects, the crystal packing
+    as a string, and the index of the active model, respectively.
+    
+    The class provides methods to read pdb, pqr, mmcif files, parse pdb lines,
+    download pdb files from the PDB database, and write pdb and pqr files.
+    Additionally, it has methods to select atoms, retrieve amino acid sequences,
+    and change the order of atoms in the model.
 
     Attributes
     ----------
@@ -66,6 +73,95 @@ class Coor:
 
     """
 
+    @property
+    def len(self):
+        return self.models[self.active_model].len
+
+    @property
+    def total_len(self):
+        total_len = 0
+        for model in self.models:
+            total_len += model.len
+        return total_len
+
+    @property
+    def model_num(self):
+        return len(self.models)
+
+    @property
+    def field(self):
+        return self.models[self.active_model].atom_dict["field"]
+
+    @property
+    def num(self):
+        return self.models[self.active_model].atom_dict["num_resid_uniqresid"][:, 0]
+
+    @property
+    def name(self):
+        return self.models[self.active_model].atom_dict["name_resname_elem"][:, 0]
+
+    @property
+    def resname(self):
+        return self.models[self.active_model].atom_dict["name_resname_elem"][:, 1]
+
+    @property
+    def alterloc(self):
+        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][
+            :, 0
+        ]
+
+    @property
+    def chain(self):
+        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][
+            :, 1
+        ]
+
+    @property
+    def insertres(self):
+        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][
+            :, 2
+        ]
+
+    @property
+    def elem(self):
+        return self.models[self.active_model].atom_dict["name_resname_elem"][:, 2]
+
+    @property
+    def resid(self):
+        return self.models[self.active_model].atom_dict["num_resid_uniqresid"][:, 1]
+
+    @property
+    def uniq_resid(self):
+        return self.models[self.active_model].atom_dict["num_resid_uniqresid"][:, 2]
+
+    @property
+    def residue(self):
+        return self.models[self.active_model].atom_dict["num_resid_uniqresid"][:, 2]
+
+    @property
+    def occ(self):
+        return self.models[self.active_model].atom_dict["occ_beta"][:, 0]
+
+    @property
+    def beta(self):
+        return self.models[self.active_model].atom_dict["occ_beta"][:, 1]
+
+    @property
+    def xyz(self):
+        return self.models[self.active_model].atom_dict["xyz"]
+
+    @property
+    def x(self):
+        return self.models[self.active_model].atom_dict["xyz"][:, 0]
+
+    @property
+    def y(self):
+        return self.models[self.active_model].atom_dict["xyz"][:, 1]
+
+    @property
+    def z(self):
+        return self.models[self.active_model].atom_dict["xyz"][:, 2]
+
     def __init__(self, coor_in=None, pdb_lines=None, pdb_id=None):
         self.active_model = 0
         self.models = []
@@ -110,8 +206,10 @@ class Coor:
         )
 
     def read_file(self, file_in):
-        """Read a pdb/pqr/gro file and return atom informations as a Coor
-        object.
+        """Read a pdb/pqr/gro/cif file and return atom information as a Coor
+        object.  It determines the file format based on the file extension
+        and parses the lines accordingly. If the file extension is not
+        recognized, it assumes it is a pdb file.
 
         Parameters
         ----------
@@ -127,10 +225,8 @@ class Coor:
         --------
         >>> prot_coor = Coor()
         >>> prot_coor.read_file(os.path.join(TEST_PATH, '1y0m.pdb'))\
-        #doctest: +ELLIPSIS
         Succeed to read file ...1y0m.pdb ,  648 atoms found
         >>> prot_coor.read_file(os.path.join(TEST_PATH, '1y0m.gro'))\
-        #doctest: +ELLIPSIS
         Succeed to read file ...1y0m.gro ,  648 atoms found
 
         """
@@ -157,12 +253,17 @@ class Coor:
         )
 
     def change_order(self, field, order_list):
-        """Change the order of the atoms in the model
+        """Change the order of the atoms in the model. The `change_order()`
+        function takes in two arguments, `field` and `order_list`, which are
+        used to change the order of the atoms in the model. The `field` argument
+        specifies which field to change the order by, while `order_list` is a
+        list of the new order. The function then modifies the atom dictionary
+        in each model to match the new order.
 
         Parameters
         ----------
         field : str
-            Field to change the order
+            The field to change the order by.
         order_list : list
             List of the new order
 
@@ -233,6 +334,15 @@ class Coor:
 
     def reset_residue_index(self):
         """Reset the residue index to the original index of the pdb file.
+        This function resets the residue index in the model to the original
+        index of the pdb file. It loops through each model in the Coor object
+        and for each atom in the model, it compares the residue number with
+        the last residue number seen. If they are different, it increments
+        the residue number, and sets the residue number of the current atom
+        to the new residue number. This effectively resets the residue index
+        to the original index of the pdb file. The function does not return
+        anything, it simply modifies the residue number of each atom in the
+        `Coor` object.
 
         Returns
         -------
@@ -252,7 +362,9 @@ class Coor:
         return
 
     def select_index(self, indexes):
-        """Select atoms from the PDB file based on the selection indexes.
+        """The `select_index()` function selects atoms from a Coor object based
+        on the provided `indexes` and returns a new `Coor` object with the
+        selected atoms.
 
         Parameters
         ----------
@@ -276,7 +388,7 @@ class Coor:
         return new_coor
 
     def get_index_select(self, selection, frame=0):
-        """Return index from the PDB file based on the selection string.
+        """Return index from the `Coor` object based on the selection string.
 
         Parameters
         ----------
@@ -297,7 +409,9 @@ class Coor:
         return indexes
 
     def select_atoms(self, selection, frame=0):
-        """Select atoms from the PDB file based on the selection string.
+        """This method allows selecting atoms from the PDB file based on a
+        selection string. The selection string follows a syntax similar to
+        that used in the VMD molecular visualization software.
 
         Parameters
         ----------
@@ -318,7 +432,29 @@ class Coor:
         return self.select_index(indexes)
 
     def get_aa_seq(self, gap_in_seq=True, frame=0):
-        """Get the amino acid sequence from a coor object.
+        """Get the amino acid sequence from a `Coor` object.
+        This function takes a Coor object, selects the CA atoms using the
+        `select_atoms()` method with the argument name CA, and returns a
+        dictionary with the amino acid sequence of each chain in the protein,
+        where the key is the chain identifier and the value is the sequence.
+
+        The function first creates empty dictionaries `seq_dict` and
+        `aa_num_dict`. These will be used to store the sequence and the number
+        of the last amino acid in each chain, respectively. Then, it loops
+        through each CA atom in the selected atoms and retrieves the chain
+        identifier, residue name, and residue number. If the chain identifier
+        is not in `seq_dict`, the function initializes an empty string for the
+        sequence of that chain and stores the residue number in `aa_num_dict`.
+        Then, if the residue name is recognized as a standard amino acid in
+        `AA_DICT`, the function adds the corresponding one-letter code to the
+        sequence string for the corresponding chain in `seq_dict`, and updates
+        the last amino acid number in aa_num_dict. If the residue name is not
+        recognized, the function logs a warning message. If the residue number
+        is not consecutive to the previous one and `gap_in_seq` is set to True,
+        the function adds gaps to the sequence.
+
+        Finally, the function returns `seq_dict`, the dictionary with the amino
+        acid sequences of each chain in the protein.
 
         Parameters
         ----------
@@ -388,11 +524,13 @@ class Coor:
 
     def get_aa_DL_seq(self, gap_in_seq=True, frame=0):
         """Get the amino acid sequence from a coor object.
-        if amino acid is in D form it will be in lower case.
+        The function calculates the amino acid sequence based
+        on the CA atoms in the structure.
 
         L or D form is determined using CA-N-C-CB angle
         Angle should take values around +34° and -34° for
         L- and D-amino acid residues.
+        if amino acid is in D form it will be in lower case.
         
         Reference:
         https://onlinelibrary.wiley.com/doi/full/10.1002/prot.10320
@@ -498,91 +636,3 @@ class Coor:
 
         return seq_dict
 
-    @property
-    def len(self):
-        return self.models[self.active_model].len
-
-    @property
-    def total_len(self):
-        total_len = 0
-        for model in self.models:
-            total_len += model.len
-        return total_len
-
-    @property
-    def model_num(self):
-        return len(self.models)
-
-    @property
-    def field(self):
-        return self.models[self.active_model].atom_dict["field"]
-
-    @property
-    def num(self):
-        return self.models[self.active_model].atom_dict["num_resid_uniqresid"][:, 0]
-
-    @property
-    def name(self):
-        return self.models[self.active_model].atom_dict["name_resname_elem"][:, 0]
-
-    @property
-    def resname(self):
-        return self.models[self.active_model].atom_dict["name_resname_elem"][:, 1]
-
-    @property
-    def alterloc(self):
-        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][
-            :, 0
-        ]
-
-    @property
-    def chain(self):
-        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][
-            :, 1
-        ]
-
-    @property
-    def insertres(self):
-        return self.models[self.active_model].atom_dict["alterloc_chain_insertres"][
-            :, 2
-        ]
-
-    @property
-    def elem(self):
-        return self.models[self.active_model].atom_dict["name_resname_elem"][:, 2]
-
-    @property
-    def resid(self):
-        return self.models[self.active_model].atom_dict["num_resid_uniqresid"][:, 1]
-
-    @property
-    def uniq_resid(self):
-        return self.models[self.active_model].atom_dict["num_resid_uniqresid"][:, 2]
-
-    @property
-    def residue(self):
-        return self.models[self.active_model].atom_dict["num_resid_uniqresid"][:, 2]
-
-    @property
-    def occ(self):
-        return self.models[self.active_model].atom_dict["occ_beta"][:, 0]
-
-    @property
-    def beta(self):
-        return self.models[self.active_model].atom_dict["occ_beta"][:, 1]
-
-    @property
-    def xyz(self):
-        return self.models[self.active_model].atom_dict["xyz"]
-
-    @property
-    def x(self):
-        return self.models[self.active_model].atom_dict["xyz"][:, 0]
-
-    @property
-    def y(self):
-        return self.models[self.active_model].atom_dict["xyz"][:, 1]
-
-    @property
-    def z(self):
-        return self.models[self.active_model].atom_dict["xyz"][:, 2]

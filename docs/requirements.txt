@@ -1,5 +1,5 @@
-sphinx>=3.0
-sphinx-argparse>=0.2.5
-sphinx_rtd_theme>=0.5
+sphinx>=5.3.0
+sphinx-argparse>=0.3.1
+sphinx_rtd_theme>=1.0.0
 nbsphinx>=0.8.7
-numpydoc
+numpydoc>=1.5.0

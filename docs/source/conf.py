@@ -26,20 +26,14 @@ sys.path.insert(0, os.path.abspath('../../src/pdb_numpy/'))
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-#extensions = [
-#    'sphinx.ext.autodoc',
-#    'sphinx.ext.todo',
-#    'sphinx.ext.githubpages',
-#    'sphinxarg.ext',
-#    'sphinx.ext.mathjax',
-#    'nbsphinx',
-#]
 
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
     'sphinx.ext.todo',
+    'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
+    'sphinx.ext.todo',
     'sphinxarg.ext',
     'sphinx.ext.mathjax',
     'numpydoc']

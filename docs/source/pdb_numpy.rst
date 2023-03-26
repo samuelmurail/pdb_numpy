@@ -29,3 +29,12 @@ pdb\_numpy.analysis module
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+pdb\_numpy.DSSP module
+--------------------------
+
+.. automodule:: pdb_numpy.DSSP
+   :members:
+   :undoc-members:
+   :show-inheritance:

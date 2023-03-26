@@ -211,9 +211,28 @@ class Model:
         """Select atoms from the PDB file based on the selection tokens.
         Selection tokens are simple selection containing only one
         keyword, operator, and values.
-        The keywords are "resname", "chain", "name", "altloc", "resid",
-        "residue", "beta", "occupancy", "x", "y", "z".
-        The operators are "==", "!=", ">", ">=", "<", "<=", "isin".
+        
+        The keywords :
+        
+        - `"resname"`
+        - `"chain"`
+        - `"name"`
+        - `"altloc"`
+        - `"resid"`
+        - `"residue"`
+        - `"beta"`
+        - `"occupancy"`
+        - `"x"`, `"y"`, `"z"`.
+
+        The operators are:
+        
+        - `"=="`
+        - `"!="`
+        - `">"`
+        - `">="`
+        - `"<"`
+        - `"<="`
+        - `"isin"`
 
         Parameters
         ----------

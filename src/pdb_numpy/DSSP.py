@@ -11,15 +11,21 @@ logger = logging.getLogger(__name__)
 
 
 def add_NH(coor):
-    """Add NH atoms to a protein.
+    """Add NH atoms to a protein structure.
 
-    TO FIX IS SHOULD RETURN A NEW COOR OBJECT
+    This function adds NH atoms to a protein structure by computing the coordinates
+    of the hydrogen atoms using neighboring C and CA atoms. The new NH atoms are added
+    to the protein structure.
 
     Parameters
     ----------
     coor : Coor
         Protein coordinates.
 
+        
+    Returns
+    -------
+    TO FIX IS SHOULD RETURN A NEW COOR OBJECT
     """
 
     protein = coor.select_atoms("protein")
@@ -76,12 +82,31 @@ def add_NH(coor):
 
 
 def get_NH_xyz(model):
-    """Compute and Return NH coordinates of protein.
+    """computes and returns the nitrogen-hydrogen (NH) coordinates of a protein.
 
     Parameters
     ----------
-    coor : Coor
-        Protein coordinates.
+    model : Model
+        Model object containing protein coordinates.
+
+    Returns
+    -------
+    NH_list : numpy.ndarray
+        2D array of shape (n_residues, 3) containing the NH coordinates for
+        each residue in the protein. The first row contains None values to
+        align with the residue numbering in the protein.
+
+    Notes
+    -----
+
+    The function first selects the protein atoms excluding alternate
+    locations B, C, D and E. It then extracts the C, CA and N atoms
+    and the corresponding residue names. It computes the NH vectors for
+    each residue and adds them to the N atom position. Finally, the NH
+    coordinates are stored in a 2D numpy array where each row represents a
+    residue and the columns correspond to the x, y, and z coordinates. The
+    first row contains None values to align with the residue numbering in
+    the protein.
 
     """
 
@@ -125,21 +150,21 @@ def get_NH_xyz(model):
 
 
 def hbond_energy(vec_N, vec_H, vec_O, vec_C):
-    """Compute HBond energy based on ON, CH, OH and CN distances.
+    r"""Compute HBond energy based on ON, CH, OH and CN distances.
 
-    E = qlq2(1/r(ON) + l/r(CH) - l/r(OH) - l/r(CN))*f
+    .. math::
+        E = q_1 q_2 \left( \frac{1}{r(ON)} + \frac{l}{r(CH)} - \frac{l}{r(OH)} - \frac{l}{r(CN)} \right) f
 
-    where:
-    q1 = 0.42 e
-    q2 = 0.20 e
-    dimensional factor f = 332
-    r in Angstrom
+    where: :math:`q1 = 0.42 e` and :math:`q2 = 0.20 e` f is a dimensional factor :math:`f = 332`
+    and :math:`r` is in Angstrom.
+
+    The function returns the calculated hydrogen bond energy in units of kcal/mol.
 
     Reference:
-    Dictionary of protein secondary structure: pattern recognition
-    of hydrogen-bonded and geometrical features.
-    Kabsch W, Sander C,
-    Biopolymers. 1983 22 2577-2637.
+    ----------
+
+    Kabsch W and Sander C. Dictionary of protein secondary structure: pattern recognition
+    of hydrogen-bonded and geometrical features. *Biopolymers*. 1983 22 2577-2637.
 
     Parameters
     ----------
@@ -173,13 +198,23 @@ def compute_bend(CA_sel):
 
     Parameters
     ----------
-    CA_sel : AtomGroup
+    CA_sel : Model
         AtomGroup containing only CA atoms.
 
     Returns
     -------
     bend : numpy.ndarray
-        Array of bend values.
+       An array of boolean values indicating whether the corresponding
+        residue has a bend (True) or not (False). The length of the array is
+        equal to the number of residues in the protein.
+    
+    Notes
+    -----
+    The bend is computed as the angle between the vectors connecting a
+    residue's CA atom to the CA atoms of the residues separated by two
+    positions in sequence. A residue is considered to have a bend if the angle
+    is greater than 70 degrees.
+
     """
 
     n_res = len(CA_sel.uniq_resid)
@@ -205,7 +240,23 @@ def compute_bend(CA_sel):
 
 
 def compute_Hbond_matrix(model):
-    """Compute Hbond matrix for a protein."""
+    """Compute Hbond matrix for a protein.
+
+    Parameters
+    ----------
+    model : Model
+        model containing the protein.
+    
+    Returns
+    -------
+    Hbond_mat : numpy.ndarray
+        A boolean matrix of shape (n_res, n_res) where n_res is the number of
+    
+    Notes
+    -----
+    The cutoff distance for the Hbond neighbor search is 8 Angstrom.
+
+    """
     cutoff = 8.0
 
     CA_array = model.select_atoms("protein and name CA and not altloc B C D E").xyz
@@ -257,23 +308,46 @@ def compute_Hbond_matrix(model):
 
 
 def compute_DSSP(coor):
-    """Compute DSSP for a protein.
+    r"""Compute DSSP for a protein.
 
-    - 96 % accuracy compared to DSSP (3eam)
-    - omitted β-bulge annotation
+    The compute_DSSP function takes in a coor parameter which represents
+    the coordinates of a protein. It computes the secondary structure of
+    the protein based on the input coordinates and returns a sequence of
+    secondary structure elements. The output sequence consists of the
+    following elements:
 
-    Code:
+    - "H" represents a 4-helix (:math:`\alpha`-helix)
+    - "B" represents a residue in an isolated :math:`\beta`-bridge
+    - "E" represents an extended strand that participates in a :math:`\beta`-ladder
+    - "G" represents a 3-helix (:math:`3_{10}`-helix)
+    - "I" represents a 5-helix (:math:`\pi`-helix)
+    - "T" represents an H-bonded turn
+    - "S" represents a bend
+
+    The function first adds NH hydrogen atoms to the protein coordinates and
+    selects the :math:`\alpha`-carbons of the protein. It then computes a distance
+    matrix between all residues and uses this to compute the secondary
+    structure of the protein. It first computes turns, then :math:`\beta`-sheets,
+    and finally assigns :math:`\alpha`-helices, :math:`\pi`-helices, and :math:`3_{10}`-helices.
+    Finally, it joins overlapping helices and returns the secondary structure
+    sequence.
+
+    Parameters
     ----------
-    “H” = 4-helix ($\alpha$-helix)
-    “B” = residue in isolated $\beta$-bridge
-    “E” - extended strand. participates in $\beta$-ladder
-    “G” = 3-helix ($3_{10}$-heIix)
-    “I” = 5-helix ($\pi$-helix)
-    “T” = H-bonded turn
-    “S” = bend
+    coor : Coor
+        Coor object containing the protein coordinates.
 
-    In case of structural overlaps. priority is given to the structure first in
-    this list.
+    Returns
+    -------
+    SS_seq : numpy.ndarray
+        A numpy array of shape (n_res,) where n_res is the number of residues
+
+
+    .. note::
+        - 96 % accuracy compared to DSSP (3eam)
+        - omitted β-bulge annotation
+
+
     """
 
     cutoff = 8

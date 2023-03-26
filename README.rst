@@ -36,10 +36,10 @@ Main features:
 
 - Reading and writing PDB/MMCIF files
 - Selecting atoms
-- Superimposing structures
-- Aligning sequences
+- Superimposing structures using sequences alignment
 - RMSD calculation
 - DockQ calculation
+- Secondary Structure calculation (pseudo DSSP)
 
 For more examples and documentation, see the pdb_numpy documentation at
 https://pdb-numpy.readthedocs.io/en/latest/readme.html.

@@ -463,7 +463,23 @@ def compute_pdockQ(
     lig_chain=None,
     cutoff=8.0,
 ):
-    r""" Compute the pdockQ score.
+    r""" Compute the pdockQ score as define in [1]_.
+
+    .. math::
+        pDockQ = \frac{L}{1 + e^{-k (x-x_{0})}} + b
+    
+    where
+    
+    .. math::
+        x = \overline{plDDT_{interface}} \cdot log(number \: of \: interface \: contacts)
+    
+    :math:`L = 0.724` is the maximum value of the sigmoid,
+    :math:`k = 0.052` is the slope of the sigmoid, :math:`x_{0} = 152.611`
+    is the midpoint of the sigmoid, and :math:`b = 0.018` is the y-intercept
+    of the sigmoid.
+
+    Implementation was inspired from https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
+
 
     inspired form:
         https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
@@ -484,12 +500,8 @@ def compute_pdockQ(
     float
         pdockQ score
     
-    Example
-    -------
-    >>> from pdb_manip_py import pdb_manip
-    >>> coor = pdb_manip.Coor("model.pdb")
-    >>> pdockQ = pdb_manip.compute_pdockQ(coor)
-    
+    inspired form:
+    https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
 
     """
 

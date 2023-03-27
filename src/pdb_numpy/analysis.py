@@ -464,7 +464,23 @@ def compute_pdockQ(
     cutoff=8.0,
     back_atom=["CA", "N", "C", "O"],
 ):
-    r""" Compute the pdockQ score.
+    r""" Compute the pdockQ score as define in [1]_.
+
+    .. math::
+        pDockQ = \frac{L}{1 + e^{-k (x-x_{0})}} + b
+    
+    where
+    
+    .. math::
+        x = \overline{plDDT_{interface}} \cdot log(number \: of \: interface \: contacts)
+    
+    :math:`L = 0.724` is the maximum value of the sigmoid,
+    :math:`k = 0.052` is the slope of the sigmoid, :math:`x_{0} = 152.611`
+    is the midpoint of the sigmoid, and :math:`b = 0.018` is the y-intercept
+    of the sigmoid.
+
+    Implementation was inspired from https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
+
 
     Parameters
     ----------
@@ -484,8 +500,12 @@ def compute_pdockQ(
     float
         pdockQ score
     
-    inspired form:
-    https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
+
+    References
+    ----------
+    .. [1] Bryant P, Pozzati G and Elofsson A. Improved prediction of protein-protein
+        interactions using AlphaFold2. *Nature Communications*,  vol. 13 1265 (2022)
+        https://www.nature.com/articles/s41467-022-28865-w
 
     """
 

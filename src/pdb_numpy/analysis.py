@@ -462,9 +462,11 @@ def compute_pdockQ(
     rec_chain=None,
     lig_chain=None,
     cutoff=8.0,
-    back_atom=["CA", "N", "C", "O"],
 ):
     r""" Compute the pdockQ score.
+
+    inspired form:
+        https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
 
     Parameters
     ----------
@@ -476,16 +478,18 @@ def compute_pdockQ(
         list of ligand chain
     cutoff : float
         cutoff for native contacts
-    back_atom : list
-        list of backbone atoms
     
     Returns
     -------
     float
         pdockQ score
     
-    inspired form:
-    https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
+    Example
+    -------
+    >>> from pdb_manip_py import pdb_manip
+    >>> coor = pdb_manip.Coor("model.pdb")
+    >>> pdockQ = pdb_manip.compute_pdockQ(coor)
+    
 
     """
 
@@ -513,7 +517,6 @@ def compute_pdockQ(
             f"chain {' '.join(lig_chain)} and within {cutoff} of chain {' '.join(rec_chain)}")
 
         contact_num = rec_in_contact.len + lig_in_contact.len
-        # print(f"Number of contacts: {contact_num}, {rec_in_contact.len}, {lig_in_contact.len}")
         if contact_num == 0:
             pdockq = 0.0
             pdockq_list.append(pdockq)
@@ -525,8 +528,6 @@ def compute_pdockQ(
         x = avg_plddt * np.log10(contact_num)
         pdockq = 0.724 / (1 + np.exp(-0.052*(x-152.611)))+0.018
 
-        # print(f"pdockQ score: {pdockq:.3f}")
-        # print(lig_chain, rec_chain)
         pdockq_list.append(pdockq)
 
     return(pdockq_list)

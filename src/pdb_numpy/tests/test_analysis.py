@@ -233,3 +233,15 @@ def test_dockq_model(tmp_path):
     assert pytest.approx(dockq["iRMS"][0], 0.5) == 1.232
 
     print(dockq)
+
+def test_pdockq(tmp_path):
+    """
+    """
+
+    pdb_numpy.logger.setLevel(level=logging.INFO)
+
+    model_coor = Coor(PDB_1RXZ_Colabfold)
+
+    pdockq = analysis.compute_pdockQ(model_coor) #, rec_chain=["B"], lig_chain=["C"])
+
+    assert pytest.approx(pdockq[0], 0.001) ==  0.2924

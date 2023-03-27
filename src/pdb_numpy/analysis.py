@@ -455,3 +455,78 @@ def dockQ(
         "LRMS": lrmsd_list,
         "DockQ": dockq_list,
     }
+
+
+def compute_pdockQ(
+    coor,
+    rec_chain=None,
+    lig_chain=None,
+    cutoff=8.0,
+    back_atom=["CA", "N", "C", "O"],
+):
+    r""" Compute the pdockQ score.
+
+    Parameters
+    ----------
+    coor : Coor
+        object containing the coordinates of the model
+    rec_chain : list
+        list of receptor chain
+    lig_chain : list
+        list of ligand chain
+    cutoff : float
+        cutoff for native contacts
+    back_atom : list
+        list of backbone atoms
+    
+    Returns
+    -------
+    float
+        pdockQ score
+    
+    inspired form:
+    https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
+
+    """
+
+    coor_CA_CB = coor.select_atoms("name CB or (resname GLY and name CA)")
+
+    model_seq = coor.get_aa_seq()
+
+    if lig_chain is None:
+        lig_chain = [
+            min(model_seq.items(), key=lambda x: len(x[1].replace("-", "")))[0]
+        ]
+    logger.info(f'Model ligand chain : {" ".join(lig_chain)}')
+    if rec_chain is None:
+        rec_chain = [chain for chain in model_seq if chain not in lig_chain]
+    logger.info(f'Model receptor chain : {" ".join(rec_chain)}')
+
+    pdockq_list = []
+
+    for model in coor_CA_CB.models:
+        
+        rec_in_contact = model.select_atoms(
+            f"chain {' '.join(rec_chain)} and within {cutoff} of chain {' '.join(lig_chain)}")
+
+        lig_in_contact = model.select_atoms(
+            f"chain {' '.join(lig_chain)} and within {cutoff} of chain {' '.join(rec_chain)}")
+
+        contact_num = rec_in_contact.len + lig_in_contact.len
+        # print(f"Number of contacts: {contact_num}, {rec_in_contact.len}, {lig_in_contact.len}")
+        if contact_num == 0:
+            pdockq = 0.0
+            pdockq_list.append(pdockq)
+            continue
+
+        avg_plddt = rec_in_contact.len * np.average(rec_in_contact.beta) + lig_in_contact.len * np.average(lig_in_contact.beta)
+        avg_plddt /= contact_num
+
+        x = avg_plddt * np.log10(contact_num)
+        pdockq = 0.724 / (1 + np.exp(-0.052*(x-152.611)))+0.018
+
+        # print(f"pdockQ score: {pdockq:.3f}")
+        # print(lig_chain, rec_chain)
+        pdockq_list.append(pdockq)
+
+    return(pdockq_list)

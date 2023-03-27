@@ -69,7 +69,7 @@ class Model:
 
     @property
     def len(self):
-        return len(self.atom_dict["field"])
+        return self.atom_dict["field"].shape[0]
 
     @property
     def field(self):

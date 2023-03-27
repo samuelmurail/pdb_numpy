@@ -480,10 +480,6 @@ def compute_pdockQ(
 
     Implementation was inspired from https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
 
-
-    inspired form:
-        https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
-
     Parameters
     ----------
     coor : Coor
@@ -493,16 +489,19 @@ def compute_pdockQ(
     lig_chain : list
         list of ligand chain
     cutoff : float
-        cutoff for native contacts
+        cutoff for native contacts, default is 8.0 A
     
     Returns
     -------
     float
         pdockQ score
     
-    inspired form:
-    https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
-
+    References
+    ----------
+    .. [1] Bryant P, Pozzati G and Elofsson A. Improved prediction of
+        protein-protein interactions using AlphaFold2. *Nature Communications*.
+        vol. 13, 1265 (2022)
+        https://www.nature.com/articles/s41467-022-28865-w
     """
 
     coor_CA_CB = coor.select_atoms("name CB or (resname GLY and name CA)")

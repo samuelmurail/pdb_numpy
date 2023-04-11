@@ -183,6 +183,7 @@ class Coor:
             get_pdb_string,
             write_pqr,
             get_pqr_string,
+            get_PDB_BioAssembly,
         )
         from ._mmcif import (
             parse_mmcif_lines,
@@ -633,3 +634,91 @@ class Coor:
                 logger.warning(f"Residue {res_name} in chain {chain} not " "recognized")
 
         return seq_dict
+
+
+    def merge_model(self):
+        """Merge all models into the first model.
+
+        Returns
+        -------
+        None
+
+        """
+
+        field_list = [
+            "field",
+            "num_resid_uniqresid",
+            "name_resname_elem",
+            "alterloc_chain_insertres",
+            "occ_beta",
+            "xyz",
+        ]
+
+        if len(self.models) > 1:
+            
+            uniqresid = 0
+            for model in self.models:
+                model.atom_dict["num_resid_uniqresid"][:, 2] += uniqresid
+                uniqresid = np.max(model.atom_dict["num_resid_uniqresid"][:, 2]) + 1
+
+            for field in field_list:
+                self.models[0].atom_dict[field] = np.concatenate(
+                    [model.atom_dict[field] for model in self.models]
+                )
+
+            self.models[0].atom_dict["num_resid_uniqresid"][:, 0] = np.arange(
+                1, self.models[0].atom_dict["num_resid_uniqresid"].shape[0] + 1
+            )
+
+            for i in range(len(self.models) -1, 0, -1):
+                del(self.models[i])
+            
+            self.active_model = 0
+
+
+    def compute_chains_CA(self, Ca_cutoff=4.5):
+        """Correct the chain ID's of a coor object, by checking consecutive
+        Calphas atoms distance. If the distance is higher than ``Ca_cutoff``
+        , the former atoms are considered as in a different chain.
+
+        Parameters
+        ----------
+        Ca_cutoff : float, optional
+            Cutoff distance between consecutive Calpha atoms, by default 4.5 Angstrom
+
+        Returns
+        -------
+        None
+            
+        """
+        
+        CA_sel = self.select_atoms("name CA and not altloc B C D")
+
+
+        for i, model in enumerate(CA_sel.models):
+
+            # Identify Chain uniq_resid
+            last_CA_xyz = model.atom_dict["xyz"][0]
+            uniqresid = model.atom_dict["num_resid_uniqresid"][0, 2]
+            last_chain = 0
+            chain_res_dict = {last_chain: [uniqresid]}
+            
+            for j in range(1, model.atom_dict["xyz"].shape[0]):
+
+                chain = model.atom_dict["alterloc_chain_insertres"][j, 1]
+                uniqresid = model.atom_dict["num_resid_uniqresid"][j, 2]
+
+                if np.linalg.norm(model.atom_dict["xyz"][j] - last_CA_xyz) > Ca_cutoff:
+                    last_chain += 1
+                    chain_res_dict[last_chain]=[uniqresid]
+                else:
+                    chain_res_dict[last_chain].append(uniqresid)
+                last_CA_xyz = model.atom_dict["xyz"][j]
+                    
+            # Change chain ID :
+            chain_char = 65 # "A"
+
+            for chain_id in chain_res_dict:
+                chain_index = self.models[i].get_index_select(
+                    f"residue {' '.join([str(i) for i in chain_res_dict[chain_id]])}")
+                self.models[i].atom_dict["alterloc_chain_insertres"][chain_index, 1] = chr(chain_char + chain_id)

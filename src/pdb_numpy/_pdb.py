@@ -7,6 +7,7 @@ import time
 import urllib.request
 import logging
 import numpy as np
+import gzip
 
 try:
     from . import geom as geom
@@ -180,6 +181,44 @@ def get_PDB(self, pdb_ID):
     ) as response:
         pdb_lines = response.read().decode("utf-8").splitlines(True)
 
+    self.parse_pdb_lines(pdb_lines)
+
+def get_PDB_BioAssembly(self, pdb_ID, index=1):
+    """Get a Bio Assembly pdb file from the PDB using its ID
+    and return a Coor object.
+
+    Parameters
+    ----------
+    self : Coor
+        Coor object
+    pdb_ID : str
+        pdb ID
+
+    Returns
+    -------
+    None
+        self.atom_dict modified as a dictionnary with atom informations
+        self.crystal_pack modified as a string with crystal informations
+
+    Examples
+    --------
+    >>> prot_coor = Coor()
+    >>> prot_coor.get_PDB('3EAM')
+    """
+
+
+    #req = Request('http://www.debian.org')
+    #req.add_header('Accept-Encoding', 'gzip')
+    #response = urlopen(req)
+    #content = gzip.decompress(response.read())
+
+    # Get the pdb file from the PDB:
+    req = urllib.request.Request(f"http://files.rcsb.org/download/{pdb_ID}.pdb{index}.gz")
+    req.add_header('Accept-Encoding', 'gzip')
+
+    with urllib.request.urlopen(req) as response:
+        pdb_lines = gzip.decompress(response.read()).decode("utf-8").splitlines(True)
+    
     self.parse_pdb_lines(pdb_lines)
 
 

@@ -691,9 +691,18 @@ class Coor:
         None
             
         """
-        
-        CA_sel = self.select_atoms("name CA and not altloc B C D")
+    
+        # 65:90 CAP letters
+        # 97:122 letters # Remove x y z for selection issues
+        # 48:57 Digits
+        # 192-> 1000 # Others
+        chain_letters = np.array(
+            [chr(i) for i in range(65, 91)] +
+            [chr(i) for i in range(97, 120)] +
+            [chr(i) for i in range(48, 58)]
+            )
 
+        CA_sel = self.select_atoms("name CA and not altloc B C D")
 
         for i, model in enumerate(CA_sel.models):
 
@@ -716,12 +725,11 @@ class Coor:
                 last_CA_xyz = model.atom_dict["xyz"][j]
                     
             # Change chain ID :
-            chain_char = 65 # "A"
 
             for chain_id in chain_res_dict:
                 chain_index = self.models[i].get_index_select(
                     f"residue {' '.join([str(i) for i in chain_res_dict[chain_id]])}")
-                self.models[i].atom_dict["alterloc_chain_insertres"][chain_index, 1] = chr(chain_char + chain_id)
+                self.models[i].atom_dict["alterloc_chain_insertres"][chain_index, 1] = chain_letters[chain_id % chain_letters.shape[0]]
     
     def apply_transformation(self, index=1):
         """Apply the transformation matrix to the coordinates.
@@ -738,9 +746,10 @@ class Coor:
 
         """
 
-        assert len(self.models) == 1, "Only one model is allowed"
 
-        if hasattr(self, "transformation"):
+        if hasattr(self, "transformation") and len(self.models) == 1:
+
+            assert len(self.models) == 1, "Only one model is allowed"
 
             matrix = np.array(self.transformation[index]['matrix'])
             indexes = np.isin(self.models[0].chain, self.transformation[index]['chains'])
@@ -748,16 +757,17 @@ class Coor:
             model_num = matrix.shape[0]//3
 
             for i in range(model_num):
-                print(i)
                 local_matrix = matrix[i*3:(i+1)*3, 1:4]
                 local_translation = matrix[i*3:(i+1)*3, 4]
 
                 if not (local_matrix == np.eye(3)).all() or (local_translation != 0.0).any():
-                    print(f'Add transformation {i}')
+                    logger.info(f'Add transformation {i}')
                     local_model = copy.deepcopy(self.models[0])
                     local_model.xyz[indexes] = np.dot(local_model.xyz[indexes], local_matrix) + matrix[i*3:(i+1)*3, 4]
                     self.models.append(local_model)
             self.merge_models()
+        else:
+            logger.warning("No transformation matrix found or Only one model is allowed")
     
     def add_symmetry(self):
         """Apply the symmetry matrix to the coordinates.
@@ -774,9 +784,8 @@ class Coor:
 
         """
 
-        assert len(self.models) == 1, "Only one model is allowed"
 
-        if hasattr(self, "symmetry"):
+        if hasattr(self, "symmetry") and len(self.models) == 1:
 
             matrix = np.array(self.symmetry['matrix'])
 
@@ -787,9 +796,11 @@ class Coor:
                 local_translation = matrix[i*3:(i+1)*3, 4]
 
                 if not (local_matrix == np.eye(3)).all() or (local_translation != 0.0).any():
-                    print(f'Add symmetry {i}')
+                    logger.info(f'Add symmetry {i}')
                     local_model = copy.deepcopy(self.models[0])
                     local_model.xyz = np.dot(local_model.xyz, local_matrix) + matrix[i*3:(i+1)*3, 4]
                     self.models.append(local_model)
             
             self.merge_models()
+        else:
+            logger.warning("No symmetry matrix found or Only one model is allowed")

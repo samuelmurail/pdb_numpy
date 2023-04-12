@@ -636,7 +636,7 @@ class Coor:
         return seq_dict
 
 
-    def merge_model(self):
+    def merge_models(self):
         """Merge all models into the first model.
 
         Returns
@@ -722,3 +722,74 @@ class Coor:
                 chain_index = self.models[i].get_index_select(
                     f"residue {' '.join([str(i) for i in chain_res_dict[chain_id]])}")
                 self.models[i].atom_dict["alterloc_chain_insertres"][chain_index, 1] = chr(chain_char + chain_id)
+    
+    def apply_transformation(self, index=1):
+        """Apply the transformation matrix to the coordinates.
+        Add a new model with the transformed coordinates.
+
+        Parameters
+        ----------
+        index : int, optional
+            Index of the transformation matrix to apply, by default 1
+
+        Returns
+        -------
+        None
+
+        """
+
+        assert len(self.models) == 1, "Only one model is allowed"
+
+        if hasattr(self, "transformation"):
+
+            matrix = np.array(self.transformation[index]['matrix'])
+            indexes = np.isin(self.models[0].chain, self.transformation[index]['chains'])
+
+            model_num = matrix.shape[0]//3
+
+            for i in range(model_num):
+                print(i)
+                local_matrix = matrix[i*3:(i+1)*3, 1:4]
+                local_translation = matrix[i*3:(i+1)*3, 4]
+
+                if not (local_matrix == np.eye(3)).all() or (local_translation != 0.0).any():
+                    print(f'Add transformation {i}')
+                    local_model = copy.deepcopy(self.models[0])
+                    local_model.xyz[indexes] = np.dot(local_model.xyz[indexes], local_matrix) + matrix[i*3:(i+1)*3, 4]
+                    self.models.append(local_model)
+            self.merge_models()
+    
+    def add_symmetry(self):
+        """Apply the symmetry matrix to the coordinates.
+        Add a model for each symmetry matrix.
+        
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        """
+
+        assert len(self.models) == 1, "Only one model is allowed"
+
+        if hasattr(self, "symmetry"):
+
+            matrix = np.array(self.symmetry['matrix'])
+
+            model_num = matrix.shape[0]//3
+
+            for i in range(model_num):
+                local_matrix = matrix[i*3:(i+1)*3, 1:4]
+                local_translation = matrix[i*3:(i+1)*3, 4]
+
+                if not (local_matrix == np.eye(3)).all() or (local_translation != 0.0).any():
+                    print(f'Add symmetry {i}')
+                    local_model = copy.deepcopy(self.models[0])
+                    local_model.xyz = np.dot(local_model.xyz, local_matrix) + matrix[i*3:(i+1)*3, 4]
+                    self.models.append(local_model)
+            
+            self.merge_models()

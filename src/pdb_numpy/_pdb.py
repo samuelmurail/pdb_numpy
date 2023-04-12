@@ -56,9 +56,16 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
     xyz_list = []  # real (8.3)
     occ_beta_list = []  # real (6.2)
 
+    transformation = ""
+    symmetry = ""
+
     for line in pdb_lines:
         if line.startswith("CRYST1"):
             self.crystal_pack = line
+        elif line.startswith('REMARK 350 '):
+            transformation += line
+        elif line.startswith('REMARK 290 '):
+            symmetry += line
         elif line.startswith("MODEL"):
             # print('Read Model {}'.format(model_num))
             model_num += 1
@@ -150,6 +157,63 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
                 f"The atom number is not the same in the model {len(self.models)-1} and the model {len(self.models)}."
             )
         self.models.append(local_model)
+    
+    if transformation != '':
+        self.transformation = parse_transformation(transformation)
+    if symmetry != '':
+        self.symmetry = parse_symmetry(symmetry)
+
+
+
+def parse_transformation(text):
+    """Parse the `REMARK 350   BIOMT` information from a pdb file.
+
+    Parameters
+    ----------
+    text : str
+        pdb file
+
+    Returns
+    -------
+    symetry_dict : dict
+        symetry information
+    """
+
+
+    transformation_dict = {}
+
+    for line in text.split('\n'):
+        if line[11:23] == "BIOMOLECULE:":
+            biomol = int(line[24:])
+            transformation_dict[biomol] = {'chains': [], 'matrix': []}
+        elif line[34:41] == "CHAINS:":
+            transformation_dict[biomol]['chains'] += line[42:].split()
+        elif line.startswith('REMARK 350   BIOMT'):
+            transformation_dict[biomol]['matrix'] += [[float(x) for x in line[19:].split()]]
+
+    return transformation_dict
+
+def parse_symmetry(text):
+    """Parse the `REMARK 290   SMTRY` information from a pdb file.
+
+    Parameters
+    ----------
+    text : str
+        pdb file
+
+    Returns
+    -------
+    symetry_dict : dict
+        symetry information
+    """
+
+    symmetry_dict = {'matrix': []}
+
+    for line in text.split('\n'):
+        if line.startswith('REMARK 290   SMTRY'):
+            symmetry_dict['matrix'] += [[float(x) for x in line[19:].split()]]
+
+    return symmetry_dict
 
 
 def get_PDB(self, pdb_ID):

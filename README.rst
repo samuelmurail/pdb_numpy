@@ -11,18 +11,18 @@
     :target: https://codecov.io/gh/samuelmurail/pdb_numpy
     :alt: Code coverage
 
-Pdb Numpy
-==============
+About PDB-numpy
+===============
 
-`pdb_numpy`` is a Python library designed to facilitate working with PDB files
+``pdb_numpy`` is a python library designed to facilitate working with PDB files
 in the context of structural bioinformatics. The library builds upon the
-powerful `numpy`` library to provide efficient and easy-to-use tools for
+powerful ``numpy`` library to provide efficient and easy-to-use tools for
 reading, manipulating, and analyzing PDB files.
 
 The library includes a number of functions for working with PDB files,
 including functions for parsing PDB files and extracting relevant information,
 such as atomic coordinates, residue identities, and structural information.
-Additionally, pdb_numpy provides a range of functions for performing common
+Additionally, ``pdb_numpy`` provides a range of functions for performing common
 manipulations on PDB structures, such as aligning structures, superimposing
 structures, and calculating RMSD values.
 
@@ -47,7 +47,7 @@ https://pdb-numpy.readthedocs.io/en/latest/readme.html.
 Contributing
 ------------
 
-`pdb_numpy`` is an open-source project and contributions are welcome. If
+``pdb_numpy`` is an open-source project and contributions are welcome. If
 you find a bug or have a feature request, please open an issue on the GitHub
 repository at https://github.com/samuelmurail/pdb_numpy. If you would like
 to contribute code, please fork the repository and submit a pull request.

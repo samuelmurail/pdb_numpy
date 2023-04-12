@@ -36,7 +36,8 @@ extensions = [
     'sphinx.ext.todo',
     'sphinxarg.ext',
     'sphinx.ext.mathjax',
-    'numpydoc']
+    'numpydoc',
+    'myst_parser']
 
 templates_path = ['_templates']
 exclude_patterns = []
@@ -45,7 +46,7 @@ exclude_patterns = []
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = ['.rst', '.ipynb']
+source_suffix = ['.rst', '.ipynb', '.md']
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -70,4 +71,4 @@ man_pages = [
 autodoc_mock_imports = ["numpy", "scipy", "pytest"]
 
 # Exclude unit pages (tests and data) from the documentation
-exclude_patterns = ['pdb_numpy.tests.rst', 'pdb_numpy.data.rst']
+exclude_patterns = ['pdb_numpy.tests.rst', 'pdb_numpy.data.rst', 'modules.rst']

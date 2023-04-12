@@ -3,16 +3,22 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to pdb_numpy's documentation!
+Welcome to PDB-numpy's documentation!
 =====================================
+
+``pdb_numpy`` is a python library designed to facilitate working with coordinates files
+in the context of structural bioinformatics. The library builds upon the
+powerful ``numpy`` library to provide efficient and easy-to-use tools for
+reading, manipulating, and analyzing coordinates files.
 
 .. toctree::
    :maxdepth: 2
    :caption: Table of Contents:
 
    readme
-   modules
-
+   installation
+   basic_example
+   pdb_numpy
 
 Indices and tables
 ==================

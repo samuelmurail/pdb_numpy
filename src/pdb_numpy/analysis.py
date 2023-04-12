@@ -493,8 +493,8 @@ def compute_pdockQ(
     
     Returns
     -------
-    float
-        pdockQ score
+    list
+        pdockQ scores
     
     References
     ----------

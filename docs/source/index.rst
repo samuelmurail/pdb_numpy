@@ -18,6 +18,7 @@ reading, manipulating, and analyzing coordinates files.
    readme
    installation
    basic_example
+   Github project <https://github.com/samuelmurail/pdb_numpy>
    pdb_numpy
 
 Indices and tables

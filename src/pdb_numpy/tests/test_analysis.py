@@ -245,3 +245,16 @@ def test_pdockq(tmp_path):
     pdockq = analysis.compute_pdockQ(model_coor) #, rec_chain=["B"], lig_chain=["C"])
 
     assert pytest.approx(pdockq[0], 0.001) ==  0.2924
+
+
+def test_pdockq_sel(tmp_path):
+    """
+    """
+
+    pdb_numpy.logger.setLevel(level=logging.INFO)
+
+    model_coor = Coor(PDB_1RXZ_Colabfold)
+
+    pdockq = analysis.compute_pdockQ_sel(model_coor, rec_sel="chain B", lig_sel="chain C") #, rec_chain=["B"], lig_chain=["C"])
+
+    assert pytest.approx(pdockq[0], 0.001) ==  0.2924

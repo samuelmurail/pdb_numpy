@@ -12,7 +12,7 @@ import logging
 
 import pdb_numpy
 from pdb_numpy import Coor
-from .datafiles import PDB_1Y0M, PQR_1Y0M, PDB_2RRI
+from .datafiles import PDB_1Y0M, PQR_1Y0M, PDB_2RRI, PDB_3FTK
 
 
 def test_get_pdb(tmp_path):
@@ -150,3 +150,75 @@ def test_read_write_pdb_models(tmp_path):
                 ).all()
             else:
                 assert (model.atom_dict[key] == model_2.atom_dict[key]).all()
+
+
+
+def test_get_pdb_bioassembly(tmp_path):
+    """Test get_pdb function."""
+    test = Coor(PDB_3FTK)
+    test.merge_models()
+
+    assert test.len == 58
+    assert test.model_num == 1
+
+    assert test.models[0].atom_dict["name_resname_elem"][0, 1] == 'ASN'
+    assert test.models[0].resname[0] == 'ASN'
+    assert test.models[0].resid[0] == 1
+    assert test.models[0].uniq_resid[0] == 0
+    assert test.models[0].name[0] == "N"
+    assert test.models[0].num[0] == 1
+    assert test.models[0].x[0] == pytest.approx(-8.053, 0.000001)
+    assert test.models[0].y[0] == pytest.approx(2.244, 0.000001)
+    assert test.models[0].z[0] == pytest.approx(10.035, 0.000001)
+    assert (
+        test.models[0].atom_dict["xyz"][0, :]
+        == np.array([-8.053, 2.244, 10.035], dtype=np.float32)
+    ).all()
+    assert (
+        test.crystal_pack
+        == "CRYST1   20.630    4.700   21.009  90.00  92.28  90.00 P 1 21 1      2          \n"
+    )
+
+    test2 = Coor()
+    test2.get_PDB_BioAssembly('3FTK', index=1)
+    test2.merge_models()
+    test2.compute_chains_CA()
+
+    assert test2.len == 174
+    assert test2.model_num == 1
+
+    assert test2.models[0].atom_dict["name_resname_elem"][0, 1] == 'ASN'
+    assert test2.models[0].resname[0] == 'ASN'
+    assert test2.models[0].resid[0] == 1
+    assert test2.models[0].uniq_resid[0] == 0
+    assert test2.models[0].name[0] == "N"
+    assert test2.models[0].num[0] == 1
+    assert test2.models[0].x[0] == pytest.approx(-8.053, 0.000001)
+    assert test2.models[0].y[0] == pytest.approx(2.244, 0.000001)
+    assert test2.models[0].z[0] == pytest.approx(10.035, 0.000001)
+
+    assert len(np.unique(test2.models[0].chain)) == 3
+
+def test_pdb_symmetry_assembly(tmp_path):
+    """Test get_pdb function."""
+    test = Coor(PDB_3FTK)
+    test.merge_models()
+
+    assert test.len == 58
+    assert test.model_num == 1
+
+    test.add_symmetry()
+
+    assert test.len == 116
+    assert test.model_num == 1
+
+    test.apply_transformation(index=1)  
+
+    assert test.len == 348
+    assert test.model_num == 1
+
+    assert len(np.unique(test.chain)) == 1
+
+    test.compute_chains_CA()
+
+    assert len(np.unique(test.chain)) == 6

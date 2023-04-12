@@ -54,7 +54,7 @@ def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     seq_1_aligned = alignement_res.contents.seq1
     seq_2_aligned = alignement_res.contents.seq2
 
-    print(seq_1_aligned)
+    # print(seq_1_aligned)
 
     free_align = my_functions.free_align
     free_align.argtypes = [ctypes.POINTER(test)]
@@ -619,9 +619,12 @@ def align_chain_permutation(
     """
 
     if chain_1 is None:
-        chain_1 = np.unique(coor_1.chain)
+        ca_chain1 = coor_1.select_atoms("name CA")
+        chain_1 = np.unique(ca_chain1.chain)
     if chain_2 is None:
-        chain_2 = np.unique(coor_2.chain)
+        ca_chain2 = coor_2.select_atoms("name CA")
+        chain_2 = np.unique(ca_chain2.chain)
+    
 
     if len(chain_2) <= len(chain_1):
         chain_1_perm = list(permutations(chain_1, len(chain_2)))

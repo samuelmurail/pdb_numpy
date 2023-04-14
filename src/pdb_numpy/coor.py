@@ -5,6 +5,8 @@ import logging
 import os
 import copy
 import numpy as np
+from scipy.spatial import distance_matrix
+
 from .data.aa_dict import AA_DICT
 from . import geom
 
@@ -699,7 +701,8 @@ class Coor:
         chain_letters = np.array(
             [chr(i) for i in range(65, 91)] +
             [chr(i) for i in range(97, 120)] +
-            [chr(i) for i in range(48, 58)]
+            [chr(i) for i in range(48, 58)] +
+            [chr(i) for i in range(192, 1000)]
             )
 
         CA_sel = self.select_atoms("name CA and not altloc B C D")
@@ -731,6 +734,7 @@ class Coor:
                     f"residue {' '.join([str(i) for i in chain_res_dict[chain_id]])}")
                 self.models[i].atom_dict["alterloc_chain_insertres"][chain_index, 1] = chain_letters[chain_id % chain_letters.shape[0]]
     
+
     def apply_transformation(self, index=1):
         """Apply the transformation matrix to the coordinates.
         Add a new model with the transformed coordinates.
@@ -767,8 +771,12 @@ class Coor:
                     self.models.append(local_model)
             self.merge_models()
         else:
-            logger.warning("No transformation matrix found or Only one model is allowed")
-    
+            if len(self.models) == 1:
+                logger.warning("No transformation matrix found.")
+            else:
+                logger.warning("Only one model is allowed.")
+
+
     def add_symmetry(self):
         """Apply the symmetry matrix to the coordinates.
         Add a model for each symmetry matrix.
@@ -803,4 +811,113 @@ class Coor:
             
             self.merge_models()
         else:
-            logger.warning("No symmetry matrix found or Only one model is allowed")
+            if len(self.models) == 1:
+                logger.warning("No symmetry matrix found.")
+            else:
+                logger.warning("Only one model is allowed.")
+
+
+    def remove_overlap_chain(self, cutoff=1.0, frame=0):
+        """Remove atoms that are closer than ``cutoff`` from another atom.
+
+        Parameters
+        ----------
+        cutoff : float, optional
+            Cutoff distance, by default 1.0 Angstrom
+
+        Returns
+        -------
+        Coor
+            A new Coor object with the overlapping atoms removed.
+
+        """
+
+        chain_list = np.unique(self.models[0].chain)
+
+        center_list = []
+        for chain in chain_list:
+            # print(f'chain {chain}')
+            chain_sel = self.models[frame].select_atoms(f'protein and chain {chain}')
+            avg = np.average(chain_sel.xyz, axis=0)
+            center_list.append(avg)
+            
+        dist_matrix = distance_matrix(center_list, center_list)
+        mask = dist_matrix < cutoff
+        # Remove lower triangle and i, (k=0)
+        mask[np.tril_indices_from(mask, k=0)] = False
+        indices = np.argwhere(mask)
+
+        remove_chains = []
+
+        for indice in indices:
+            indice.sort()
+            remove_chains.append(indice[1])
+        
+        remove_chains = [chain_list[i] for i in remove_chains]
+        keep_chains = [chain for chain in chain_list if chain not in remove_chains]
+        return self.select_atoms(f'chain {" ".join(keep_chains)}')
+
+    def copy_box(self, x=1, y=1, z=1):
+        """Copy the box in the x, y and z direction.
+
+        Parameters
+        ----------
+        x : int, optional
+            Number of copy in the x direction, by default 1
+        y : int, optional
+            Number of copy in the y direction, by default 1
+        z : int, optional
+            Number of copy in the z direction, by default 1
+
+        Returns
+        -------
+        Coor
+            A new Coor object with the box copied.
+
+        """
+
+        if hasattr(self, "crystal_pack") and len(self.models) == 1:
+                    
+            a, b, c, alpha, beta, gamma = [float(i) for i in self.crystal_pack.split()[1:7]]
+            alpha = np.deg2rad(alpha)
+            beta = np.deg2rad(beta)
+            gamma = np.deg2rad(gamma)
+            v1 = np.array([a, 0.0, 0.0])
+            v2 = np.array([b * np.cos(gamma), b * np.sin(gamma), 0.0])
+            v = ((1.0
+                  - np.cos(alpha) ** 2
+                  - np.cos(beta) ** 2
+                  - np.cos(gamma) ** 2
+                  + 2.0 * np.cos(alpha) * np.cos(beta) * np.cos(gamma)
+                )
+                ** 0.5
+                * a
+                * b
+                * c)
+            v3 = np.array([
+                c * np.cos(beta),
+                (c / np.sin(gamma))
+                * (np.cos(alpha) - np.cos(beta) * np.cos(gamma)),
+                v / (a * b * np.sin(gamma)),
+            ])
+
+            for i in range(x):
+                for j in range(y):
+                    for k in range(z):
+                        if i == 0 and j == 0 and k == 0:
+                            continue
+                        else:
+                            logger.info('Add copy', i, j, k)
+                            local_model = copy.deepcopy(self.models[0])
+                            translation = i*v1 + j*v2 + k*v3
+
+                            local_model.xyz = local_model.xyz + translation
+                            self.models.append(local_model)
+            
+            #new_coor.crystal_pack = crystal_pack
+            self.merge_models()
+        else:
+            if len(self.models) == 1:
+                logger.warning("No crystal pack found.")
+            else:
+                logger.warning("Only one model is allowed.")

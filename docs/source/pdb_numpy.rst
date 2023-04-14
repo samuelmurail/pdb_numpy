@@ -1,12 +1,12 @@
 PDB\_Numpy package
-===================
+==================
 
 
 Submodules
 ----------
 
 
-pdb\_numpy.coor module
+``Coor`` Class
 ----------------------
 
 .. automodule:: pdb_numpy.coor
@@ -14,7 +14,7 @@ pdb\_numpy.coor module
    :undoc-members:
    :show-inheritance:
 
-pdb\_numpy.model module
+``Model`` Class
 -----------------------
 
 .. automodule:: pdb_numpy.model
@@ -22,8 +22,8 @@ pdb\_numpy.model module
    :undoc-members:
    :show-inheritance:
 
-pdb\_numpy.analysis module
---------------------------
+Analysis module
+---------------
 
 .. automodule:: pdb_numpy.analysis
    :members:
@@ -31,8 +31,8 @@ pdb\_numpy.analysis module
    :show-inheritance:
 
 
-pdb\_numpy.DSSP module
---------------------------
+DSSP module
+-----------
 
 .. automodule:: pdb_numpy.DSSP
    :members:

@@ -11,7 +11,7 @@ import numpy as np
 import logging
 
 import pdb_numpy
-from pdb_numpy import Coor
+from pdb_numpy import Coor, pdb
 from .datafiles import PDB_1Y0M, PQR_1Y0M, PDB_2RRI, PDB_3FTK
 
 
@@ -89,7 +89,7 @@ def test_read_write_pdb(tmp_path, caplog):
     test = Coor(PDB_1Y0M)
     assert test.len == 648
 
-    test.write_pdb(os.path.join(tmp_path, "test.pdb"))
+    pdb.write(test, os.path.join(tmp_path, "test.pdb"))
     captured = caplog.records
 
     assert captured[-1].msg.startswith("Succeed to save file ")
@@ -112,7 +112,7 @@ def test_read_write_pdb(tmp_path, caplog):
             ).all()
 
     # Test if overwritting file is prevent
-    test2.write_pdb(os.path.join(tmp_path, "test.pdb"))
+    pdb.write(test2, os.path.join(tmp_path, "test.pdb"))
 
     # captured = caplog.records
 
@@ -125,8 +125,8 @@ def test_read_write_pqr(tmp_path):
     test = Coor(PQR_1Y0M)
     assert test.len == 1362
 
-    test.write_pqr(os.path.join(tmp_path, "test_2.pqr"))
-    test.write_pdb(os.path.join(tmp_path, "test_2.pdb"))
+    pdb.write_pqr(test, os.path.join(tmp_path, "test_2.pqr"))
+    pdb.write(test, os.path.join(tmp_path, "test_2.pdb"))
 
 
 def test_read_write_pdb_models(tmp_path):
@@ -135,7 +135,7 @@ def test_read_write_pdb_models(tmp_path):
 
     assert test.model_num == 20
 
-    test.write_pdb(os.path.join(tmp_path, "test_2rri.pdb"))
+    pdb.write(test, os.path.join(tmp_path, "test_2rri.pdb"))
 
     test_2 = Coor(os.path.join(tmp_path, "test_2rri.pdb"))
 
@@ -180,7 +180,7 @@ def test_get_pdb_bioassembly(tmp_path):
     )
 
     test2 = Coor()
-    test2.get_PDB_BioAssembly('3FTK', index=1)
+    test2 = pdb.fetch_PDB_BioAssembly('3FTK', index=1)
     test2.merge_models()
     test2.compute_chains_CA()
 

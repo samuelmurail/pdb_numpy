@@ -8,12 +8,10 @@ import urllib.request
 import logging
 import numpy as np
 
-try:
-    from . import geom as geom
-    from .model import Model
-except ImportError:
-    import pdb_numpy.geom as geom
-    from model import Model
+
+from . import geom
+from .model import Model
+from . import coor
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -47,25 +45,23 @@ MMCIF_ATOM_SITE = (
 )
 
 
-def parse_mmcif_lines(self, mmcif_lines):
+def parse(mmcif_lines):
     """Parse the mmcif lines and return atom information as a dictionary
 
     Parameters
     ----------
-    self : Coor
-        Coor object
+
     mmcif_lines : list
         list of pdb lines
 
     Returns
     -------
-    None
-        self.atom_dict modified as a dictionary with atom information
-        self.crystal_pack modified as a string with crystal information
+    Coor
+        Coor object
 
     """
 
-    data_mmCIF = parse_raw_mmcif_lines(mmcif_lines)
+    data_mmCIF = _parse_raw_mmcif_lines(mmcif_lines)
 
     model_index = data_mmCIF["_atom_site"]["col_names"].index("pdbx_PDB_model_num")
     model_array = np.array(data_mmCIF["_atom_site"]["value"][model_index]).astype(
@@ -164,6 +160,8 @@ def parse_mmcif_lines(self, mmcif_lines):
 
     # Need to extract atom symbols ?
 
+    mmcif_coor = coor.Coor()
+
     for model in model_list:
         model_index = model_array == model
 
@@ -177,33 +175,31 @@ def parse_mmcif_lines(self, mmcif_lines):
             "occ_beta": occ_beta_array[model_index],
         }
 
-        if len(self.models) > 1 and local_model.len != self.models[-1].len:
+        if len(mmcif_coor.models) > 1 and local_model.len != mmcif_coor.models[-1].len:
             logger.warning(
-                f"The atom number is not the same in the model {len(self.models)-1} and the model {len(self.models)}."
+                f"The atom number is not the same in the model {len(mmcif_coor.models)-1} and the model {len(mmcif_coor.models)}."
             )
 
-        self.models.append(local_model)
+        mmcif_coor.models.append(local_model)
 
     data_mmCIF["_atom_site"] = None
-    self.data_mmCIF = data_mmCIF
+    mmcif_coor.data_mmCIF = data_mmCIF
 
+    return mmcif_coor
 
-def get_PDB_mmcif(self, pdb_ID):
+def fetch(pdb_ID):
     """Get a mmcif file from the PDB using its ID
     and return a Coor object.
 
     Parameters
     ----------
-    self : Coor
-        Coor object
     pdb_ID : str
         pdb ID
 
     Returns
     -------
-    None
-        self.atom_dict modified as a dictionnary with atom informations
-        self.crystal_pack modified as a string with crystal informations
+    Coor
+        Coor object
 
     Examples
     --------
@@ -215,12 +211,12 @@ def get_PDB_mmcif(self, pdb_ID):
     with urllib.request.urlopen(
         f"http://files.rcsb.org/download/{pdb_ID}.cif"
     ) as response:
-        pdb_lines = response.read().decode("utf-8").splitlines(True)
+        mmcif_lines = response.read().decode("utf-8").splitlines(True)
 
-    self.parse_mmcif_lines(pdb_lines)
+    return parse(mmcif_lines)
 
 
-def parse_raw_mmcif_lines(mmcif_lines):
+def _parse_raw_mmcif_lines(mmcif_lines):
     """Parse the mmcif lines and return atom information as a dictionary
 
     Parameters
@@ -230,9 +226,8 @@ def parse_raw_mmcif_lines(mmcif_lines):
 
     Returns
     -------
-    None
-        self.atom_dict modified as a dictionary with atom information
-        self.crystal_pack modified as a string with crystal information
+    dict
+        dictionary with atom information
 
     """
 
@@ -327,7 +322,7 @@ def parse_raw_mmcif_lines(mmcif_lines):
     return data_mmCIF
 
 
-def get_float_format_size(array, dec_num=3):
+def _get_float_format_size(array, dec_num=3):
     """Return the float format size for a given array.
 
     Parameters
@@ -349,14 +344,33 @@ def get_float_format_size(array, dec_num=3):
 
     return size
 
+def read(file_in):
+    """Read a mmcif file.
 
-def write_mmcif(self, mmcif_out, check_file_out=True):
+    Parameters
+    ----------
+    file_in : str
+        path of the pdb file to read
+
+    Returns
+    -------
+    Coor
+        Coor object
+
+    """
+
+    with open(file_in, "r") as filin:
+        lines = filin.readlines()
+
+    return parse(lines)
+
+def write(coor, mmcif_out, check_file_out=True):
     """Write a mmcif file.
 
     Parameters
     ----------
-    self : Coor
-        Coor object
+    coor : Coor
+        Coor object to write
     mmcif_out : str
         path of the mmcif file to write
     check_file_out : bool, optional, default=True
@@ -376,42 +390,42 @@ def write_mmcif(self, mmcif_out, check_file_out=True):
     line_max_len = 135
     old_category = ""
 
-    for category in self.data_mmCIF:
+    for category in coor.data_mmCIF:
         if category == "title":
-            filout.write(f"{self.data_mmCIF[category]['title']}\n")
+            filout.write(f"{coor.data_mmCIF[category]['title']}\n")
         elif category == "_atom_site":
-            atom_num = self.total_len
+            atom_num = coor.total_len
             model_num = 1
             filout.write(MMCIF_ATOM_SITE)
             # Get column size
             atom_num_size = len(
-                str(self.models[-1].atom_dict["num_resid_uniqresid"][-1, 0])
+                str(coor.models[-1].atom_dict["num_resid_uniqresid"][-1, 0])
             )
             resnum_size = len(
-                str(max(self.models[-1].atom_dict["num_resid_uniqresid"][:, 2]))
+                str(max(coor.models[-1].atom_dict["num_resid_uniqresid"][:, 2]))
             )
             resid_size = len(
-                str(max(self.models[-1].atom_dict["num_resid_uniqresid"][:, 1]))
+                str(max(coor.models[-1].atom_dict["num_resid_uniqresid"][:, 1]))
             )
             name_size = len(
-                max(self.models[0].atom_dict["name_resname_elem"][:, 0], key=len)
+                max(coor.models[0].atom_dict["name_resname_elem"][:, 0], key=len)
             )
             chain_size = len(
-                max(self.models[0].atom_dict["alterloc_chain_insertres"][:, 1], key=len)
+                max(coor.models[0].atom_dict["alterloc_chain_insertres"][:, 1], key=len)
             )
             resname_size = len(
-                max(self.models[0].atom_dict["name_resname_elem"][:, 1], key=len)
+                max(coor.models[0].atom_dict["name_resname_elem"][:, 1], key=len)
             )
             elem_size = len(
-                max(self.models[0].atom_dict["name_resname_elem"][:, 2], key=len)
+                max(coor.models[0].atom_dict["name_resname_elem"][:, 2], key=len)
             )
-            x_size = get_float_format_size(self.models[0].atom_dict["xyz"][:, 0])
-            y_size = get_float_format_size(self.models[0].atom_dict["xyz"][:, 1])
-            z_size = get_float_format_size(self.models[0].atom_dict["xyz"][:, 2])
-            beta_size = get_float_format_size(
-                self.models[0].atom_dict["occ_beta"][:, 1], dec_num=2
+            x_size = _get_float_format_size(coor.models[0].atom_dict["xyz"][:, 0])
+            y_size = _get_float_format_size(coor.models[0].atom_dict["xyz"][:, 1])
+            z_size = _get_float_format_size(coor.models[0].atom_dict["xyz"][:, 2])
+            beta_size = _get_float_format_size(
+                coor.models[0].atom_dict["occ_beta"][:, 1], dec_num=2
             )
-            for model in self.models:
+            for model in coor.models:
                 for i in range(model.len):
                     alt_pos = (
                         "."
@@ -476,15 +490,15 @@ def write_mmcif(self, mmcif_out, check_file_out=True):
                 filout.write("# \n")
                 old_category = category
             # Write the loop
-            if "col_names" in self.data_mmCIF[category]:
+            if "col_names" in coor.data_mmCIF[category]:
                 filout.write("loop_\n")
                 raw_width = []
-                for i, col_name in enumerate(self.data_mmCIF[category]["col_names"]):
+                for i, col_name in enumerate(coor.data_mmCIF[category]["col_names"]):
                     filout.write(f"{category}.{col_name} \n")
                     # Extract the word with no column
                     list_no_column = [
                         elem
-                        for elem in self.data_mmCIF[category]["value"][i]
+                        for elem in coor.data_mmCIF[category]["value"][i]
                         if elem.find(";")
                     ]
                     # Compute the max length of the word with no column
@@ -498,10 +512,10 @@ def write_mmcif(self, mmcif_out, check_file_out=True):
                     if tot_width > line_max_len:
                         break_list.append(i)
                         tot_width = 0
-                for i in range(len(self.data_mmCIF[category]["value"][0])):
+                for i in range(len(coor.data_mmCIF[category]["value"][0])):
                     str_out = ""
-                    for j in range(len(self.data_mmCIF[category]["col_names"])):
-                        word = self.data_mmCIF[category]["value"][j][i]
+                    for j in range(len(coor.data_mmCIF[category]["col_names"])):
+                        word = coor.data_mmCIF[category]["value"][j][i]
                         # If the word starts with a ";", we add a new line
                         if word[0] == ";":
                             # Except if the previous word was a ";"
@@ -520,18 +534,18 @@ def write_mmcif(self, mmcif_out, check_file_out=True):
             # Write the data
             else:
                 max_len = (
-                    len(max(self.data_mmCIF[category], key=len)) + len(category) + 3
+                    len(max(coor.data_mmCIF[category], key=len)) + len(category) + 3
                 )
-                for attribute in self.data_mmCIF[category]:
-                    if self.data_mmCIF[category][attribute].startswith(";"):
+                for attribute in coor.data_mmCIF[category]:
+                    if coor.data_mmCIF[category][attribute].startswith(";"):
                         filout.write(
-                            f"{'.'.join([category, attribute]):{max_len}} \n{self.data_mmCIF[category][attribute]}"
+                            f"{'.'.join([category, attribute]):{max_len}} \n{coor.data_mmCIF[category][attribute]}"
                         )
                     else:
-                        local_str = f"{'.'.join([category, attribute]):{max_len}} {self.data_mmCIF[category][attribute]} \n"
+                        local_str = f"{'.'.join([category, attribute]):{max_len}} {coor.data_mmCIF[category][attribute]} \n"
                         if len(local_str) > line_max_len:
                             filout.write(
-                                f"{'.'.join([category, attribute]):{max_len}} \n{self.data_mmCIF[category][attribute]} \n"
+                                f"{'.'.join([category, attribute]):{max_len}} \n{coor.data_mmCIF[category][attribute]} \n"
                             )
                         else:
                             filout.write(local_str)

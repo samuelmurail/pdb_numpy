@@ -9,12 +9,11 @@ import logging
 import numpy as np
 import gzip
 
-try:
-    from . import geom as geom
-    from .model import Model
-except ImportError:
-    import pdb_numpy.geom as geom
-    from model import Model
+
+from . import geom as geom
+from .model import Model
+from . import coor
+
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -22,13 +21,11 @@ logger = logging.getLogger(__name__)
 FIELD_DICT = {"A": "ATOM  ", "H": "HETATM"}
 
 
-def parse_pdb_lines(self, pdb_lines, pqr_format=False):
+def parse(pdb_lines, pqr_format=False):
     """Parse the pdb lines and return atom informations as a dictionnary
 
     Parameters
     ----------
-    self : Coor
-        Coor object
     pdb_lines : list
         list of pdb lines
     pqr_format : bool, optional
@@ -36,11 +33,12 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
 
     Returns
     -------
-    None
-        self.atom_dict modified as a dictionnary with atom informations
-        self.crystal_pack modified as a string with crystal informations
+    Coor
+        Coor object
 
     """
+
+    pdb_coor = coor.Coor()
 
     atom_index = 0
     uniq_resid = -1
@@ -61,7 +59,7 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
 
     for line in pdb_lines:
         if line.startswith("CRYST1"):
-            self.crystal_pack = line
+            pdb_coor.crystal_pack = line
         elif line.startswith('REMARK 350 '):
             transformation += line
         elif line.startswith('REMARK 290 '):
@@ -84,11 +82,11 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
                     "xyz": np.array(xyz_list, dtype="float32"),
                     "occ_beta": np.array(occ_beta_list, dtype="float32"),
                 }
-                if len(self.models) > 1 and local_model.len != self.models[-1].len:
+                if len(pdb_coor.models) > 1 and local_model.len != pdb_coor.models[-1].len:
                     logger.warning(
-                        f"The atom number is not the same in the model {len(self.models)-1} and the model {len(self.models)}."
+                        f"The atom number is not the same in the model {len(pdb_coor.models)-1} and the model {len(pdb_coor.models)}."
                     )
-                self.models.append(local_model)
+                pdb_coor.models.append(local_model)
                 atom_index = 0
                 uniq_resid = -1
                 old_resid = -np.inf
@@ -152,18 +150,18 @@ def parse_pdb_lines(self, pdb_lines, pqr_format=False):
             "xyz": np.array(xyz_list, dtype="float32"),
             "occ_beta": np.array(occ_beta_list, dtype="float32"),
         }
-        if len(self.models) > 1 and local_model.len != self.models[-1].len:
+        if len(pdb_coor.models) > 1 and local_model.len != pdb_coor.models[-1].len:
             logger.warning(
-                f"The atom number is not the same in the model {len(self.models)-1} and the model {len(self.models)}."
+                f"The atom number is not the same in the model {len(pdb_coor.models)-1} and the model {len(pdb_coor.models)}."
             )
-        self.models.append(local_model)
+        pdb_coor.models.append(local_model)
     
     if transformation != '':
-        self.transformation = parse_transformation(transformation)
+        pdb_coor.transformation = parse_transformation(transformation)
     if symmetry != '':
-        self.symmetry = parse_symmetry(symmetry)
+        pdb_coor.symmetry = parse_symmetry(symmetry)
 
-
+    return pdb_coor
 
 def parse_transformation(text):
     """Parse the `REMARK 350   BIOMT` information from a pdb file.
@@ -216,7 +214,7 @@ def parse_symmetry(text):
     return symmetry_dict
 
 
-def get_PDB(self, pdb_ID):
+def fetch(pdb_ID):
     """Get a pdb file from the PDB using its ID
     and return a Coor object.
 
@@ -245,36 +243,29 @@ def get_PDB(self, pdb_ID):
     ) as response:
         pdb_lines = response.read().decode("utf-8").splitlines(True)
 
-    self.parse_pdb_lines(pdb_lines)
+    return parse(pdb_lines)
 
-def get_PDB_BioAssembly(self, pdb_ID, index=1):
+def fetch_PDB_BioAssembly(pdb_ID, index=1):
     """Get a Bio Assembly pdb file from the PDB using its ID
     and return a Coor object.
 
     Parameters
     ----------
-    self : Coor
-        Coor object
     pdb_ID : str
         pdb ID
+    index : int
+        Bio Assembly index
 
     Returns
     -------
-    None
-        self.atom_dict modified as a dictionnary with atom informations
-        self.crystal_pack modified as a string with crystal informations
+    Coor
+        Coor object
 
     Examples
     --------
     >>> prot_coor = Coor()
     >>> prot_coor.get_PDB('3EAM')
     """
-
-
-    #req = Request('http://www.debian.org')
-    #req.add_header('Accept-Encoding', 'gzip')
-    #response = urlopen(req)
-    #content = gzip.decompress(response.read())
 
     # Get the pdb file from the PDB:
     req = urllib.request.Request(f"http://files.rcsb.org/download/{pdb_ID}.pdb{index}.gz")
@@ -283,7 +274,7 @@ def get_PDB_BioAssembly(self, pdb_ID, index=1):
     with urllib.request.urlopen(req) as response:
         pdb_lines = gzip.decompress(response.read()).decode("utf-8").splitlines(True)
     
-    self.parse_pdb_lines(pdb_lines)
+    return parse(pdb_lines)
 
 
 def get_pdb_string(self):
@@ -312,7 +303,7 @@ def get_pdb_string(self):
 
     str_out = ""
 
-    if self.crystal_pack is not None:
+    if self.crystal_pack != "":
         str_out += geom.cryst_convert(self.crystal_pack, format_out="pdb")
     elif self.data_mmCIF is not None:
         str_out += geom.cryst_convert_mmCIF(self.data_mmCIF, format_out="pdb")
@@ -355,12 +346,12 @@ def get_pdb_string(self):
     return str_out
 
 
-def get_pqr_string(self):
+def get_pqr_string(coor):
     """Return a coor object as a pqr string.
 
     Parameters
     ----------
-    self : Coor
+    coor : Coor
         Coor object
     
     Returns
@@ -381,10 +372,10 @@ def get_pqr_string(self):
     """
 
     str_out = ""
-    if self.crystal_pack is not None:
-        str_out += geom.cryst_convert(self.crystal_pack, format_out="pdb")
+    if coor.crystal_pack != "":
+        str_out += geom.cryst_convert(coor.crystal_pack, format_out="pdb")
 
-    for model_index, model in enumerate(self.models):
+    for model_index, model in enumerate(coor.models):
         str_out += f"MODEL    {model_index:4d}\n"
 
         for i in range(model.len):
@@ -419,12 +410,12 @@ def get_pqr_string(self):
     return str_out
 
 
-def write_pdb(self, pdb_out, check_file_out=True):
+def write(coor, pdb_out, check_file_out=True):
     """Write a pdb file.
 
     Parameters
     ----------
-    self : Coor
+    coor : Coor
         Coor object
     pdb_out : str
         path of the pdb file to write
@@ -447,18 +438,18 @@ def write_pdb(self, pdb_out, check_file_out=True):
         return
 
     filout = open(pdb_out, "w")
-    filout.write(self.get_pdb_string())
+    filout.write(get_pdb_string(coor))
     filout.close()
     logger.info(f"Succeed to save file {os.path.relpath(pdb_out)}")
     return
 
 
-def write_pqr(self, pqr_out, check_file_out=True):
+def write_pqr(coor, pqr_out, check_file_out=True):
     """Write a pdb file.
 
     Parameters
     ----------
-    self : Coor
+    coor : Coor
         Coor object
     pqr_out : str
         path of the pqr file to write
@@ -486,5 +477,5 @@ def write_pqr(self, pqr_out, check_file_out=True):
         return
 
     filout = open(pqr_out, "w")
-    filout.write(self.get_pqr_string())
+    filout.write(get_pqr_string(coor))
     filout.close()

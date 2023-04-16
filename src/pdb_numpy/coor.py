@@ -8,7 +8,8 @@ import numpy as np
 from scipy.spatial import distance_matrix
 
 from .data.aa_dict import AA_DICT
-from . import geom
+from . import geom, mmcif, pdb
+
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -167,46 +168,21 @@ class Coor:
     def __init__(self, coor_in=None, pdb_lines=None, pdb_id=None):
         self.active_model = 0
         self.models = []
-        self.crystal_pack = None
+        self.crystal_pack = ""
         self.data_mmCIF = None
+        self.symmetry = ""
+        self.transformation = ""
 
         if coor_in is not None:
             self.read_file(coor_in)
         elif pdb_lines is not None:
             self.parse_pdb_lines(pdb_lines)
         elif pdb_id is not None:
-            self.get_PDB(pdb_id)
-
-    try:
-        from ._pdb import (
-            parse_pdb_lines,
-            get_PDB,
-            write_pdb,
-            get_pdb_string,
-            write_pqr,
-            get_pqr_string,
-            get_PDB_BioAssembly,
-        )
-        from ._mmcif import (
-            parse_mmcif_lines,
-            get_PDB_mmcif,
-            write_mmcif,
-        )
-    except ImportError:
-        logger.warning("ImportError: pdb_numpy is not installed, using local files")
-        from _pdb import (
-            parse_pdb_lines,
-            get_PDB,
-            write_pdb,
-            get_pdb_string,
-            write_pqr,
-            get_pqr_string,
-        )
-        from _mmcif import (
-            parse_mmcif_lines,
-            get_PDB_mmcif,
-            write_mmcif,
-        )
+            pdb_coor = pdb.fetch(pdb_ID=pdb_id)
+            self.models = pdb_coor.models
+            self.crystal_pack = pdb_coor.crystal_pack
+            self.transformation =  pdb_coor.transformation
+            self.symmetry =  pdb_coor.symmetry
 
     def read_file(self, file_in):
         """Read a pdb/pqr/gro/cif file and return atom information as a Coor
@@ -239,11 +215,22 @@ class Coor:
         if str(file_in).endswith(".gro"):
             self.parse_gro_lines(lines)
         elif str(file_in).endswith(".pqr"):
-            self.parse_pdb_lines(lines, pqr_format=True)
+            pdb_coor = pdb.parse(pdb_lines=lines, pqr_format=True)
+            self.models = pdb_coor.models
+            self.crystal_pack = pdb_coor.crystal_pack
+            self.transformation =  pdb_coor.transformation
+            self.symmetry =  pdb_coor.symmetry
         elif str(file_in).endswith(".pdb"):
-            self.parse_pdb_lines(pdb_lines=lines, pqr_format=False)
+            pdb_coor = pdb.parse(pdb_lines=lines)
+            self.models = pdb_coor.models
+            self.crystal_pack = pdb_coor.crystal_pack
+            self.transformation =  pdb_coor.transformation
+            self.symmetry =  pdb_coor.symmetry
         elif str(file_in).endswith(".cif"):
-            self.parse_mmcif_lines(mmcif_lines=lines)
+            mmcif_coor = mmcif.parse(mmcif_lines=lines)
+            self.data_mmCIF = mmcif_coor.data_mmCIF
+            self.models = mmcif_coor.models
+            self.crystal_pack = mmcif_coor.crystal_pack
         else:
             logger.warning(
                 "File name doesn't finish with .pdb" " read it as .pdb anyway"
@@ -751,7 +738,7 @@ class Coor:
         """
 
 
-        if hasattr(self, "transformation") and len(self.models) == 1:
+        if self.transformation != "" and len(self.models) == 1:
 
             assert len(self.models) == 1, "Only one model is allowed"
 
@@ -793,7 +780,7 @@ class Coor:
         """
 
 
-        if hasattr(self, "symmetry") and len(self.models) == 1:
+        if self.symmetry != "" and len(self.models) == 1:
 
             matrix = np.array(self.symmetry['matrix'])
 

@@ -337,7 +337,6 @@ def print_align_seq(seq_1, seq_2, line_len=80):
 
     sim_seq = ""
     for i in range(len(seq_1)):
-
         if seq_1[i] == seq_2[i]:
             sim_seq += "*"
             continue
@@ -624,7 +623,6 @@ def align_chain_permutation(
     if chain_2 is None:
         ca_chain2 = coor_2.select_atoms("name CA")
         chain_2 = np.unique(ca_chain2.chain)
-    
 
     if len(chain_2) <= len(chain_1):
         chain_1_perm = list(permutations(chain_1, len(chain_2)))

@@ -211,9 +211,9 @@ class Model:
         """Select atoms from the PDB file based on the selection tokens.
         Selection tokens are simple selection containing only one
         keyword, operator, and values.
-        
+
         The keywords :
-        
+
         - `"resname"`
         - `"chain"`
         - `"name"`
@@ -225,7 +225,7 @@ class Model:
         - `"x"`, `"y"`, `"z"`.
 
         The operators are:
-        
+
         - `"=="`
         - `"!="`
         - `">"`
@@ -365,7 +365,6 @@ class Model:
 
         i = 0
         while i < len(tokens):
-
             if tokens[i] in ["and", "or"]:
                 logical = tokens[i]
                 bool_list = new_bool_list

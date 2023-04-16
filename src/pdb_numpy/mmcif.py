@@ -187,6 +187,7 @@ def parse(mmcif_lines):
 
     return mmcif_coor
 
+
 def fetch(pdb_ID):
     """Get a mmcif file from the PDB using its ID
     and return a Coor object.
@@ -344,6 +345,7 @@ def _get_float_format_size(array, dec_num=3):
 
     return size
 
+
 def read(file_in):
     """Read a mmcif file.
 
@@ -363,6 +365,7 @@ def read(file_in):
         lines = filin.readlines()
 
     return parse(lines)
+
 
 def write(coor, mmcif_out, check_file_out=True):
     """Write a mmcif file.

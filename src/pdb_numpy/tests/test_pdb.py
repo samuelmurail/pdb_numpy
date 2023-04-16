@@ -152,7 +152,6 @@ def test_read_write_pdb_models(tmp_path):
                 assert (model.atom_dict[key] == model_2.atom_dict[key]).all()
 
 
-
 def test_get_pdb_bioassembly(tmp_path):
     """Test get_pdb function."""
     test = Coor(PDB_3FTK)
@@ -161,8 +160,8 @@ def test_get_pdb_bioassembly(tmp_path):
     assert test.len == 58
     assert test.model_num == 1
 
-    assert test.models[0].atom_dict["name_resname_elem"][0, 1] == 'ASN'
-    assert test.models[0].resname[0] == 'ASN'
+    assert test.models[0].atom_dict["name_resname_elem"][0, 1] == "ASN"
+    assert test.models[0].resname[0] == "ASN"
     assert test.models[0].resid[0] == 1
     assert test.models[0].uniq_resid[0] == 0
     assert test.models[0].name[0] == "N"
@@ -180,15 +179,15 @@ def test_get_pdb_bioassembly(tmp_path):
     )
 
     test2 = Coor()
-    test2 = pdb.fetch_PDB_BioAssembly('3FTK', index=1)
+    test2 = pdb.fetch_PDB_BioAssembly("3FTK", index=1)
     test2.merge_models()
     test2.compute_chains_CA()
 
     assert test2.len == 174
     assert test2.model_num == 1
 
-    assert test2.models[0].atom_dict["name_resname_elem"][0, 1] == 'ASN'
-    assert test2.models[0].resname[0] == 'ASN'
+    assert test2.models[0].atom_dict["name_resname_elem"][0, 1] == "ASN"
+    assert test2.models[0].resname[0] == "ASN"
     assert test2.models[0].resid[0] == 1
     assert test2.models[0].uniq_resid[0] == 0
     assert test2.models[0].name[0] == "N"
@@ -198,6 +197,7 @@ def test_get_pdb_bioassembly(tmp_path):
     assert test2.models[0].z[0] == pytest.approx(10.035, 0.000001)
 
     assert len(np.unique(test2.models[0].chain)) == 3
+
 
 def test_pdb_symmetry_assembly(tmp_path):
     """Test get_pdb function."""
@@ -212,7 +212,7 @@ def test_pdb_symmetry_assembly(tmp_path):
     assert test.len == 116
     assert test.model_num == 1
 
-    test.apply_transformation(index=1)  
+    test.apply_transformation(index=1)
 
     assert test.len == 348
     assert test.model_num == 1

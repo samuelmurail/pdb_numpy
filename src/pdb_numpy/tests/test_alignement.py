@@ -180,7 +180,6 @@ def test_seq_align_C(caplog):
 
 
 def test_get_common_atoms():
-
     test = Coor(pdb_id="1jd4")
 
     test_A = test.select_atoms("chain A")
@@ -194,7 +193,6 @@ def test_get_common_atoms():
 
 
 def test_align_seq_based():
-
     coor_1 = Coor(PDB_1U85)
     coor_2 = Coor(PDB_1UBD)
 
@@ -230,7 +228,6 @@ def test_align_seq_based():
 
 
 def test_multi_chain_permutation():
-
     coor_1 = Coor(PDB_2MUS_MODEL)
     coor_1 = coor_1.select_atoms("chain B C D E F")
     coor_2 = Coor(PDB_2MUS)

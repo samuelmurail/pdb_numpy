@@ -195,7 +195,6 @@ def native_contact(
     fnat_list = []
     fnonnat_list = []
     for model in coor.models:
-
         rec_lig_interface = model.select_atoms(
             f'(chain {" ".join(rec_chain)} and within {cutoff} of chain {" ".join(lig_chain)}) or '
             f'(chain {" ".join(lig_chain)} and within {cutoff} of chain {" ".join(rec_chain)})'
@@ -463,16 +462,16 @@ def compute_pdockQ(
     lig_chain=None,
     cutoff=8.0,
 ):
-    r""" Compute the pdockQ score as define in [1]_.
+    r"""Compute the pdockQ score as define in [1]_.
 
     .. math::
         pDockQ = \frac{L}{1 + e^{-k (x-x_{0})}} + b
-    
+
     where
-    
+
     .. math::
         x = \overline{plDDT_{interface}} \cdot log(number \: of \: interface \: contacts)
-    
+
     :math:`L = 0.724` is the maximum value of the sigmoid,
     :math:`k = 0.052` is the slope of the sigmoid, :math:`x_{0} = 152.611`
     is the midpoint of the sigmoid, and :math:`b = 0.018` is the y-intercept
@@ -490,12 +489,12 @@ def compute_pdockQ(
         list of ligand chain
     cutoff : float
         cutoff for native contacts, default is 8.0 A
-    
+
     Returns
     -------
     list
         pdockQ scores
-    
+
     References
     ----------
     .. [1] Bryant P, Pozzati G and Elofsson A. Improved prediction of
@@ -520,12 +519,13 @@ def compute_pdockQ(
     pdockq_list = []
 
     for model in coor_CA_CB.models:
-        
         rec_in_contact = model.select_atoms(
-            f"chain {' '.join(rec_chain)} and within {cutoff} of chain {' '.join(lig_chain)}")
+            f"chain {' '.join(rec_chain)} and within {cutoff} of chain {' '.join(lig_chain)}"
+        )
 
         lig_in_contact = model.select_atoms(
-            f"chain {' '.join(lig_chain)} and within {cutoff} of chain {' '.join(rec_chain)}")
+            f"chain {' '.join(lig_chain)} and within {cutoff} of chain {' '.join(rec_chain)}"
+        )
 
         contact_num = rec_in_contact.len + lig_in_contact.len
         if contact_num == 0:
@@ -533,15 +533,17 @@ def compute_pdockQ(
             pdockq_list.append(pdockq)
             continue
 
-        avg_plddt = rec_in_contact.len * np.average(rec_in_contact.beta) + lig_in_contact.len * np.average(lig_in_contact.beta)
+        avg_plddt = rec_in_contact.len * np.average(
+            rec_in_contact.beta
+        ) + lig_in_contact.len * np.average(lig_in_contact.beta)
         avg_plddt /= contact_num
 
         x = avg_plddt * np.log10(contact_num)
-        pdockq = 0.724 / (1 + np.exp(-0.052*(x-152.611)))+0.018
+        pdockq = 0.724 / (1 + np.exp(-0.052 * (x - 152.611))) + 0.018
 
         pdockq_list.append(pdockq)
 
-    return(pdockq_list)
+    return pdockq_list
 
 
 def compute_pdockQ_sel(
@@ -550,16 +552,16 @@ def compute_pdockQ_sel(
     lig_sel,
     cutoff=8.0,
 ):
-    r""" Compute the pdockQ score as define in [1]_. Using two selection strings.
+    r"""Compute the pdockQ score as define in [1]_. Using two selection strings.
 
     .. math::
         pDockQ = \frac{L}{1 + e^{-k (x-x_{0})}} + b
-    
+
     where
-    
+
     .. math::
         x = \overline{plDDT_{interface}} \cdot log(number \: of \: interface \: contacts)
-    
+
     :math:`L = 0.724` is the maximum value of the sigmoid,
     :math:`k = 0.052` is the slope of the sigmoid, :math:`x_{0} = 152.611`
     is the midpoint of the sigmoid, and :math:`b = 0.018` is the y-intercept
@@ -577,12 +579,12 @@ def compute_pdockQ_sel(
         selection string for ligand
     cutoff : float
         cutoff for native contacts, default is 8.0 A
-    
+
     Returns
     -------
     float
         pdockQ score
-    
+
     References
     ----------
     .. [1] Bryant P, Pozzati G and Elofsson A. Improved prediction of
@@ -596,12 +598,13 @@ def compute_pdockQ_sel(
     pdockq_list = []
 
     for model in coor_CA_CB.models:
-        
         rec_in_contact = model.select_atoms(
-            f"({rec_sel}) and within {cutoff} of ({lig_sel})")
+            f"({rec_sel}) and within {cutoff} of ({lig_sel})"
+        )
 
         lig_in_contact = model.select_atoms(
-            f"({lig_sel}) and within {cutoff} of ({rec_sel})")
+            f"({lig_sel}) and within {cutoff} of ({rec_sel})"
+        )
 
         contact_num = rec_in_contact.len + lig_in_contact.len
         if contact_num == 0:
@@ -609,12 +612,14 @@ def compute_pdockQ_sel(
             pdockq_list.append(pdockq)
             continue
 
-        avg_plddt = rec_in_contact.len * np.average(rec_in_contact.beta) + lig_in_contact.len * np.average(lig_in_contact.beta)
+        avg_plddt = rec_in_contact.len * np.average(
+            rec_in_contact.beta
+        ) + lig_in_contact.len * np.average(lig_in_contact.beta)
         avg_plddt /= contact_num
 
         x = avg_plddt * np.log10(contact_num)
-        pdockq = 0.724 / (1 + np.exp(-0.052*(x-152.611)))+0.018
+        pdockq = 0.724 / (1 + np.exp(-0.052 * (x - 152.611))) + 0.018
 
         pdockq_list.append(pdockq)
 
-    return(pdockq_list)
+    return pdockq_list

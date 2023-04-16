@@ -22,7 +22,7 @@ def add_NH(coor):
     coor : Coor
         Protein coordinates.
 
-        
+
     Returns
     -------
     TO FIX IS SHOULD RETURN A NEW COOR OBJECT
@@ -33,7 +33,6 @@ def add_NH(coor):
 
     for m_i, model in enumerate(coor.models):
         for i in range(len(unique_residues) - 1):
-
             if model.resname[model.uniq_resid == unique_residues[i + 1]][0] == b"PRO":
                 continue
 
@@ -125,7 +124,6 @@ def get_NH_xyz(model):
     # Add first NH
     NH_list.append([None, None, None])
     for i in range(len(unique_residues) - 1):
-
         if resname_array[i + 1] == b"PRO":
             NH_list.append([None, None, None])
             continue
@@ -207,7 +205,7 @@ def compute_bend(CA_sel):
        An array of boolean values indicating whether the corresponding
         residue has a bend (True) or not (False). The length of the array is
         equal to the number of residues in the protein.
-    
+
     Notes
     -----
     The bend is computed as the angle between the vectors connecting a
@@ -221,7 +219,6 @@ def compute_bend(CA_sel):
     bend = np.array([False for _ in range(n_res)])
 
     for i in range(2, n_res - 2):
-
         CA_i = CA_sel.xyz[i]
         CA_i_minus_2 = CA_sel.xyz[i - 2]
         CA_i_plus_2 = CA_sel.xyz[i + 2]
@@ -246,12 +243,12 @@ def compute_Hbond_matrix(model):
     ----------
     model : Model
         model containing the protein.
-    
+
     Returns
     -------
     Hbond_mat : numpy.ndarray
         A boolean matrix of shape (n_res, n_res) where n_res is the number of
-    
+
     Notes
     -----
     The cutoff distance for the Hbond neighbor search is 8 Angstrom.
@@ -282,7 +279,6 @@ def compute_Hbond_matrix(model):
     indexes = np.argwhere(mask)
 
     for i, j in indexes:
-
         O_i = O_array[i]
         C_i = C_array[i]
         N_i = N_array[i]

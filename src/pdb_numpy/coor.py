@@ -45,17 +45,6 @@ class Coor:
         Parse a list of pdb lines and store atom informations as a dictionnary
         od numpy array. The fonction can also read pqr lines if
         the file extension is .pqr
-    get_PDB(pdb_id)
-        Download a pdb file from the PDB database and return atom informations as a dictionnary
-        indexed on the atom num.
-    write_pdb(file_out, model_num=0)
-        Write a pdb file from the Coor object
-    get_pdb_string(model_num=0)
-        Return a pdb string from the Coor object
-    write_pqr(file_out, model_num=0)
-        Write a pqr file from the Coor object
-    get_pqr_string(model_num=0)
-        Return a pqr string from the Coor object
     select_atoms(select)
         Return a list of atom index corresponding to the selection
     simple_select_atoms(select)
@@ -181,8 +170,8 @@ class Coor:
             pdb_coor = pdb.fetch(pdb_ID=pdb_id)
             self.models = pdb_coor.models
             self.crystal_pack = pdb_coor.crystal_pack
-            self.transformation =  pdb_coor.transformation
-            self.symmetry =  pdb_coor.symmetry
+            self.transformation = pdb_coor.transformation
+            self.symmetry = pdb_coor.symmetry
 
     def read_file(self, file_in):
         """Read a pdb/pqr/gro/cif file and return atom information as a Coor
@@ -218,14 +207,14 @@ class Coor:
             pdb_coor = pdb.parse(pdb_lines=lines, pqr_format=True)
             self.models = pdb_coor.models
             self.crystal_pack = pdb_coor.crystal_pack
-            self.transformation =  pdb_coor.transformation
-            self.symmetry =  pdb_coor.symmetry
+            self.transformation = pdb_coor.transformation
+            self.symmetry = pdb_coor.symmetry
         elif str(file_in).endswith(".pdb"):
             pdb_coor = pdb.parse(pdb_lines=lines)
             self.models = pdb_coor.models
             self.crystal_pack = pdb_coor.crystal_pack
-            self.transformation =  pdb_coor.transformation
-            self.symmetry =  pdb_coor.symmetry
+            self.transformation = pdb_coor.transformation
+            self.symmetry = pdb_coor.symmetry
         elif str(file_in).endswith(".cif"):
             mmcif_coor = mmcif.parse(mmcif_lines=lines)
             self.data_mmCIF = mmcif_coor.data_mmCIF
@@ -479,7 +468,6 @@ class Coor:
         aa_num_dict = {}
 
         for i in range(CA_sel.len):
-
             chain = (
                 CA_sel.models[frame]
                 .atom_dict["alterloc_chain_insertres"][i, 1]
@@ -521,7 +509,7 @@ class Coor:
         Angle should take values around +34° and -34° for
         L- and D-amino acid residues.
         if amino acid is in D form it will be in lower case.
-        
+
         Reference:
         https://onlinelibrary.wiley.com/doi/full/10.1002/prot.10320
 
@@ -533,14 +521,14 @@ class Coor:
             if True, add gaps in the sequence, by default True
         frame : int
             Frame number for the selection, default is 0
-        
+
         Returns
         -------
         dict
             Dictionary with chain as key and sequence as value.
-        
+
         Examples
-        --------   
+        --------
         >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))
         Succeed to read file ...1y0m.pdb ,  648 atoms found
         >>> prot_coor.get_aa_DL_seq()
@@ -568,7 +556,6 @@ class Coor:
         aa_num_dict = {}
 
         for i in CA_index:
-
             chain = (
                 self.models[frame]
                 .atom_dict["alterloc_chain_insertres"][i, 1]
@@ -624,7 +611,6 @@ class Coor:
 
         return seq_dict
 
-
     def merge_models(self):
         """Merge all models into the first model.
 
@@ -644,7 +630,6 @@ class Coor:
         ]
 
         if len(self.models) > 1:
-            
             uniqresid = 0
             for model in self.models:
                 model.atom_dict["num_resid_uniqresid"][:, 2] += uniqresid
@@ -659,11 +644,10 @@ class Coor:
                 1, self.models[0].atom_dict["num_resid_uniqresid"].shape[0] + 1
             )
 
-            for i in range(len(self.models) -1, 0, -1):
-                del(self.models[i])
-            
-            self.active_model = 0
+            for i in range(len(self.models) - 1, 0, -1):
+                del self.models[i]
 
+            self.active_model = 0
 
     def compute_chains_CA(self, Ca_cutoff=4.5):
         """Correct the chain ID's of a coor object, by checking consecutive
@@ -678,49 +662,49 @@ class Coor:
         Returns
         -------
         None
-            
+
         """
-    
+
         # 65:90 CAP letters
         # 97:122 letters # Remove x y z for selection issues
         # 48:57 Digits
         # 192-> 1000 # Others
         chain_letters = np.array(
-            [chr(i) for i in range(65, 91)] +
-            [chr(i) for i in range(97, 120)] +
-            [chr(i) for i in range(48, 58)] +
-            [chr(i) for i in range(192, 1000)]
-            )
+            [chr(i) for i in range(65, 91)]
+            + [chr(i) for i in range(97, 120)]
+            + [chr(i) for i in range(48, 58)]
+            + [chr(i) for i in range(192, 1000)]
+        )
 
         CA_sel = self.select_atoms("name CA and not altloc B C D")
 
         for i, model in enumerate(CA_sel.models):
-
             # Identify Chain uniq_resid
             last_CA_xyz = model.atom_dict["xyz"][0]
             uniqresid = model.atom_dict["num_resid_uniqresid"][0, 2]
             last_chain = 0
             chain_res_dict = {last_chain: [uniqresid]}
-            
-            for j in range(1, model.atom_dict["xyz"].shape[0]):
 
+            for j in range(1, model.atom_dict["xyz"].shape[0]):
                 chain = model.atom_dict["alterloc_chain_insertres"][j, 1]
                 uniqresid = model.atom_dict["num_resid_uniqresid"][j, 2]
 
                 if np.linalg.norm(model.atom_dict["xyz"][j] - last_CA_xyz) > Ca_cutoff:
                     last_chain += 1
-                    chain_res_dict[last_chain]=[uniqresid]
+                    chain_res_dict[last_chain] = [uniqresid]
                 else:
                     chain_res_dict[last_chain].append(uniqresid)
                 last_CA_xyz = model.atom_dict["xyz"][j]
-                    
+
             # Change chain ID :
 
             for chain_id in chain_res_dict:
                 chain_index = self.models[i].get_index_select(
-                    f"residue {' '.join([str(i) for i in chain_res_dict[chain_id]])}")
-                self.models[i].atom_dict["alterloc_chain_insertres"][chain_index, 1] = chain_letters[chain_id % chain_letters.shape[0]]
-    
+                    f"residue {' '.join([str(i) for i in chain_res_dict[chain_id]])}"
+                )
+                self.models[i].atom_dict["alterloc_chain_insertres"][
+                    chain_index, 1
+                ] = chain_letters[chain_id % chain_letters.shape[0]]
 
     def apply_transformation(self, index=1):
         """Apply the transformation matrix to the coordinates.
@@ -737,24 +721,30 @@ class Coor:
 
         """
 
-
         if self.transformation != "" and len(self.models) == 1:
-
             assert len(self.models) == 1, "Only one model is allowed"
 
-            matrix = np.array(self.transformation[index]['matrix'])
-            indexes = np.isin(self.models[0].chain, self.transformation[index]['chains'])
+            matrix = np.array(self.transformation[index]["matrix"])
+            indexes = np.isin(
+                self.models[0].chain, self.transformation[index]["chains"]
+            )
 
-            model_num = matrix.shape[0]//3
+            model_num = matrix.shape[0] // 3
 
             for i in range(model_num):
-                local_matrix = matrix[i*3:(i+1)*3, 1:4]
-                local_translation = matrix[i*3:(i+1)*3, 4]
+                local_matrix = matrix[i * 3 : (i + 1) * 3, 1:4]
+                local_translation = matrix[i * 3 : (i + 1) * 3, 4]
 
-                if not (local_matrix == np.eye(3)).all() or (local_translation != 0.0).any():
-                    logger.info(f'Add transformation {i}')
+                if (
+                    not (local_matrix == np.eye(3)).all()
+                    or (local_translation != 0.0).any()
+                ):
+                    logger.info(f"Add transformation {i}")
                     local_model = copy.deepcopy(self.models[0])
-                    local_model.xyz[indexes] = np.dot(local_model.xyz[indexes], local_matrix) + matrix[i*3:(i+1)*3, 4]
+                    local_model.xyz[indexes] = (
+                        np.dot(local_model.xyz[indexes], local_matrix)
+                        + matrix[i * 3 : (i + 1) * 3, 4]
+                    )
                     self.models.append(local_model)
             self.merge_models()
         else:
@@ -763,11 +753,10 @@ class Coor:
             else:
                 logger.warning("Only one model is allowed.")
 
-
     def add_symmetry(self):
         """Apply the symmetry matrix to the coordinates.
         Add a model for each symmetry matrix.
-        
+
 
         Parameters
         ----------
@@ -779,30 +768,33 @@ class Coor:
 
         """
 
-
         if self.symmetry != "" and len(self.models) == 1:
+            matrix = np.array(self.symmetry["matrix"])
 
-            matrix = np.array(self.symmetry['matrix'])
-
-            model_num = matrix.shape[0]//3
+            model_num = matrix.shape[0] // 3
 
             for i in range(model_num):
-                local_matrix = matrix[i*3:(i+1)*3, 1:4]
-                local_translation = matrix[i*3:(i+1)*3, 4]
+                local_matrix = matrix[i * 3 : (i + 1) * 3, 1:4]
+                local_translation = matrix[i * 3 : (i + 1) * 3, 4]
 
-                if not (local_matrix == np.eye(3)).all() or (local_translation != 0.0).any():
-                    logger.info(f'Add symmetry {i}')
+                if (
+                    not (local_matrix == np.eye(3)).all()
+                    or (local_translation != 0.0).any()
+                ):
+                    logger.info(f"Add symmetry {i}")
                     local_model = copy.deepcopy(self.models[0])
-                    local_model.xyz = np.dot(local_model.xyz, local_matrix) + matrix[i*3:(i+1)*3, 4]
+                    local_model.xyz = (
+                        np.dot(local_model.xyz, local_matrix)
+                        + matrix[i * 3 : (i + 1) * 3, 4]
+                    )
                     self.models.append(local_model)
-            
+
             self.merge_models()
         else:
             if len(self.models) == 1:
                 logger.warning("No symmetry matrix found.")
             else:
                 logger.warning("Only one model is allowed.")
-
 
     def remove_overlap_chain(self, cutoff=1.0, frame=0):
         """Remove atoms that are closer than ``cutoff`` from another atom.
@@ -824,10 +816,10 @@ class Coor:
         center_list = []
         for chain in chain_list:
             # print(f'chain {chain}')
-            chain_sel = self.models[frame].select_atoms(f'protein and chain {chain}')
+            chain_sel = self.models[frame].select_atoms(f"protein and chain {chain}")
             avg = np.average(chain_sel.xyz, axis=0)
             center_list.append(avg)
-            
+
         dist_matrix = distance_matrix(center_list, center_list)
         mask = dist_matrix < cutoff
         # Remove lower triangle and i, (k=0)
@@ -839,7 +831,7 @@ class Coor:
         for indice in indices:
             indice.sort()
             remove_chains.append(indice[1])
-        
+
         remove_chains = [chain_list[i] for i in remove_chains]
         keep_chains = [chain for chain in chain_list if chain not in remove_chains]
         return self.select_atoms(f'chain {" ".join(keep_chains)}')
@@ -864,29 +856,35 @@ class Coor:
         """
 
         if hasattr(self, "crystal_pack") and len(self.models) == 1:
-                    
-            a, b, c, alpha, beta, gamma = [float(i) for i in self.crystal_pack.split()[1:7]]
+            a, b, c, alpha, beta, gamma = [
+                float(i) for i in self.crystal_pack.split()[1:7]
+            ]
             alpha = np.deg2rad(alpha)
             beta = np.deg2rad(beta)
             gamma = np.deg2rad(gamma)
             v1 = np.array([a, 0.0, 0.0])
             v2 = np.array([b * np.cos(gamma), b * np.sin(gamma), 0.0])
-            v = ((1.0
-                  - np.cos(alpha) ** 2
-                  - np.cos(beta) ** 2
-                  - np.cos(gamma) ** 2
-                  + 2.0 * np.cos(alpha) * np.cos(beta) * np.cos(gamma)
+            v = (
+                (
+                    1.0
+                    - np.cos(alpha) ** 2
+                    - np.cos(beta) ** 2
+                    - np.cos(gamma) ** 2
+                    + 2.0 * np.cos(alpha) * np.cos(beta) * np.cos(gamma)
                 )
                 ** 0.5
                 * a
                 * b
-                * c)
-            v3 = np.array([
-                c * np.cos(beta),
-                (c / np.sin(gamma))
-                * (np.cos(alpha) - np.cos(beta) * np.cos(gamma)),
-                v / (a * b * np.sin(gamma)),
-            ])
+                * c
+            )
+            v3 = np.array(
+                [
+                    c * np.cos(beta),
+                    (c / np.sin(gamma))
+                    * (np.cos(alpha) - np.cos(beta) * np.cos(gamma)),
+                    v / (a * b * np.sin(gamma)),
+                ]
+            )
 
             for i in range(x):
                 for j in range(y):
@@ -894,14 +892,14 @@ class Coor:
                         if i == 0 and j == 0 and k == 0:
                             continue
                         else:
-                            logger.info('Add copy', i, j, k)
+                            logger.info("Add copy", i, j, k)
                             local_model = copy.deepcopy(self.models[0])
-                            translation = i*v1 + j*v2 + k*v3
+                            translation = i * v1 + j * v2 + k * v3
 
                             local_model.xyz = local_model.xyz + translation
                             self.models.append(local_model)
-            
-            #new_coor.crystal_pack = crystal_pack
+
+            # new_coor.crystal_pack = crystal_pack
             self.merge_models()
         else:
             if len(self.models) == 1:

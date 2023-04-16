@@ -60,9 +60,9 @@ def parse(pdb_lines, pqr_format=False):
     for line in pdb_lines:
         if line.startswith("CRYST1"):
             pdb_coor.crystal_pack = line
-        elif line.startswith('REMARK 350 '):
+        elif line.startswith("REMARK 350 "):
             transformation += line
-        elif line.startswith('REMARK 290 '):
+        elif line.startswith("REMARK 290 "):
             symmetry += line
         elif line.startswith("MODEL"):
             # print('Read Model {}'.format(model_num))
@@ -82,7 +82,10 @@ def parse(pdb_lines, pqr_format=False):
                     "xyz": np.array(xyz_list, dtype="float32"),
                     "occ_beta": np.array(occ_beta_list, dtype="float32"),
                 }
-                if len(pdb_coor.models) > 1 and local_model.len != pdb_coor.models[-1].len:
+                if (
+                    len(pdb_coor.models) > 1
+                    and local_model.len != pdb_coor.models[-1].len
+                ):
                     logger.warning(
                         f"The atom number is not the same in the model {len(pdb_coor.models)-1} and the model {len(pdb_coor.models)}."
                     )
@@ -155,13 +158,14 @@ def parse(pdb_lines, pqr_format=False):
                 f"The atom number is not the same in the model {len(pdb_coor.models)-1} and the model {len(pdb_coor.models)}."
             )
         pdb_coor.models.append(local_model)
-    
-    if transformation != '':
+
+    if transformation != "":
         pdb_coor.transformation = parse_transformation(transformation)
-    if symmetry != '':
+    if symmetry != "":
         pdb_coor.symmetry = parse_symmetry(symmetry)
 
     return pdb_coor
+
 
 def parse_transformation(text):
     """Parse the `REMARK 350   BIOMT` information from a pdb file.
@@ -177,19 +181,21 @@ def parse_transformation(text):
         symetry information
     """
 
-
     transformation_dict = {}
 
-    for line in text.split('\n'):
+    for line in text.split("\n"):
         if line[11:23] == "BIOMOLECULE:":
             biomol = int(line[24:])
-            transformation_dict[biomol] = {'chains': [], 'matrix': []}
+            transformation_dict[biomol] = {"chains": [], "matrix": []}
         elif line[34:41] == "CHAINS:":
-            transformation_dict[biomol]['chains'] += line[42:].split()
-        elif line.startswith('REMARK 350   BIOMT'):
-            transformation_dict[biomol]['matrix'] += [[float(x) for x in line[19:].split()]]
+            transformation_dict[biomol]["chains"] += line[42:].split()
+        elif line.startswith("REMARK 350   BIOMT"):
+            transformation_dict[biomol]["matrix"] += [
+                [float(x) for x in line[19:].split()]
+            ]
 
     return transformation_dict
+
 
 def parse_symmetry(text):
     """Parse the `REMARK 290   SMTRY` information from a pdb file.
@@ -205,11 +211,11 @@ def parse_symmetry(text):
         symetry information
     """
 
-    symmetry_dict = {'matrix': []}
+    symmetry_dict = {"matrix": []}
 
-    for line in text.split('\n'):
-        if line.startswith('REMARK 290   SMTRY'):
-            symmetry_dict['matrix'] += [[float(x) for x in line[19:].split()]]
+    for line in text.split("\n"):
+        if line.startswith("REMARK 290   SMTRY"):
+            symmetry_dict["matrix"] += [[float(x) for x in line[19:].split()]]
 
     return symmetry_dict
 
@@ -245,6 +251,7 @@ def fetch(pdb_ID):
 
     return parse(pdb_lines)
 
+
 def fetch_PDB_BioAssembly(pdb_ID, index=1):
     """Get a Bio Assembly pdb file from the PDB using its ID
     and return a Coor object.
@@ -268,12 +275,14 @@ def fetch_PDB_BioAssembly(pdb_ID, index=1):
     """
 
     # Get the pdb file from the PDB:
-    req = urllib.request.Request(f"http://files.rcsb.org/download/{pdb_ID}.pdb{index}.gz")
-    req.add_header('Accept-Encoding', 'gzip')
+    req = urllib.request.Request(
+        f"http://files.rcsb.org/download/{pdb_ID}.pdb{index}.gz"
+    )
+    req.add_header("Accept-Encoding", "gzip")
 
     with urllib.request.urlopen(req) as response:
         pdb_lines = gzip.decompress(response.read()).decode("utf-8").splitlines(True)
-    
+
     return parse(pdb_lines)
 
 

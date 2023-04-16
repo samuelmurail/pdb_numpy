@@ -24,7 +24,6 @@ import pytest
 
 
 def test_measure_rmsd(caplog):
-
     pdb_numpy.logger.setLevel(level=logging.INFO)
 
     coor_1 = Coor(PDB_1U85)
@@ -234,27 +233,28 @@ def test_dockq_model(tmp_path):
 
     print(dockq)
 
+
 def test_pdockq(tmp_path):
-    """
-    """
+    """ """
 
     pdb_numpy.logger.setLevel(level=logging.INFO)
 
     model_coor = Coor(PDB_1RXZ_Colabfold)
 
-    pdockq = analysis.compute_pdockQ(model_coor) #, rec_chain=["B"], lig_chain=["C"])
+    pdockq = analysis.compute_pdockQ(model_coor)  # , rec_chain=["B"], lig_chain=["C"])
 
-    assert pytest.approx(pdockq[0], 0.001) ==  0.2924
+    assert pytest.approx(pdockq[0], 0.001) == 0.2924
 
 
 def test_pdockq_sel(tmp_path):
-    """
-    """
+    """ """
 
     pdb_numpy.logger.setLevel(level=logging.INFO)
 
     model_coor = Coor(PDB_1RXZ_Colabfold)
 
-    pdockq = analysis.compute_pdockQ_sel(model_coor, rec_sel="chain B", lig_sel="chain C") #, rec_chain=["B"], lig_chain=["C"])
+    pdockq = analysis.compute_pdockQ_sel(
+        model_coor, rec_sel="chain B", lig_sel="chain C"
+    )  # , rec_chain=["B"], lig_chain=["C"])
 
-    assert pytest.approx(pdockq[0], 0.001) ==  0.2924
+    assert pytest.approx(pdockq[0], 0.001) == 0.2924

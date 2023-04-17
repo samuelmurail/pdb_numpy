@@ -166,6 +166,14 @@ def test_parse_selection():
         ["name", "N", "CA", "C", "O"],
     ]
 
+    selection = "chain A and noh"
+    selec = select.parse_selection(selection)
+    assert selec == [
+        ["chain", "A"],
+        "and",
+        "not",
+        ["name", "H*"]]
+
 
 def test_select_atoms():
     """Test select_atoms function."""
@@ -247,6 +255,11 @@ def test_select_atoms_multi_frame():
     new = test.select_atoms(selec, frame=10)
     assert new.len == 58
     assert new.models[10].len == 58
+
+    selec = "noh"
+    new = test.select_atoms(selec)
+    assert new.len == 237
+    assert new.models[10].len == 237
 
 
 def test_select_atoms_within(tmp_path):

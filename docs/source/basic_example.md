@@ -77,7 +77,7 @@ Nter_coor = coor_1hsg.select_atoms("chain A and resid <= 10")
 
 
 > **note:**
-> To select protein atoms you can use the `protein` and `backbone` keywords.
+> To select protein atoms you can use the `noh`, `protein` and `backbone` keywords.
 >
 > ```python
 > prot_coor = coor_1hsg("protein and chain A")

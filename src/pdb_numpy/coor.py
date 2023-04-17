@@ -9,7 +9,7 @@ from scipy.spatial import distance_matrix
 
 from .data.aa_dict import AA_DICT
 from . import geom
-from .format import mmcif, pdb
+from .format import mmcif, pdb, pqr
 
 
 # Logging
@@ -249,14 +249,14 @@ class Coor:
         if str(file_out).endswith(".pdb"):
             pdb.write(self, file_out)
         elif str(file_out).endswith(".pqr"):
-            pdb.write_pqr(self, file_out)
+            pqr.write(self, file_out)
         elif str(file_out).endswith(".cif"):
             mmcif.write(self, file_out)
         else:
             logger.warning(
                 "File name doesn't finish with .pdb" " read it as .pdb anyway"
             )
-            pdb.write_pqr(self, file_out)
+            pdb.write(self, file_out)
 
     def change_order(self, field, order_list):
         """Change the order of the atoms in the model. The `change_order()`

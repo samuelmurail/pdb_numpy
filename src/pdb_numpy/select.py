@@ -27,6 +27,7 @@ KEYWORDS = [
 NICKNAMES = {
     "protein": f"resname {' '.join(AA_DICT.keys())}",
     "backbone": f"resname {' '.join(AA_DICT.keys())} and name N CA C O",
+    "noh": "not name H*",
 }
 
 
@@ -235,3 +236,19 @@ def remove_incomplete_backbone_residues(coor, back_atom=["CA", "C", "N", "O"]):
             logger.warning(f"Removing residue {uniq_res} has incomplete backbone atoms")
 
     return no_alter_loc.select_atoms(f'not residue {" ".join(uniq_res_to_remove)}')
+
+def remove_hydrogens(coor):
+    """Remove hydrogens atoms from the Coor object
+
+    Parameters
+    ----------
+    coor : Coor
+        Coor object
+
+    Returns
+    -------
+    Coor
+        a new Coor object with the selected atoms
+    """
+
+    return coor.select_atoms("not name H*")

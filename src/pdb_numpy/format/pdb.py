@@ -224,16 +224,13 @@ def fetch(pdb_ID):
 
     Parameters
     ----------
-    self : Coor
-        Coor object
     pdb_ID : str
         pdb ID
 
     Returns
     -------
-    None
-        self.atom_dict modified as a dictionnary with atom informations
-        self.crystal_pack modified as a string with crystal informations
+    Coor
+        Coor object
 
     Examples
     --------
@@ -284,12 +281,12 @@ def fetch_PDB_BioAssembly(pdb_ID, index=1):
     return parse(pdb_lines)
 
 
-def get_pdb_string(self):
+def get_pdb_string(pdb_coor):
     """Return a coor object as a pdb string.
 
     Parameters
     ----------
-    self : Coor
+    pdb_coor : Coor
         Coor object
     
     Returns
@@ -310,12 +307,12 @@ def get_pdb_string(self):
 
     str_out = ""
 
-    if self.crystal_pack != "":
-        str_out += geom.cryst_convert(self.crystal_pack, format_out="pdb")
-    elif self.data_mmCIF is not None:
-        str_out += geom.cryst_convert_mmCIF(self.data_mmCIF, format_out="pdb")
+    if pdb_coor.crystal_pack != "":
+        str_out += geom.cryst_convert(pdb_coor.crystal_pack, format_out="pdb")
+    elif pdb_coor.data_mmCIF is not None:
+        str_out += geom.cryst_convert_mmCIF(pdb_coor.data_mmCIF, format_out="pdb")
 
-    for model_index, model in enumerate(self.models):
+    for model_index, model in enumerate(pdb_coor.models):
         str_out += f"MODEL    {model_index:4d}\n"
 
         for i in range(model.len):

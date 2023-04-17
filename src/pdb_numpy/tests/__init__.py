@@ -1,1 +1,1 @@
-"""Test library for pdbnumpy module."""
+"""Test library for pdb_numpy module."""

@@ -37,6 +37,7 @@ def angle_vec(vec_a, vec_b):
     >>> angle = Coor.angle_vec([1, 0, 0], [-1, 0, 0])
     >>> print(f'angle = {np.degrees(angle):.2f}')
     angle = 180.00
+
     """
 
     unit_vec_a = vec_a / np.linalg.norm(vec_a)
@@ -47,6 +48,84 @@ def angle_vec(vec_a, vec_b):
     angle = np.arccos(dot_product)
 
     return angle
+
+
+def compute_unit_cell_vectors(alpha, beta, gamma, a, b, c):
+    r"""Compute unit cell vectors.
+    Formula from:
+
+    - https://mailman-1.sys.kth.se/pipermail/gromacs.org_gmx-users/2008-May/033944.html
+    - http://gisaxs.com/index.php/Unit_cell
+
+    .. math::
+        a = \begin{bmatrix}
+                \alpha \\
+                0 \\
+                0 
+            \end{bmatrix}
+        \;\; b = \begin{bmatrix}
+                \beta \cos(\gamma) \\
+                \beta \sin(\gamma) \\
+                0
+            \end{bmatrix}
+    
+    .. math::
+
+        c = \begin{bmatrix}
+                c \cos(\beta) \\
+                \frac{c}{\sin(\gamma)} \left( \cos(\alpha) - \cos(\beta) \cos(\gamma) \right) \\
+                \frac{c}{\sin(\gamma)} \sqrt{1 - \cos^2(\alpha) - \cos^2(\beta) - \cos^2(\gamma) + 2 \cos(\alpha) \cos(\beta) \cos(\gamma)}
+            \end{bmatrix}
+
+
+    
+
+    Parameters
+    ----------
+    alpha : float
+        alpha angle in degrees
+    beta : float
+        beta angle in degrees
+    gamma : float
+        gamma angle in degrees
+    a : float
+        a length in Angstrom
+    b : float
+        b length in Angstrom
+    c : float
+        c length in Angstrom
+
+    Returns
+    -------
+    tuple
+        unit cell vectors
+    """
+
+    alpha = np.deg2rad(alpha)
+    beta = np.deg2rad(beta)
+    gamma = np.deg2rad(gamma)
+    v1 = [a / 10, 0.0, 0.0]
+    v2 = [b * np.cos(gamma) / 10, b * np.sin(gamma) / 10, 0.0]
+    v = (
+        (
+            1.0
+            - np.cos(alpha) ** 2
+            - np.cos(beta) ** 2
+            - np.cos(gamma) ** 2
+            + 2.0 * np.cos(alpha) * np.cos(beta) * np.cos(gamma)
+        )
+        ** 0.5
+        * a
+        * b
+        * c
+    )
+    v3 = [
+        c * np.cos(beta) / 10,
+        (c / np.sin(gamma)) * (np.cos(alpha) - np.cos(beta) * np.cos(gamma)) / 10,
+        v / (a * b * np.sin(gamma)) / 10,
+    ]
+
+    return v1, v2, v3
 
 
 def cryst_convert(crystal_pack, format_out="pdb"):
@@ -129,31 +208,7 @@ def cryst_convert(crystal_pack, format_out="pdb"):
         )
     elif format_out == "gro":
         if format_in == "pdb":
-            alpha = np.deg2rad(alpha)
-            beta = np.deg2rad(beta)
-            gamma = np.deg2rad(gamma)
-            v1 = [a / 10, 0.0, 0.0]
-            v2 = [b * np.cos(gamma) / 10, b * np.sin(gamma) / 10, 0.0]
-            v = (
-                (
-                    1.0
-                    - np.cos(alpha) ** 2
-                    - np.cos(beta) ** 2
-                    - np.cos(gamma) ** 2
-                    + 2.0 * np.cos(alpha) * np.cos(beta) * np.cos(gamma)
-                )
-                ** 0.5
-                * a
-                * b
-                * c
-            )
-            v3 = [
-                c * np.cos(beta) / 10,
-                (c / np.sin(gamma))
-                * (np.cos(alpha) - np.cos(beta) * np.cos(gamma))
-                / 10,
-                v / (a * b * np.sin(gamma)) / 10,
-            ]
+            v1, v2, v3 = compute_unit_cell_vectors(alpha, beta, gamma, a, b, c)
         new_line = (
             "{:10.5f}{:10.5f}{:10.5f}{:10.5f}{:10.5f}"
             "{:10.5f}{:10.5f}{:10.5f}{:10.5f}\n".format(

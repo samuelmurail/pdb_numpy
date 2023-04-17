@@ -11,7 +11,8 @@ import numpy as np
 import logging
 
 import pdb_numpy
-from pdb_numpy import Coor, pdb
+from pdb_numpy import Coor
+from pdb_numpy.format import pdb
 from .datafiles import PDB_1Y0M, PQR_1Y0M, PDB_2RRI, PDB_3FTK
 
 
@@ -89,7 +90,7 @@ def test_read_write_pdb(tmp_path, caplog):
     test = Coor(PDB_1Y0M)
     assert test.len == 648
 
-    pdb.write(test, os.path.join(tmp_path, "test.pdb"))
+    test.write(os.path.join(tmp_path, "test.pdb"))
     captured = caplog.records
 
     assert captured[-1].msg.startswith("Succeed to save file ")
@@ -112,7 +113,7 @@ def test_read_write_pdb(tmp_path, caplog):
             ).all()
 
     # Test if overwritting file is prevent
-    pdb.write(test2, os.path.join(tmp_path, "test.pdb"))
+    test2.write(os.path.join(tmp_path, "test.pdb"))
 
     # captured = caplog.records
 
@@ -125,8 +126,8 @@ def test_read_write_pqr(tmp_path):
     test = Coor(PQR_1Y0M)
     assert test.len == 1362
 
-    pdb.write_pqr(test, os.path.join(tmp_path, "test_2.pqr"))
-    pdb.write(test, os.path.join(tmp_path, "test_2.pdb"))
+    test.write(os.path.join(tmp_path, "test_2.pqr"))
+    test.write(os.path.join(tmp_path, "test_2.pdb"))
 
 
 def test_read_write_pdb_models(tmp_path):
@@ -135,7 +136,7 @@ def test_read_write_pdb_models(tmp_path):
 
     assert test.model_num == 20
 
-    pdb.write(test, os.path.join(tmp_path, "test_2rri.pdb"))
+    test.write(os.path.join(tmp_path, "test_2rri.pdb"))
 
     test_2 = Coor(os.path.join(tmp_path, "test_2rri.pdb"))
 

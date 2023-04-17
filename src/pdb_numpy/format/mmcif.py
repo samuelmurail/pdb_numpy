@@ -9,9 +9,9 @@ import logging
 import numpy as np
 
 
-from . import geom
-from .model import Model
-from . import coor
+from .. import geom
+from ..model import Model
+from .. import coor
 
 # Logging
 logger = logging.getLogger(__name__)

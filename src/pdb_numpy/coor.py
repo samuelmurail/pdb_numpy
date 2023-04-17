@@ -8,7 +8,8 @@ import numpy as np
 from scipy.spatial import distance_matrix
 
 from .data.aa_dict import AA_DICT
-from . import geom, mmcif, pdb
+from . import geom
+from .format import mmcif, pdb
 
 
 # Logging
@@ -37,20 +38,14 @@ class Coor:
 
     Methods
     -------
-    read_file(file_in)
+    read(file_in)
         Read a pdb file and store atom informations as a dictionnary
         od numpy array. The fonction can also read pqr files if
-        the file extension is .pqr
-    parse_pdb_lines(pdb_lines)
-        Parse a list of pdb lines and store atom informations as a dictionnary
-        od numpy array. The fonction can also read pqr lines if
         the file extension is .pqr
     select_atoms(select)
         Return a list of atom index corresponding to the selection
     simple_select_atoms(select)
         Return a list of atom index corresponding to a simple selection
-    select_tokens(select)
-        Return a list of tokens corresponding to the selection
     select_index(select)
         Return a list of atom index corresponding to the selection
     dist_under_index(index, dist)
@@ -61,7 +56,6 @@ class Coor:
         Return a string of amino acid sequence
     get_aa_DL_seq(model_num=0)
         Return a string of amino acid sequence with disulfide bonds
-
 
     """
 
@@ -163,7 +157,7 @@ class Coor:
         self.transformation = ""
 
         if coor_in is not None:
-            self.read_file(coor_in)
+            self.read(coor_in)
         elif pdb_lines is not None:
             self.parse_pdb_lines(pdb_lines)
         elif pdb_id is not None:
@@ -173,7 +167,7 @@ class Coor:
             self.transformation = pdb_coor.transformation
             self.symmetry = pdb_coor.symmetry
 
-    def read_file(self, file_in):
+    def read(self, file_in):
         """Read a pdb/pqr/gro/cif file and return atom information as a Coor
         object.  It determines the file format based on the file extension
         and parses the lines accordingly. If the file extension is not
@@ -192,9 +186,9 @@ class Coor:
         Examples
         --------
         >>> prot_coor = Coor()
-        >>> prot_coor.read_file(os.path.join(TEST_PATH, '1y0m.pdb'))\
+        >>> prot_coor.read(os.path.join(TEST_PATH, '1y0m.pdb'))\
         Succeed to read file ...1y0m.pdb ,  648 atoms found
-        >>> prot_coor.read_file(os.path.join(TEST_PATH, '1y0m.gro'))\
+        >>> prot_coor.read(os.path.join(TEST_PATH, '1y0m.gro'))\
         Succeed to read file ...1y0m.gro ,  648 atoms found
 
         """
@@ -224,12 +218,45 @@ class Coor:
             logger.warning(
                 "File name doesn't finish with .pdb" " read it as .pdb anyway"
             )
-            self.parse_pdb_lines(lines, pqr_format=False)
+            pdb_coor = pdb.parse(pdb_lines=lines)
+            self.models = pdb_coor.models
+            self.crystal_pack = pdb_coor.crystal_pack
+            self.transformation = pdb_coor.transformation
+            self.symmetry = pdb_coor.symmetry
 
         logger.info(
             f"Succeed to read file { os.path.relpath(file_in)} \n"
             f"{self.len} atoms found"
         )
+
+    def write(self, file_out):
+        """Write a pdb/pqr/gro/cif file from a Coor object. It determines the
+        file format based on the file extension and writes the lines
+        accordingly. If the file extension is not recognized, it assumes it
+        is a pdb file.
+
+        Parameters
+        ----------
+        file_out : str
+            Path of the pdb file to write
+
+        Returns
+        -------
+        None
+
+        """
+
+        if str(file_out).endswith(".pdb"):
+            pdb.write(self, file_out)
+        elif str(file_out).endswith(".pqr"):
+            pdb.write_pqr(self, file_out)
+        elif str(file_out).endswith(".cif"):
+            mmcif.write(self, file_out)
+        else:
+            logger.warning(
+                "File name doesn't finish with .pdb" " read it as .pdb anyway"
+            )
+            pdb.write_pqr(self, file_out)
 
     def change_order(self, field, order_list):
         """Change the order of the atoms in the model. The `change_order()`
@@ -859,32 +886,7 @@ class Coor:
             a, b, c, alpha, beta, gamma = [
                 float(i) for i in self.crystal_pack.split()[1:7]
             ]
-            alpha = np.deg2rad(alpha)
-            beta = np.deg2rad(beta)
-            gamma = np.deg2rad(gamma)
-            v1 = np.array([a, 0.0, 0.0])
-            v2 = np.array([b * np.cos(gamma), b * np.sin(gamma), 0.0])
-            v = (
-                (
-                    1.0
-                    - np.cos(alpha) ** 2
-                    - np.cos(beta) ** 2
-                    - np.cos(gamma) ** 2
-                    + 2.0 * np.cos(alpha) * np.cos(beta) * np.cos(gamma)
-                )
-                ** 0.5
-                * a
-                * b
-                * c
-            )
-            v3 = np.array(
-                [
-                    c * np.cos(beta),
-                    (c / np.sin(gamma))
-                    * (np.cos(alpha) - np.cos(beta) * np.cos(gamma)),
-                    v / (a * b * np.sin(gamma)),
-                ]
-            )
+            v1, v2, v3 = geom.compute_unit_cell_vectors(alpha, beta, gamma, a, b, c)
 
             for i in range(x):
                 for j in range(y):

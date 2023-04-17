@@ -10,9 +10,9 @@ import numpy as np
 import gzip
 
 
-from . import geom as geom
-from .model import Model
-from . import coor
+from .. import geom as geom
+from ..model import Model
+from .. import coor
 
 
 # Logging

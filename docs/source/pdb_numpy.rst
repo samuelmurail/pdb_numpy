@@ -38,3 +38,12 @@ DSSP module
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+Geom module
+-----------
+
+.. automodule:: pdb_numpy.geom
+   :members:
+   :undoc-members:
+   :show-inheritance:

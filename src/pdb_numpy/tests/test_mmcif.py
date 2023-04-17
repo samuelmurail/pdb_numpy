@@ -11,7 +11,8 @@ import numpy as np
 import logging
 
 import pdb_numpy
-from pdb_numpy import Coor, mmcif, pdb
+from pdb_numpy import Coor
+from pdb_numpy.format import mmcif
 from .datafiles import MMCIF_1Y0M, MMCIF_2RRI
 
 
@@ -49,10 +50,10 @@ def test_read_mmcif_write_pdb(tmp_path, caplog):
 
     pdb_numpy.logger.setLevel(level=logging.INFO)
 
-    test = mmcif.read(MMCIF_1Y0M)
+    test = Coor(MMCIF_1Y0M)
     assert test.len == 648
 
-    pdb.write(test, os.path.join(tmp_path, "test.pdb"))
+    test.write(os.path.join(tmp_path, "test.pdb"))
     captured = caplog.records
 
     assert captured[-1].msg.startswith("Succeed to save file ")
@@ -78,7 +79,7 @@ def test_read_mmcif_write_pdb(tmp_path, caplog):
             ).all()
 
     # Test if overwritting file is prevent
-    pdb.write(test2, os.path.join(tmp_path, "test.pdb"))
+    test2.write(os.path.join(tmp_path, "test.pdb"))
 
     # captured = caplog.records
 
@@ -91,16 +92,16 @@ def test_read_mmcif_write_mmcif(tmp_path, caplog):
 
     pdb_numpy.logger.setLevel(level=logging.INFO)
 
-    test = mmcif.read(MMCIF_1Y0M)
+    test = Coor(MMCIF_1Y0M)
     assert test.len == 648
 
-    mmcif.write(test, os.path.join(tmp_path, "test.cif"))
+    test.write(os.path.join(tmp_path, "test.cif"))
     captured = caplog.records
 
     assert captured[-1].msg.startswith("Succeed to save file ")
     assert captured[-1].msg.endswith("test.cif")
 
-    test2 = mmcif.read(os.path.join(tmp_path, "test.cif"))
+    test2 = Coor(os.path.join(tmp_path, "test.cif"))
     assert test2.len == test.len
     # assert test2.crystal_pack.strip() == "CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P 1          2"
 
@@ -117,7 +118,7 @@ def test_read_mmcif_write_mmcif(tmp_path, caplog):
             ).all()
 
     # Test if overwritting file is prevent
-    mmcif.write(test2, os.path.join(tmp_path, "test.cif"))
+    test2.write(os.path.join(tmp_path, "test.cif"))
 
     assert captured[-1].msg.startswith("MMCIF file")
     assert captured[-1].msg.endswith("test.cif already exist, file not saved")
@@ -125,11 +126,11 @@ def test_read_mmcif_write_mmcif(tmp_path, caplog):
 
 def test_read_mmcif_write_pdb_models(tmp_path):
     """Test read and write pdb function with several models."""
-    test = mmcif.read(MMCIF_2RRI)
+    test = Coor(MMCIF_2RRI)
 
     assert test.model_num == 20
 
-    pdb.write(test, os.path.join(tmp_path, "test_2rri.pdb"))
+    test.write(os.path.join(tmp_path, "test_2rri.pdb"))
 
     test_2 = Coor(os.path.join(tmp_path, "test_2rri.pdb"))
 
@@ -152,9 +153,9 @@ def test_read_mmcif_write_mmcif_models(tmp_path):
 
     assert test.model_num == 20
 
-    mmcif.write(test, os.path.join(tmp_path, "test_2rri.cif"))
+    test.write(os.path.join(tmp_path, "test_2rri.cif"))
 
-    test_2 = mmcif.read(os.path.join(tmp_path, "test_2rri.cif"))
+    test_2 = Coor(os.path.join(tmp_path, "test_2rri.cif"))
 
     assert test_2.model_num == 20
 

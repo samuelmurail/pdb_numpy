@@ -77,9 +77,6 @@ def compute_unit_cell_vectors(alpha, beta, gamma, a, b, c):
                 \frac{c}{\sin(\gamma)} \sqrt{1 - \cos^2(\alpha) - \cos^2(\beta) - \cos^2(\gamma) + 2 \cos(\alpha) \cos(\beta) \cos(\gamma)}
             \end{bmatrix}
 
-
-    
-
     Parameters
     ----------
     alpha : float
@@ -125,7 +122,7 @@ def compute_unit_cell_vectors(alpha, beta, gamma, a, b, c):
         v / (a * b * np.sin(gamma)) / 10,
     ]
 
-    return v1, v2, v3
+    return np.array(v1), np.array(v2), np.array(v3)
 
 
 def cryst_convert(crystal_pack, format_out="pdb"):

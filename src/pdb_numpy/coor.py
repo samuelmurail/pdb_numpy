@@ -185,10 +185,9 @@ class Coor:
 
         Examples
         --------
-        >>> prot_coor = Coor()
-        >>> prot_coor.read(os.path.join(TEST_PATH, '1y0m.pdb'))\
+        >>> prot_coor = Coor('1y0m.pdb')
         Succeed to read file ...1y0m.pdb ,  648 atoms found
-        >>> prot_coor.read(os.path.join(TEST_PATH, '1y0m.gro'))\
+        >>> prot_coor.read('1y0m.gro')
         Succeed to read file ...1y0m.gro ,  648 atoms found
 
         """
@@ -229,7 +228,7 @@ class Coor:
             f"{self.len} atoms found"
         )
 
-    def write(self, file_out):
+    def write(self, file_out, check_file_out=True):
         """Write a pdb/pqr/gro/cif file from a Coor object. It determines the
         file format based on the file extension and writes the lines
         accordingly. If the file extension is not recognized, it assumes it
@@ -247,11 +246,11 @@ class Coor:
         """
 
         if str(file_out).endswith(".pdb"):
-            pdb.write(self, file_out)
+            pdb.write(self, file_out, check_file_out)
         elif str(file_out).endswith(".pqr"):
-            pdb.write_pqr(self, file_out)
+            pdb.write_pqr(self, file_out, check_file_out)
         elif str(file_out).endswith(".cif"):
-            mmcif.write(self, file_out)
+            mmcif.write(self, file_out, check_file_out)
         else:
             logger.warning(
                 "File name doesn't finish with .pdb" " read it as .pdb anyway"
@@ -478,12 +477,12 @@ class Coor:
         
         Examples
         --------
-        >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))\
+        >>> prot_coor = Coor('1y0m.pdb')
         >>> prot_coor.get_aa_seq()
         {'A': 'TFKSAVKALFDYKAQREDELTFTKSAIIQNVEKQDGGWWRGDYGGKKQLWFPSNYVEEMIN'}
 
         .. warning::
-            If atom chains are not arranged sequentialy (A,A,A,B,B,A,A,A ...),
+            If atom chains are not arranged sequentially (A,A,A,B,B,A,A,A ...),
             the first atom seq will be overwritten by the last one.
 
         """
@@ -556,12 +555,12 @@ class Coor:
 
         Examples
         --------
-        >>> prot_coor = Coor(os.path.join(TEST_PATH, '1y0m.pdb'))
-        Succeed to read file ...1y0m.pdb ,  648 atoms found
+        >>> prot_coor = Coor('1y0m.pdb')
+        Succeed to read file 1y0m.pdb ,  648 atoms found
         >>> prot_coor.get_aa_DL_seq()
         {'A': 'TFKSAVKALFDYKAQREDELTFTKSAIIQNVEKQDGGWWRGDYGGKKQLWFPSNYVEEMIN'}
-        >>> prot_coor = Coor(os.path.join(TEST_PATH, '6be9_frame_0.pdb'))
-        Succeed to read file ...6be9_frame_0.pdb ,  104 atoms found
+        >>> prot_coor = Coor('6be9_frame_0.pdb')
+        Succeed to read file 6be9_frame_0.pdb ,  104 atoms found
         >>> prot_coor.get_aa_DL_seq()
         Residue K2 is in D form
         Residue N6 is in D form
@@ -569,7 +568,7 @@ class Coor:
         {'A': 'TkNDTnp'}
 
         .. warning::
-            If atom chains are not arranged sequentialy (A,A,A,B,B,A,A,A ...),
+            If atom chains are not arranged sequentially (A,A,A,B,B,A,A,A ...),
             the first atom seq will be overwritten by the last one.
 
         """

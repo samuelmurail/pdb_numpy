@@ -258,9 +258,11 @@ class Coor:
         if str(file_out).endswith(".pdb"):
             pdb.write(self, file_out, check_file_out)
         elif str(file_out).endswith(".pqr"):
-            pdb.write(self, file_out, check_file_out)
+            pqr.write(self, file_out, check_file_out)
         elif str(file_out).endswith(".cif"):
             mmcif.write(self, file_out, check_file_out)
+        elif str(file_out).endswith(".gro"):
+            gro.write(self, file_out, check_file_out)
         else:
             logger.warning(
                 "File name doesn't finish with .pdb" " read it as .pdb anyway"

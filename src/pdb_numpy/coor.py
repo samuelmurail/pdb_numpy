@@ -258,14 +258,14 @@ class Coor:
         if str(file_out).endswith(".pdb"):
             pdb.write(self, file_out, check_file_out)
         elif str(file_out).endswith(".pqr"):
-            pdb.write_pqr(self, file_out)
+            pdb.write(self, file_out, check_file_out)
         elif str(file_out).endswith(".cif"):
-            mmcif.write(self, file_out)
+            mmcif.write(self, file_out, check_file_out)
         else:
             logger.warning(
                 "File name doesn't finish with .pdb" " read it as .pdb anyway"
             )
-            pdb.write(self, file_out)
+            pdb.write(self, file_out, check_file_out)
 
     def change_order(self, field, order_list):
         """Change the order of the atoms in the model. The `change_order()`

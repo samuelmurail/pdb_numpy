@@ -9,7 +9,7 @@ from scipy.spatial import distance_matrix
 
 from .data.aa_dict import AA_DICT
 from . import geom
-from .format import mmcif, pdb
+from .format import mmcif, pdb, pqr, gro
 
 
 # Logging
@@ -159,7 +159,11 @@ class Coor:
         if coor_in is not None:
             self.read(coor_in)
         elif pdb_lines is not None:
-            self.parse_pdb_lines(pdb_lines)
+            pdb_coor = pdb.parse(pdb_lines=pdb_lines)
+            self.models = pdb_coor.models
+            self.crystal_pack = pdb_coor.crystal_pack
+            self.transformation = pdb_coor.transformation
+            self.symmetry = pdb_coor.symmetry
         elif pdb_id is not None:
             pdb_coor = pdb.fetch(pdb_ID=pdb_id)
             self.models = pdb_coor.models
@@ -195,7 +199,9 @@ class Coor:
         file_lines = open(file_in)
         lines = file_lines.readlines()
         if str(file_in).endswith(".gro"):
-            self.parse_gro_lines(lines)
+            gro_coor = gro.parse(gro_lines=lines)
+            self.models = gro_coor.models
+            self.crystal_pack = gro_coor.crystal_pack
         elif str(file_in).endswith(".pqr"):
             pdb_coor = pdb.parse(pdb_lines=lines, pqr_format=True)
             self.models = pdb_coor.models
@@ -238,6 +244,10 @@ class Coor:
         ----------
         file_out : str
             Path of the pdb file to write
+        check_file_out : bool
+            If True, check if the file exists and don't
+            overwrite it. If False, overwrite the file without asking for
+            confirmation.
 
         Returns
         -------
@@ -248,14 +258,14 @@ class Coor:
         if str(file_out).endswith(".pdb"):
             pdb.write(self, file_out, check_file_out)
         elif str(file_out).endswith(".pqr"):
-            pdb.write_pqr(self, file_out, check_file_out)
+            pdb.write_pqr(self, file_out)
         elif str(file_out).endswith(".cif"):
-            mmcif.write(self, file_out, check_file_out)
+            mmcif.write(self, file_out)
         else:
             logger.warning(
                 "File name doesn't finish with .pdb" " read it as .pdb anyway"
             )
-            pdb.write_pqr(self, file_out)
+            pdb.write(self, file_out)
 
     def change_order(self, field, order_list):
         """Change the order of the atoms in the model. The `change_order()`

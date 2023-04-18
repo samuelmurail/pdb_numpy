@@ -277,6 +277,10 @@ class Model:
         if isinstance(values, list):
             if column in ["resname", "chain", "name", "altloc"]:
                 values = np.array(values, dtype="U")
+                # deal with case with "name H*"
+                if len(values) == 1 and values[0][-1] == "*":
+                    operator = "startswith"
+                    values = values[0][:-1]
             elif column in ["resid", "residue"]:
                 values = np.array(values, dtype=int)
             elif column in ["beta", "occupancy", "x", "y", "z"]:
@@ -314,6 +318,11 @@ class Model:
             bool_val = self.atom_dict[col][:, index] <= values
         elif operator == "isin":
             bool_val = np.isin(self.atom_dict[col][:, index], (values))
+        elif operator == "startswith":
+            bool_val = np.array(
+                [x.startswith(values) for x in self.atom_dict[col][:, index]]
+            )
+
         else:
             raise ValueError(f"Operator {operator} not recognized")
 

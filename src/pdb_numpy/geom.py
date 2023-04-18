@@ -95,14 +95,14 @@ def compute_unit_cell_vectors(alpha, beta, gamma, a, b, c):
     Returns
     -------
     tuple
-        unit cell vectors
+        unit cell vectors (in Angstrom)
     """
 
     alpha = np.deg2rad(alpha)
     beta = np.deg2rad(beta)
     gamma = np.deg2rad(gamma)
-    v1 = [a / 10, 0.0, 0.0]
-    v2 = [b * np.cos(gamma) / 10, b * np.sin(gamma) / 10, 0.0]
+    v1 = [a, 0.0, 0.0]
+    v2 = [b * np.cos(gamma), b * np.sin(gamma), 0.0]
     v = (
         (
             1.0
@@ -117,9 +117,9 @@ def compute_unit_cell_vectors(alpha, beta, gamma, a, b, c):
         * c
     )
     v3 = [
-        c * np.cos(beta) / 10,
-        (c / np.sin(gamma)) * (np.cos(alpha) - np.cos(beta) * np.cos(gamma)) / 10,
-        v / (a * b * np.sin(gamma)) / 10,
+        c * np.cos(beta),
+        (c / np.sin(gamma)) * (np.cos(alpha) - np.cos(beta) * np.cos(gamma)),
+        v / (a * b * np.sin(gamma)),
     ]
 
     return np.array(v1), np.array(v2), np.array(v3)
@@ -206,6 +206,9 @@ def cryst_convert(crystal_pack, format_out="pdb"):
     elif format_out == "gro":
         if format_in == "pdb":
             v1, v2, v3 = compute_unit_cell_vectors(alpha, beta, gamma, a, b, c)
+            v1 /= 10
+            v2 /= 10
+            v3 /= 10
         new_line = (
             "{:10.5f}{:10.5f}{:10.5f}{:10.5f}{:10.5f}"
             "{:10.5f}{:10.5f}{:10.5f}{:10.5f}\n".format(

@@ -7,6 +7,7 @@ from collections import OrderedDict
 import urllib.request
 import logging
 import numpy as np
+import gzip
 
 
 from .. import geom
@@ -182,11 +183,45 @@ def parse(mmcif_lines):
 
         mmcif_coor.models.append(local_model)
 
+    # Delete atom coordinates in the dict
     data_mmCIF["_atom_site"] = None
     mmcif_coor.data_mmCIF = data_mmCIF
 
+    #if '_pdbx_struct_oper_list' in data_mmCIF:
+    #    mmcif_coor.transformation = parse_transformation(data_mmCIF['_pdbx_struct_oper_list'])
+
     return mmcif_coor
 
+def parse_transformation(pdbx_struct_oper_list):
+    """Parse the `_pdbx_struct_oper_list` information from a mmcif file.
+
+    Parameters
+    ----------
+    pdbx_struct_oper_list : dict
+        mmcif file information
+
+    Returns
+    -------
+    symetry_dict : dict
+        symetry information
+    """
+
+    print(pdbx_struct_oper_list)
+
+    transformation_dict = {}
+
+    for line in text.split("\n"):
+        if line[11:23] == "BIOMOLECULE:":
+            biomol = int(line[24:])
+            transformation_dict[biomol] = {"chains": [], "matrix": []}
+        elif line[34:41] == "CHAINS:":
+            transformation_dict[biomol]["chains"] += line[42:].split()
+        elif line.startswith("REMARK 350   BIOMT"):
+            transformation_dict[biomol]["matrix"] += [
+                [float(x) for x in line[19:].split()]
+            ]
+
+    return transformation_dict
 
 def fetch(pdb_ID):
     """Get a mmcif file from the PDB using its ID
@@ -215,6 +250,42 @@ def fetch(pdb_ID):
         mmcif_lines = response.read().decode("utf-8").splitlines(True)
 
     return parse(mmcif_lines)
+
+
+def fetch_BioAssembly(pdb_ID, index=1):
+    """Get a Bio Assembly mmcif file from the PDB using its ID
+    and return a Coor object.
+
+    Parameters
+    ----------
+    pdb_ID : str
+        pdb ID
+    index : int
+        Bio Assembly index
+
+    Returns
+    -------
+    Coor
+        Coor object
+
+    Examples
+    --------
+    >>> prot_coor = Coor()
+    >>> prot_coor.get_PDB('3EAM')
+    """
+
+    #https://files.rcsb.org/download/5AEF-assembly1.cif.gz
+
+    # Get the pdb file from the PDB:
+    req = urllib.request.Request(
+        f"http://files.rcsb.org/download/{pdb_ID}-assembly{index}.cif.gz"
+    )
+    req.add_header("Accept-Encoding", "gzip")
+
+    with urllib.request.urlopen(req) as response:
+        cif_lines = gzip.decompress(response.read()).decode("utf-8").splitlines(True)
+
+    return parse(cif_lines)
 
 
 def _parse_raw_mmcif_lines(mmcif_lines):

@@ -203,7 +203,7 @@ class Coor:
             self.models = gro_coor.models
             self.crystal_pack = gro_coor.crystal_pack
         elif str(file_in).endswith(".pqr"):
-            pdb_coor = pdb.parse(pdb_lines=lines, pqr_format=True)
+            pdb_coor = pqr.parse(pqr_lines=lines)
             self.models = pdb_coor.models
             self.crystal_pack = pdb_coor.crystal_pack
             self.transformation = pdb_coor.transformation
@@ -759,13 +759,27 @@ class Coor:
 
         """
 
+
+        if len(self.models) != 1:
+            logger.warning("Only one model is allowed.")
+            return
+        if self.transformation == "":
+            logger.warning("No transformation matrix found.")
+            return
+        
         if self.transformation != "" and len(self.models) == 1:
             assert len(self.models) == 1, "Only one model is allowed"
 
+            print(self.transformation[index]["chains"])
+            print(self.models[0].chain)
+
             matrix = np.array(self.transformation[index]["matrix"])
-            indexes = np.isin(
-                self.models[0].chain, self.transformation[index]["chains"]
-            )
+            indexes = np.argwhere(
+                np.isin(self.models[0].chain, self.transformation[index]["chains"])
+            ).ravel()
+            print(indexes.shape)
+            print(indexes)
+            print(matrix)
 
             model_num = matrix.shape[0] // 3
 
@@ -777,19 +791,15 @@ class Coor:
                     not (local_matrix == np.eye(3)).all()
                     or (local_translation != 0.0).any()
                 ):
-                    logger.info(f"Add transformation {i}")
+                    print(f"Add transformation {i}")
+                    print(local_matrix, local_translation)
                     local_model = copy.deepcopy(self.models[0])
-                    local_model.xyz[indexes] = (
-                        np.dot(local_model.xyz[indexes], local_matrix)
-                        + matrix[i * 3 : (i + 1) * 3, 4]
-                    )
+                    local_model.xyz[indexes,:] = np.dot(local_model.xyz[indexes,:], local_matrix)
+                    local_model.xyz[indexes,:] += local_translation
                     self.models.append(local_model)
+                print(self.models[i].xyz[indexes,:].shape)
             self.merge_models()
-        else:
-            if len(self.models) == 1:
-                logger.warning("No transformation matrix found.")
-            else:
-                logger.warning("Only one model is allowed.")
+
 
     def add_symmetry(self):
         """Apply the symmetry matrix to the coordinates.
@@ -892,12 +902,19 @@ class Coor:
             A new Coor object with the box copied.
 
         """
+        if len(self.models) != 1:
+            logger.warning("Only one model is allowed.")
+            return
+        if self.crystal_pack == "":
+            logger.warning("No crystal pack found.")
+            return
 
-        if hasattr(self, "crystal_pack") and len(self.models) == 1:
+        if self.crystal_pack != "" and len(self.models) == 1:
             a, b, c, alpha, beta, gamma = [
                 float(i) for i in self.crystal_pack.split()[1:7]
             ]
             v1, v2, v3 = geom.compute_unit_cell_vectors(alpha, beta, gamma, a, b, c)
+            print(v1, v2, v3)
 
             for i in range(x):
                 for j in range(y):
@@ -905,7 +922,7 @@ class Coor:
                         if i == 0 and j == 0 and k == 0:
                             continue
                         else:
-                            logger.info("Add copy", i, j, k)
+                            logger.info(f"Add copy {i:2d} {j:2d} {k:2d}")
                             local_model = copy.deepcopy(self.models[0])
                             translation = i * v1 + j * v2 + k * v3
 
@@ -914,8 +931,4 @@ class Coor:
 
             # new_coor.crystal_pack = crystal_pack
             self.merge_models()
-        else:
-            if len(self.models) == 1:
-                logger.warning("No crystal pack found.")
-            else:
-                logger.warning("Only one model is allowed.")
+

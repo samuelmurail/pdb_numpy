@@ -34,7 +34,7 @@ def parse(pqr_lines):
 
     """
 
-    return pdb.parse(pqr_lines)
+    return pdb.parse(pqr_lines, pqr_format=True)
 
 
 def get_pqr_string(coor):

@@ -171,7 +171,7 @@ def test_get_pdb_bioassembly(tmp_path):
     )
 
     test2 = Coor()
-    test2 = pdb.fetch_PDB_BioAssembly("3FTK", index=1)
+    test2 = pdb.fetch_BioAssembly("3FTK", index=1)
     test2.merge_models()
     test2.compute_chains_CA()
 

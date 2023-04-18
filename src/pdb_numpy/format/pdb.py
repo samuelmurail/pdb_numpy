@@ -186,7 +186,7 @@ def parse_transformation(text):
             biomol = int(line[24:])
             transformation_dict[biomol] = {"chains": [], "matrix": []}
         elif line[34:41] == "CHAINS:":
-            transformation_dict[biomol]["chains"] += line[42:].split()
+            transformation_dict[biomol]["chains"] += [chain.strip() for chain in line[42:].split(",")]
         elif line.startswith("REMARK 350   BIOMT"):
             transformation_dict[biomol]["matrix"] += [
                 [float(x) for x in line[19:].split()]
@@ -247,7 +247,7 @@ def fetch(pdb_ID):
     return parse(pdb_lines)
 
 
-def fetch_PDB_BioAssembly(pdb_ID, index=1):
+def fetch_BioAssembly(pdb_ID, index=1):
     """Get a Bio Assembly pdb file from the PDB using its ID
     and return a Coor object.
 

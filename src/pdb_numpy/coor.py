@@ -219,6 +219,8 @@ class Coor:
             self.data_mmCIF = mmcif_coor.data_mmCIF
             self.models = mmcif_coor.models
             self.crystal_pack = mmcif_coor.crystal_pack
+            self.transformation = mmcif_coor.transformation
+            self.symmetry = mmcif_coor.symmetry
         else:
             logger.warning(
                 "File name doesn't finish with .pdb" " read it as .pdb anyway"
@@ -768,18 +770,12 @@ class Coor:
             return
         
         if self.transformation != "" and len(self.models) == 1:
-            assert len(self.models) == 1, "Only one model is allowed"
-
-            print(self.transformation[index]["chains"])
-            print(self.models[0].chain)
 
             matrix = np.array(self.transformation[index]["matrix"])
-            indexes = np.argwhere(
-                np.isin(self.models[0].chain, self.transformation[index]["chains"])
-            ).ravel()
-            print(indexes.shape)
-            print(indexes)
-            print(matrix)
+            #indexes = np.argwhere(
+            #    np.isin(self.models[0].chain, self.transformation[index]["chains"])
+            #).ravel()
+            indexes = np.isin(self.models[0].chain, self.transformation[index]["chains"])
 
             model_num = matrix.shape[0] // 3
 
@@ -791,13 +787,13 @@ class Coor:
                     not (local_matrix == np.eye(3)).all()
                     or (local_translation != 0.0).any()
                 ):
-                    print(f"Add transformation {i}")
-                    print(local_matrix, local_translation)
+                    logger.info(f"Add transformation {i}")
+                    # print(local_matrix, local_translation)
                     local_model = copy.deepcopy(self.models[0])
                     local_model.xyz[indexes,:] = np.dot(local_model.xyz[indexes,:], local_matrix)
                     local_model.xyz[indexes,:] += local_translation
                     self.models.append(local_model)
-                print(self.models[i].xyz[indexes,:].shape)
+                # print(self.models[i].xyz[indexes,:].shape)
             self.merge_models()
 
 

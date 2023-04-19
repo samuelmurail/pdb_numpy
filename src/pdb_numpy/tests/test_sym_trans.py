@@ -39,7 +39,7 @@ def test_add_symmetry_trans_box_pdb(tmp_path):
     assert test.len == 3024
 
 
-def test_add_symmetry_trans_box_pdb(tmp_path):
+def test_add_symmetry_trans_box_mmcif(tmp_path):
     """Test add_symmetry function."""
 
     test = Coor(MMCIF_2OL9)
@@ -52,11 +52,11 @@ def test_add_symmetry_trans_box_pdb(tmp_path):
 
     test.apply_transformation()
 
-    #assert test.len == 112
+    assert test.len == 112
 
     test.copy_box(3, 3, 3)
 
-    #assert test.len == 3024
+    assert test.len == 3024
 
     test.compute_chains_CA()
     test.remove_overlap_chain()

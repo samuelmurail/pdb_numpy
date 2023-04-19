@@ -44,6 +44,10 @@ def test_fetch_mmcif(tmp_path):
     assert test.data_mmCIF["_cell"]["angle_gamma"] == "90.00"
     assert test.data_mmCIF["_cell"]["Z_PDB"] == "2"
 
+    assert (
+        test.crystal_pack
+        == "CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P 1 21 1    2\n"
+    )
 
 def test_read_mmcif_write_pdb(tmp_path, caplog):
     """Test read_file function."""
@@ -62,8 +66,8 @@ def test_read_mmcif_write_pdb(tmp_path, caplog):
     test2 = Coor(os.path.join(tmp_path, "test.pdb"))
     assert test2.len == test.len
     assert (
-        test2.crystal_pack.strip()
-        == "CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P 1          2"
+        test.crystal_pack
+        == "CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P 1 21 1    2\n"
     )
 
     for key in test.models[0].atom_dict:

@@ -8,7 +8,7 @@ The sources for PDB-numpy can be downloaded from the GithubRepo.
 You can either clone the public repository:
 
 ```bash
-$ git clone git://github.com/samuelmurail/pdb_numpy
+$ git clone git@github.com:samuelmurail/pdb_numpy.git
 ```
 
 Or download the tarball:

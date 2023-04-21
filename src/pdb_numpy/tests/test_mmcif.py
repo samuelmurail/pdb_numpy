@@ -181,6 +181,7 @@ def test_mmcif_symmetry_assembly(tmp_path):
 
     assert test.len == 58
     assert test.model_num == 1
+    assert len(np.unique(test.chain)) == 2
 
     # Useless
     test.add_symmetry()
@@ -188,16 +189,16 @@ def test_mmcif_symmetry_assembly(tmp_path):
     assert test.len == 58
     assert test.model_num == 1
 
-    test.apply_transformation(index_list=[1, 2])
+    test.apply_transformation()
 
-    assert test.len == 696
+    assert test.len == 348
     assert test.model_num == 1
 
-    assert len(np.unique(test.chain)) == 1
+    assert len(np.unique(test.chain)) == 2
 
     test.compute_chains_CA()
 
-    assert len(np.unique(test.chain)) == 12
+    assert len(np.unique(test.chain)) == 6
 
     test.remove_overlap_chain()
-    assert test.len == 696
+    assert test.len == 348

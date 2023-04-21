@@ -589,7 +589,6 @@ class Coor:
 
         # Get CA atoms
         CA_index = self.get_index_select("name CA and not altloc B C D", frame=frame)
-        print(CA_index)
         N_C_CB_sel = self.select_atoms("name N C CB and not altloc B C D", frame=frame)
 
         seq_dict = {}
@@ -746,14 +745,14 @@ class Coor:
                     chain_index, 1
                 ] = chain_letters[chain_id % chain_letters.shape[0]]
 
-    def apply_transformation(self, index=1):
+    def apply_transformation(self, index_list=None):
         """Apply the transformation matrix to the coordinates.
         Add a new model with the transformed coordinates.
 
         Parameters
         ----------
-        index : int, optional
-            Index of the transformation matrix to apply, by default 1
+        index_list : list, optional
+            Index list of the transformation matrix to apply, by default all
 
         Returns
         -------
@@ -761,6 +760,8 @@ class Coor:
 
         """
 
+        if index_list is None:
+            index_list = self.transformation.keys()
 
         if len(self.models) != 1:
             logger.warning("Only one model is allowed.")
@@ -771,29 +772,28 @@ class Coor:
         
         if self.transformation != "" and len(self.models) == 1:
 
-            matrix = np.array(self.transformation[index]["matrix"])
-            #indexes = np.argwhere(
-            #    np.isin(self.models[0].chain, self.transformation[index]["chains"])
-            #).ravel()
-            indexes = np.isin(self.models[0].chain, self.transformation[index]["chains"])
+            for index in index_list:
+                matrix = np.array(self.transformation[index]["matrix"])
+                #indexes = np.argwhere(
+                #    np.isin(self.models[0].chain, self.transformation[index]["chains"])
+                #).ravel()
+                indexes = np.isin(self.models[0].chain, self.transformation[index]["chains"])
 
-            model_num = matrix.shape[0] // 3
+                model_num = matrix.shape[0] // 3
 
-            for i in range(model_num):
-                local_matrix = matrix[i * 3 : (i + 1) * 3, 1:4]
-                local_translation = matrix[i * 3 : (i + 1) * 3, 4]
+                for i in range(model_num):
+                    local_matrix = matrix[i * 3 : (i + 1) * 3, 1:4]
+                    local_translation = matrix[i * 3 : (i + 1) * 3, 4]
 
-                if (
-                    not (local_matrix == np.eye(3)).all()
-                    or (local_translation != 0.0).any()
-                ):
-                    logger.info(f"Add transformation {i}")
-                    # print(local_matrix, local_translation)
-                    local_model = copy.deepcopy(self.models[0])
-                    local_model.xyz[indexes,:] = np.dot(local_model.xyz[indexes,:], local_matrix)
-                    local_model.xyz[indexes,:] += local_translation
-                    self.models.append(local_model)
-                # print(self.models[i].xyz[indexes,:].shape)
+                    if (
+                        not (local_matrix == np.eye(3)).all()
+                        or (local_translation != 0.0).any()
+                    ):
+                        logger.info(f"Add transformation {i}")
+                        local_model = copy.deepcopy(self.models[0])
+                        local_model.xyz[indexes,:] = np.dot(local_model.xyz[indexes,:], local_matrix)
+                        local_model.xyz[indexes,:] += local_translation
+                        self.models.append(local_model)
             self.merge_models()
 
 
@@ -910,7 +910,6 @@ class Coor:
                 float(i) for i in self.crystal_pack.split()[1:7]
             ]
             v1, v2, v3 = geom.compute_unit_cell_vectors(alpha, beta, gamma, a, b, c)
-            print(v1, v2, v3)
 
             for i in range(x):
                 for j in range(y):

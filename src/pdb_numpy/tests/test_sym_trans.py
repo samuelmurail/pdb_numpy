@@ -61,4 +61,4 @@ def test_add_symmetry_trans_box_mmcif(tmp_path):
     test.compute_chains_CA()
     test.remove_overlap_chain()
 
-    #assert test.len == 3024
+    assert test.len == 3024

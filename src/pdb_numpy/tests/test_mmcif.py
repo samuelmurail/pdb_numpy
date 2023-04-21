@@ -13,7 +13,7 @@ import logging
 import pdb_numpy
 from pdb_numpy import Coor
 from pdb_numpy.format import mmcif
-from .datafiles import MMCIF_1Y0M, MMCIF_2RRI
+from .datafiles import MMCIF_1Y0M, MMCIF_2RRI, MMCIF_3FTK
 
 
 def test_fetch_mmcif(tmp_path):
@@ -172,3 +172,32 @@ def test_read_mmcif_write_mmcif_models(tmp_path):
                 ).all()
             else:
                 assert (model.atom_dict[key] == model_2.atom_dict[key]).all()
+
+
+def test_mmcif_symmetry_assembly(tmp_path):
+    """Test get_pdb function."""
+    test = Coor(MMCIF_3FTK)
+    test.merge_models()
+
+    assert test.len == 58
+    assert test.model_num == 1
+
+    # Useless
+    test.add_symmetry()
+
+    assert test.len == 58
+    assert test.model_num == 1
+
+    test.apply_transformation(index_list=[1, 2])
+
+    assert test.len == 696
+    assert test.model_num == 1
+
+    assert len(np.unique(test.chain)) == 1
+
+    test.compute_chains_CA()
+
+    assert len(np.unique(test.chain)) == 12
+
+    test.remove_overlap_chain()
+    assert test.len == 696

@@ -32,6 +32,7 @@ PDB_2MUS = os.path.join(TEST_FILE_PATH, "2mus.pdb")
 PDB_2MUS_MODEL = os.path.join(TEST_FILE_PATH, "af_2.2_2mus.pdb")
 
 PDB_3FTK = os.path.join(TEST_FILE_PATH, "3ftk.pdb")
+MMCIF_3FTK = os.path.join(TEST_FILE_PATH, "3ftk.cif")
 
 PDB_2OL9 = os.path.join(TEST_FILE_PATH, "2ol9.pdb")
 MMCIF_2OL9 = os.path.join(TEST_FILE_PATH, "2ol9.cif")

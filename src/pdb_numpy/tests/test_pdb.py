@@ -199,12 +199,12 @@ def test_pdb_symmetry_assembly(tmp_path):
     assert test.len == 58
     assert test.model_num == 1
 
-    test.add_symmetry()
+    test = test.add_symmetry()
 
     assert test.len == 116
     assert test.model_num == 1
 
-    test.apply_transformation(index_list=[1, 2])
+    test = test.apply_transformation(index_list=[1, 2])
 
     assert test.len == 696
     assert test.model_num == 1
@@ -215,5 +215,5 @@ def test_pdb_symmetry_assembly(tmp_path):
 
     assert len(np.unique(test.chain)) == 12
 
-    test.remove_overlap_chain()
-    assert test.len == 696
+    test = test.remove_overlap_chain()
+    assert test.len == 431

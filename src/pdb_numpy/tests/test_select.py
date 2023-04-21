@@ -168,11 +168,7 @@ def test_parse_selection():
 
     selection = "chain A and noh"
     selec = select.parse_selection(selection)
-    assert selec == [
-        ["chain", "A"],
-        "and",
-        "not",
-        ["name", "H*"]]
+    assert selec == [["chain", "A"], "and", "not", ["name", "H*"]]
 
 
 def test_select_atoms():

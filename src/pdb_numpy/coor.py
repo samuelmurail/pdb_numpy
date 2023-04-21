@@ -181,7 +181,7 @@ class Coor:
         ----------
         file_in : str
             Path of the pdb file to read
-        
+
         Returns
         -------
         None
@@ -483,12 +483,12 @@ class Coor:
             if True, add gaps in the sequence, by default True
         frame : int
             Frame number for the selection, default is 0
-    
+
         Returns
         -------
         dict
             Dictionary with chain as key and sequence as value.
-        
+
         Examples
         --------
         >>> prot_coor = Coor('1y0m.pdb')
@@ -756,8 +756,8 @@ class Coor:
 
         Returns
         -------
-        None
-
+        Coor
+            A new Coor object with the transformation added.
         """
 
         if index_list is None:
@@ -765,37 +765,41 @@ class Coor:
 
         if len(self.models) != 1:
             logger.warning("Only one model is allowed.")
-            return
+            return self
         if self.transformation == "":
             logger.warning("No transformation matrix found.")
-            return
-        
-        if self.transformation != "" and len(self.models) == 1:
+            return self
 
-            for index in index_list:
-                matrix = np.array(self.transformation[index]["matrix"])
-                #indexes = np.argwhere(
-                #    np.isin(self.models[0].chain, self.transformation[index]["chains"])
-                #).ravel()
-                indexes = np.isin(self.models[0].chain, self.transformation[index]["chains"])
+        new_coor = copy.deepcopy(self)
 
-                model_num = matrix.shape[0] // 3
+        for index in index_list:
+            matrix = np.array(self.transformation[index]["matrix"])
+            # indexes = np.argwhere(
+            #    np.isin(self.models[0].chain, self.transformation[index]["chains"])
+            # ).ravel()
+            indexes = np.isin(
+                self.models[0].chain, self.transformation[index]["chains"]
+            )
 
-                for i in range(model_num):
-                    local_matrix = matrix[i * 3 : (i + 1) * 3, 1:4]
-                    local_translation = matrix[i * 3 : (i + 1) * 3, 4]
+            model_num = matrix.shape[0] // 3
 
-                    if (
-                        not (local_matrix == np.eye(3)).all()
-                        or (local_translation != 0.0).any()
-                    ):
-                        logger.info(f"Add transformation {i}")
-                        local_model = copy.deepcopy(self.models[0])
-                        local_model.xyz[indexes,:] = np.dot(local_model.xyz[indexes,:], local_matrix)
-                        local_model.xyz[indexes,:] += local_translation
-                        self.models.append(local_model)
-            self.merge_models()
+            for i in range(model_num):
+                local_matrix = matrix[i * 3 : (i + 1) * 3, 1:4]
+                local_translation = matrix[i * 3 : (i + 1) * 3, 4]
 
+                if (
+                    not (local_matrix == np.eye(3)).all()
+                    or (local_translation != 0.0).any()
+                ):
+                    logger.info(f"Add transformation {i}")
+                    local_model = copy.deepcopy(self.models[0])
+                    local_model.xyz[indexes, :] = np.dot(
+                        local_model.xyz[indexes, :], local_matrix
+                    )
+                    local_model.xyz[indexes, :] += local_translation
+                    new_coor.models.append(local_model)
+        new_coor.merge_models()
+        return new_coor
 
     def add_symmetry(self):
         """Apply the symmetry matrix to the coordinates.
@@ -808,37 +812,42 @@ class Coor:
 
         Returns
         -------
-        None
+        Coor
+            A new Coor object with the symmetry added.
 
         """
 
-        if self.symmetry != "" and len(self.models) == 1:
-            matrix = np.array(self.symmetry["matrix"])
+        if self.symmetry == "":
+            logger.warning("No symmetry matrix found.")
+            return self
+        elif len(self.models) != 1:
+            logger.warning("Only one model is allowed.")
+            return self
 
-            model_num = matrix.shape[0] // 3
+        new_coor = copy.deepcopy(self)
 
-            for i in range(model_num):
-                local_matrix = matrix[i * 3 : (i + 1) * 3, 1:4]
-                local_translation = matrix[i * 3 : (i + 1) * 3, 4]
+        matrix = np.array(new_coor.symmetry["matrix"])
 
-                if (
-                    not (local_matrix == np.eye(3)).all()
-                    or (local_translation != 0.0).any()
-                ):
-                    logger.info(f"Add symmetry {i}")
-                    local_model = copy.deepcopy(self.models[0])
-                    local_model.xyz = (
-                        np.dot(local_model.xyz, local_matrix)
-                        + matrix[i * 3 : (i + 1) * 3, 4]
-                    )
-                    self.models.append(local_model)
+        model_num = matrix.shape[0] // 3
 
-            self.merge_models()
-        else:
-            if len(self.models) == 1:
-                logger.warning("No symmetry matrix found.")
-            else:
-                logger.warning("Only one model is allowed.")
+        for i in range(model_num):
+            local_matrix = matrix[i * 3 : (i + 1) * 3, 1:4]
+            local_translation = matrix[i * 3 : (i + 1) * 3, 4]
+
+            if (
+                not (local_matrix == np.eye(3)).all()
+                or (local_translation != 0.0).any()
+            ):
+                logger.info(f"Add symmetry {i}")
+                local_model = copy.deepcopy(self.models[0])
+                local_model.xyz = (
+                    np.dot(local_model.xyz, local_matrix)
+                    + matrix[i * 3 : (i + 1) * 3, 4]
+                )
+                new_coor.models.append(local_model)
+
+        new_coor.merge_models()
+        return new_coor
 
     def remove_overlap_chain(self, cutoff=1.0, frame=0):
         """Remove atoms that are closer than ``cutoff`` from another atom.
@@ -900,30 +909,30 @@ class Coor:
         """
         if len(self.models) != 1:
             logger.warning("Only one model is allowed.")
-            return
+            return self
         if self.crystal_pack == "":
             logger.warning("No crystal pack found.")
-            return
+            return self
 
-        if self.crystal_pack != "" and len(self.models) == 1:
-            a, b, c, alpha, beta, gamma = [
-                float(i) for i in self.crystal_pack.split()[1:7]
-            ]
-            v1, v2, v3 = geom.compute_unit_cell_vectors(alpha, beta, gamma, a, b, c)
+        new_coor = copy.deepcopy(self)
 
-            for i in range(x):
-                for j in range(y):
-                    for k in range(z):
-                        if i == 0 and j == 0 and k == 0:
-                            continue
-                        else:
-                            logger.info(f"Add copy {i:2d} {j:2d} {k:2d}")
-                            local_model = copy.deepcopy(self.models[0])
-                            translation = i * v1 + j * v2 + k * v3
+        a, b, c, alpha, beta, gamma = [float(i) for i in self.crystal_pack.split()[1:7]]
+        v1, v2, v3 = geom.compute_unit_cell_vectors(alpha, beta, gamma, a, b, c)
 
-                            local_model.xyz = local_model.xyz + translation
-                            self.models.append(local_model)
+        for i in range(x):
+            for j in range(y):
+                for k in range(z):
+                    if i == 0 and j == 0 and k == 0:
+                        continue
+                    else:
+                        logger.info(f"Add copy {i:2d} {j:2d} {k:2d}")
+                        local_model = copy.deepcopy(new_coor.models[0])
+                        translation = i * v1 + j * v2 + k * v3
 
-            # new_coor.crystal_pack = crystal_pack
-            self.merge_models()
+                        local_model.xyz = local_model.xyz + translation
+                        new_coor.models.append(local_model)
 
+        # new_coor.crystal_pack = crystal_pack
+        new_coor.merge_models()
+
+        return new_coor

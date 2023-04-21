@@ -187,12 +187,13 @@ def parse(mmcif_lines):
     data_mmCIF["_atom_site"] = None
     mmcif_coor.data_mmCIF = data_mmCIF
 
-    if '_pdbx_struct_oper_list' in data_mmCIF:
+    if "_pdbx_struct_oper_list" in data_mmCIF:
         mmcif_coor.transformation = parse_transformation(data_mmCIF)
-    if '_cell' in data_mmCIF:
+    if "_cell" in data_mmCIF:
         mmcif_coor.crystal_pack = parse_crystal_pack(data_mmCIF)
 
     return mmcif_coor
+
 
 def parse_crystal_pack(data_mmCIF):
     """
@@ -200,12 +201,12 @@ def parse_crystal_pack(data_mmCIF):
     treat the following mmcif tags:
     - `_cell`
     - `_symmetry`
-    
+
     Parameters
     ----------
     data_mmCIF : dict
         mmcif data
-    
+
     Returns
     -------
     crystal_pack : str
@@ -220,7 +221,7 @@ def parse_crystal_pack(data_mmCIF):
     gamma = float(data_mmCIF["_cell"]["angle_gamma"])
     z = int(data_mmCIF["_cell"]["Z_PDB"])
 
-    sGroup = data_mmCIF["_symmetry"]["space_group_name_H-M"].replace("\'", "")
+    sGroup = data_mmCIF["_symmetry"]["space_group_name_H-M"].replace("'", "")
 
     crystal_pack = f"CRYST1{a:9.3f}{b:9.3f}{c:9.3f}{alpha:7.2f}{beta:7.2f}{gamma:7.2f} {sGroup:9} {z:3d}\n"
     return crystal_pack
@@ -243,74 +244,106 @@ def parse_transformation(data_mmCIF):
     transformation_dict : dict
         transformation dict
     """
-    
+
     matrix_indexes = [
-        ['id', 'matrix[1][1]', 'matrix[1][2]', 'matrix[1][3]', 'vector[1]'],
-        ['id', 'matrix[2][1]', 'matrix[2][2]', 'matrix[2][3]', 'vector[2]'],
-        ['id', 'matrix[3][1]', 'matrix[3][2]', 'matrix[3][3]', 'vector[3]']
+        ["id", "matrix[1][1]", "matrix[1][2]", "matrix[1][3]", "vector[1]"],
+        ["id", "matrix[2][1]", "matrix[2][2]", "matrix[2][3]", "vector[2]"],
+        ["id", "matrix[3][1]", "matrix[3][2]", "matrix[3][3]", "vector[3]"],
     ]
     transformation_dict = {}
-    
+
     # print('_pdbx_struct_oper_list', data_mmCIF['_pdbx_struct_oper_list'])
     # print('_pdbx_struct_assembly_gen', data_mmCIF['_pdbx_struct_assembly_gen'])
 
     # Extract transformation list:
     # Here with only one transformation
-    if 'asym_id_list' in data_mmCIF['_pdbx_struct_assembly_gen']:
+    if "asym_id_list" in data_mmCIF["_pdbx_struct_assembly_gen"]:
         trans_num = 1
         chain_list = [
-            chain.strip() for chain in data_mmCIF['_pdbx_struct_assembly_gen']['asym_id_list'].split(',')
+            chain.strip()
+            for chain in data_mmCIF["_pdbx_struct_assembly_gen"]["asym_id_list"].split(
+                ","
+            )
         ]
-        
+
         transformation_dict[1] = {"chains": chain_list, "matrix": []}
 
-        if 'value' in data_mmCIF['_pdbx_struct_oper_list']:
-            for i in range(len(data_mmCIF['_pdbx_struct_oper_list']['value'][0])):
-                
+        if "value" in data_mmCIF["_pdbx_struct_oper_list"]:
+            for i in range(len(data_mmCIF["_pdbx_struct_oper_list"]["value"][0])):
+
                 for matrix_index in matrix_indexes:
                     local_matrix = []
                     for index in matrix_index:
-                        local_index = data_mmCIF['_pdbx_struct_oper_list']['col_names'].index(index)
-                        local_matrix.append(float(data_mmCIF['_pdbx_struct_oper_list']['value'][local_index][i]))
+                        local_index = data_mmCIF["_pdbx_struct_oper_list"][
+                            "col_names"
+                        ].index(index)
+                        local_matrix.append(
+                            float(
+                                data_mmCIF["_pdbx_struct_oper_list"]["value"][
+                                    local_index
+                                ][i]
+                            )
+                        )
                     transformation_dict[1]["matrix"].append(local_matrix)
         else:
             for matrix_index in matrix_indexes:
                 local_matrix = []
                 for index in matrix_index:
-                    local_matrix.append(float(data_mmCIF['_pdbx_struct_oper_list'][index]))
+                    local_matrix.append(
+                        float(data_mmCIF["_pdbx_struct_oper_list"][index])
+                    )
                 transformation_dict[1]["matrix"].append(local_matrix)
-        
+
     # Here with multiple transformation
     else:
-        trans_num = len(data_mmCIF['_pdbx_struct_assembly']['value'][0])
-        assert trans_num == len(data_mmCIF['_pdbx_struct_assembly_gen']['value'][0])
-        
-        chain_index = data_mmCIF['_pdbx_struct_assembly_gen']['col_names'].index('asym_id_list')
-        local_matrix_index = data_mmCIF['_pdbx_struct_assembly_gen']['col_names'].index('oper_expression')
-        
+        trans_num = len(data_mmCIF["_pdbx_struct_assembly"]["value"][0])
+        assert trans_num == len(data_mmCIF["_pdbx_struct_assembly_gen"]["value"][0])
+
+        chain_index = data_mmCIF["_pdbx_struct_assembly_gen"]["col_names"].index(
+            "asym_id_list"
+        )
+        local_matrix_index = data_mmCIF["_pdbx_struct_assembly_gen"]["col_names"].index(
+            "oper_expression"
+        )
+
         for i in range(trans_num):
             # Extract chain list and matrix indexes
             chain_list = [
-                chain.strip() for chain in data_mmCIF['_pdbx_struct_assembly_gen']['value'][chain_index][i].split(',')
+                chain.strip()
+                for chain in data_mmCIF["_pdbx_struct_assembly_gen"]["value"][
+                    chain_index
+                ][i].split(",")
             ]
             matrix_index_list = [
-                chain.strip() for chain in data_mmCIF['_pdbx_struct_assembly_gen']['value'][local_matrix_index][i].split(',')
+                chain.strip()
+                for chain in data_mmCIF["_pdbx_struct_assembly_gen"]["value"][
+                    local_matrix_index
+                ][i].split(",")
             ]
-            transformation_dict[i+1] = {"chains": chain_list, "matrix": []}
+            transformation_dict[i + 1] = {"chains": chain_list, "matrix": []}
 
             # Extract matrix value
-            for j in range(len(data_mmCIF['_pdbx_struct_oper_list']['value'][0])):
-                matrix_id = data_mmCIF['_pdbx_struct_oper_list']['value'][0][j]
-                
+            for j in range(len(data_mmCIF["_pdbx_struct_oper_list"]["value"][0])):
+                matrix_id = data_mmCIF["_pdbx_struct_oper_list"]["value"][0][j]
+
                 if matrix_id in matrix_index_list:
                     for matrix_index in matrix_indexes:
                         local_matrix = []
                         for index in matrix_index:
-                            local_index = data_mmCIF['_pdbx_struct_oper_list']['col_names'].index(index)
-                            local_matrix.append(float(data_mmCIF['_pdbx_struct_oper_list']['value'][local_index][j]))
-                        transformation_dict[i+1]["matrix"].append(local_matrix)
-        
+                            local_index = data_mmCIF["_pdbx_struct_oper_list"][
+                                "col_names"
+                            ].index(index)
+                            local_matrix.append(
+                                float(
+                                    data_mmCIF["_pdbx_struct_oper_list"]["value"][
+                                        local_index
+                                    ][j]
+                                )
+                            )
+                        transformation_dict[i + 1]["matrix"].append(local_matrix)
+
     return transformation_dict
+
 
 def parse_symmetry(data_mmCIF):
     """Parse information from a mmcif file.
@@ -329,12 +362,13 @@ def parse_symmetry(data_mmCIF):
     """
 
     symmetry_dict = {}
-    if '_symmetry_equiv_pos_as_xyz' in data_mmCIF:
-        symmetry_dict['symmetry'] = data_mmCIF['_symmetry_equiv_pos_as_xyz']['value']
+    if "_symmetry_equiv_pos_as_xyz" in data_mmCIF:
+        symmetry_dict["symmetry"] = data_mmCIF["_symmetry_equiv_pos_as_xyz"]["value"]
     else:
-        symmetry_dict['symmetry'] = []
+        symmetry_dict["symmetry"] = []
 
     return symmetry_dict
+
 
 def fetch(pdb_ID):
     """Get a mmcif file from the PDB using its ID
@@ -387,7 +421,7 @@ def fetch_BioAssembly(pdb_ID, index=1):
     >>> prot_coor.get_PDB('3EAM')
     """
 
-    #https://files.rcsb.org/download/5AEF-assembly1.cif.gz
+    # https://files.rcsb.org/download/5AEF-assembly1.cif.gz
 
     # Get the pdb file from the PDB:
     req = urllib.request.Request(

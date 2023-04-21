@@ -51,10 +51,10 @@ def test_cryst_convert():
     )
 
     cryst = geom.cryst_convert(cryst_gro_line, format_out="gro")
-    #assert cryst == np.array(cryst_gro_line.split())
+    # assert cryst == np.array(cryst_gro_line.split())
 
     np.testing.assert_allclose(
         np.array([float(i) for i in cryst.split()]),
         np.array([float(i) for i in cryst_gro_line.split()]),
-        atol=1e-2)
-
+        atol=1e-2,
+    )

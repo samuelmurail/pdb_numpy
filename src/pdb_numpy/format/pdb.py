@@ -186,7 +186,9 @@ def parse_transformation(text):
             biomol = int(line[24:])
             transformation_dict[biomol] = {"chains": [], "matrix": []}
         elif line[34:41] == "CHAINS:":
-            transformation_dict[biomol]["chains"] += [chain.strip() for chain in line[42:].split(",")]
+            transformation_dict[biomol]["chains"] += [
+                chain.strip() for chain in line[42:].split(",")
+            ]
         elif line.startswith("REMARK 350   BIOMT"):
             transformation_dict[biomol]["matrix"] += [
                 [float(x) for x in line[19:].split()]
@@ -382,4 +384,3 @@ def write(coor, pdb_out, check_file_out=True):
     filout.close()
     logger.info(f"Succeed to save file {os.path.relpath(pdb_out)}")
     return
-

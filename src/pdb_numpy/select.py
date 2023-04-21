@@ -237,6 +237,7 @@ def remove_incomplete_backbone_residues(coor, back_atom=["CA", "C", "N", "O"]):
 
     return no_alter_loc.select_atoms(f'not residue {" ".join(uniq_res_to_remove)}')
 
+
 def remove_hydrogens(coor):
     """Remove hydrogens atoms from the Coor object
 

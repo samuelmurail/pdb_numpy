@@ -46,7 +46,7 @@ def parse(gro_lines):
     chain = ""
     insert_res = ""
     elem_symbol = ""
-    
+
     index_list = []
     field_list = []  # 6 char
     num_resid_uniqresid_list = []  # int 5 digits (+1 with Chimera)
@@ -63,7 +63,7 @@ def parse(gro_lines):
             title = line
         elif i == 1:
             num = int(line.strip())
-        elif (i % (num+3)) == num + 2:
+        elif (i % (num + 3)) == num + 2:
             gro_coor.crystal_pack = line
 
             if len(field_list) > 0:
@@ -99,15 +99,19 @@ def parse(gro_lines):
                 xyz_list = []  # real (8.3)
                 occ_beta_list = []  # real (6.2)
 
-        elif (i % (num+3)) >= 2:
+        elif (i % (num + 3)) >= 2:
             # "%5d%-5s%5s%5d%8.3f%8.3f%8.3f%8.4f%8.4f%8.4f"
             resid = int(line[:5])
             res_name = line[5:10].strip()
             atom_name = line[10:15].strip()
             atom_num = int(line[15:20])
-            xyz = np.array([float(line[20:28]) * 10,
-                            float(line[28:36]) * 10,
-                            float(line[36:44]) * 10])
+            xyz = np.array(
+                [
+                    float(line[20:28]) * 10,
+                    float(line[28:36]) * 10,
+                    float(line[36:44]) * 10,
+                ]
+            )
 
             if resid != old_resid:
                 uniq_resid += 1
@@ -124,7 +128,7 @@ def parse(gro_lines):
             atom_index += 1
 
     return gro_coor
-    
+
 
 def get_gro_string(gro_coor):
     """Return a coor object as a gro string.
@@ -133,12 +137,12 @@ def get_gro_string(gro_coor):
     ----------
     self : Coor
         Coor object
-    
+
     Returns
     -------
     str
         Coor object as a gro string
-    
+
     """
 
     str_out = ""
@@ -150,16 +154,15 @@ def get_gro_string(gro_coor):
         for i in range(model.len):
 
             # Note : Here we use 4 letter residue name.
-            str_out += "{:5d}{:5s}{:>5s}{:5d}"\
-                       "{:8.3f}{:8.3f}{:8.3f}\n".format(
-                            model.atom_dict["num_resid_uniqresid"][i, 1],
-                            model.atom_dict["name_resname_elem"][i, 1].astype(np.str_),
-                            model.atom_dict["name_resname_elem"][i, 0].astype(np.str_),
-                            model.atom_dict["num_resid_uniqresid"][i, 0],
-                            model.atom_dict["xyz"][i, 0]/10.,
-                            model.atom_dict["xyz"][i, 1]/10.,
-                            model.atom_dict["xyz"][i, 2]/10.,
-                          )
+            str_out += "{:5d}{:5s}{:>5s}{:5d}" "{:8.3f}{:8.3f}{:8.3f}\n".format(
+                model.atom_dict["num_resid_uniqresid"][i, 1],
+                model.atom_dict["name_resname_elem"][i, 1].astype(np.str_),
+                model.atom_dict["name_resname_elem"][i, 0].astype(np.str_),
+                model.atom_dict["num_resid_uniqresid"][i, 0],
+                model.atom_dict["xyz"][i, 0] / 10.0,
+                model.atom_dict["xyz"][i, 1] / 10.0,
+                model.atom_dict["xyz"][i, 2] / 10.0,
+            )
         if gro_coor.crystal_pack is not None:
             str_out += geom.cryst_convert(gro_coor.crystal_pack, format_out="gro")
     str_out += "END\n"
@@ -198,4 +201,3 @@ def write(coor, gro_out, check_file_out=True):
     filout.close()
     logger.info(f"Succeed to save file {os.path.relpath(gro_out)}")
     return
-

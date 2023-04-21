@@ -12,6 +12,7 @@ import numpy as np
 from pdb_numpy import Coor
 from .datafiles import PDB_1Y0M, GRO_2RRI, MMCIF_1Y0M
 
+
 def test_read_gro(tmp_path):
     """Test get_gro function."""
     test = Coor(GRO_2RRI)
@@ -31,10 +32,8 @@ def test_read_gro(tmp_path):
         test.models[0].atom_dict["xyz"][0, :]
         == np.array([-11.43, 14.76, -14.63], dtype=np.float32)
     ).all()
-    assert (
-        test.crystal_pack
-        == "   0.10000   0.10000   0.10000\n"
-    )
+    assert test.crystal_pack == "   0.10000   0.10000   0.10000\n"
+
 
 def test_read_pdb_write_gro(tmp_path):
     """Test get_gro function."""
@@ -60,16 +59,11 @@ def test_read_pdb_write_gro(tmp_path):
         == "   2.87480   3.09780   2.97326   0.00000   0.00000   0.00000   0.00000  -0.11006   0.00000\n"
     )
 
-    np.testing.assert_allclose(
-        test.xyz,
-        test_gro.xyz,
-        atol=1e-2)
-
+    np.testing.assert_allclose(test.xyz, test_gro.xyz, atol=1e-2)
 
 
 def test_read_mmcif_write_gro(tmp_path, caplog):
     """Test read_file function."""
-
 
     test = Coor(MMCIF_1Y0M)
     assert test.len == 648

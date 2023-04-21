@@ -31,7 +31,7 @@ def test_read_write_pqr(tmp_path):
     # Can't test the whole file because of the different atom order
     # In C-ter part
     np.testing.assert_allclose(
-        test_pqr_noh.models[0].xyz[:500,:],
-        test_pdb_no_altloc.models[0].xyz[:500,:],
-        atol=1e-3)
-
+        test_pqr_noh.models[0].xyz[:500, :],
+        test_pdb_no_altloc.models[0].xyz[:500, :],
+        atol=1e-3,
+    )

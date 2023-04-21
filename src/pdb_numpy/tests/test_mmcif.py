@@ -49,6 +49,7 @@ def test_fetch_mmcif(tmp_path):
         == "CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P 1 21 1    2\n"
     )
 
+
 def test_read_mmcif_write_pdb(tmp_path, caplog):
     """Test read_file function."""
 
@@ -184,12 +185,12 @@ def test_mmcif_symmetry_assembly(tmp_path):
     assert len(np.unique(test.chain)) == 2
 
     # Useless
-    test.add_symmetry()
+    test = test.add_symmetry()
 
     assert test.len == 58
     assert test.model_num == 1
 
-    test.apply_transformation()
+    test = test.apply_transformation()
 
     assert test.len == 348
     assert test.model_num == 1
@@ -200,5 +201,5 @@ def test_mmcif_symmetry_assembly(tmp_path):
 
     assert len(np.unique(test.chain)) == 6
 
-    test.remove_overlap_chain()
+    test = test.remove_overlap_chain()
     assert test.len == 348

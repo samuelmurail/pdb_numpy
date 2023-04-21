@@ -148,6 +148,12 @@ class Coor:
     def z(self):
         return self.models[self.active_model].atom_dict["xyz"][:, 2]
 
+
+    @property
+    def com(self):
+        """Return the center of mass of the active model"""
+        return np.average(self.models[self.active_model].atom_dict["xyz"], axis=0)
+
     def __init__(self, coor_in=None, pdb_lines=None, pdb_id=None):
         self.active_model = 0
         self.models = []

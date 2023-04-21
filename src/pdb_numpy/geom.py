@@ -265,29 +265,7 @@ def cryst_convert_mmCIF(data_mmCIF, format_out="pdb"):
             f"{gamma:7.2f} P {sGroup:8} {z:3d}\n"
         )
     elif format_out == "gro":
-        alpha = np.deg2rad(alpha)
-        beta = np.deg2rad(beta)
-        gamma = np.deg2rad(gamma)
-        v1 = [a / 10, 0.0, 0.0]
-        v2 = [b * np.cos(gamma) / 10, b * np.sin(gamma) / 10, 0.0]
-        v = (
-            (
-                1.0
-                - np.cos(alpha) ** 2
-                - np.cos(beta) ** 2
-                - np.cos(gamma) ** 2
-                + 2.0 * np.cos(alpha) * np.cos(beta) * np.cos(gamma)
-            )
-            ** 0.5
-            * a
-            * b
-            * c
-        )
-        v3 = [
-            c * np.cos(beta) / 10,
-            (c / np.sin(gamma)) * (np.cos(alpha) - np.cos(beta) * np.cos(gamma)) / 10,
-            v / (a * b * np.sin(gamma)) / 10,
-        ]
+        v1, v2, v3 = compute_unit_cell_vectors(alpha, beta, gamma, a, b, c)
         new_line = (
             "{:10.5f}{:10.5f}{:10.5f}{:10.5f}{:10.5f}"
             "{:10.5f}{:10.5f}{:10.5f}{:10.5f}\n".format(

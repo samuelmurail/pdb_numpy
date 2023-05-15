@@ -694,7 +694,7 @@ class Coor:
 
             self.active_model = 0
 
-    def compute_chains_CA(self, Ca_cutoff=4.5):
+    def compute_chains_CA(self, Ca_cutoff=4.2):
         """Correct the chain ID's of a coor object, by checking consecutive
         Calphas atoms distance. If the distance is higher than ``Ca_cutoff``
         , the former atoms are considered as in a different chain.

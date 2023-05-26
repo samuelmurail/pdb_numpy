@@ -121,7 +121,7 @@ def plot_pseudo_3D(coor, c_field="index", cmap="gist_rainbow",
     if sel is not None:
         ca_atoms = coor.select_atoms(sel)
     else:
-        ca_atoms = self
+        ca_atoms = coor
     
     xyz_ca = ca_atoms.xyz
     xy_ca = xyz_ca[:, :2]

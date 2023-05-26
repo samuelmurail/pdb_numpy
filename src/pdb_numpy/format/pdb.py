@@ -86,8 +86,10 @@ def parse(pdb_lines, pqr_format=False):
                 ):
                     logger.warning(
                         f"The atom number is not the same in the model {len(pdb_coor.models)-1} and the model {len(pdb_coor.models)}."
+                        "\nSkip this model."
                     )
-                pdb_coor.models.append(local_model)
+                else:
+                    pdb_coor.models.append(local_model)
                 atom_index = 0
                 uniq_resid = -1
                 old_resid = -np.inf
@@ -154,8 +156,10 @@ def parse(pdb_lines, pqr_format=False):
         if len(pdb_coor.models) > 1 and local_model.len != pdb_coor.models[-1].len:
             logger.warning(
                 f"The atom number is not the same in the model {len(pdb_coor.models)-1} and the model {len(pdb_coor.models)}."
+                "\nSkip this model."
             )
-        pdb_coor.models.append(local_model)
+        else:
+            pdb_coor.models.append(local_model)
 
     if transformation != "":
         pdb_coor.transformation = parse_transformation(transformation)

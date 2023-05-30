@@ -296,7 +296,8 @@ class Model:
 
         elif isinstance(values, str):
             # Remove the "." before checking if the string is numeric
-            if values.replace(".", "", 1).isnumeric():
+            # Also remove the "-" if it is the first character
+            if values.replace(".", "", 1).lstrip("-").isnumeric():
                 if values.find(".") == -1:
                     values = int(values)
                 else:

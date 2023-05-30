@@ -9,7 +9,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def get_view(coor, ref=None, cartoon=True, licorice=False, unitcell=False, color='chainid', **kwargs):
+def get_view(
+    coor,
+    ref=None,
+    cartoon=True,
+    licorice=False,
+    unitcell=False,
+    color="chainid",
+    **kwargs
+):
     """Return a `nglview` object to be view in
     a jupyter notebook.
 
@@ -23,7 +31,7 @@ def get_view(coor, ref=None, cartoon=True, licorice=False, unitcell=False, color
         Add a licorice representation of the ligand, by default False
     color : str, optional
         Color representation, by default 'chain'
-        
+
 
     Returns
     -------
@@ -33,7 +41,7 @@ def get_view(coor, ref=None, cartoon=True, licorice=False, unitcell=False, color
     Examples
     --------
     >>> import pdb_numpy
-    >>> from pdb_numpy import visu 
+    >>> from pdb_numpy import visu
     >>> coor = pdb_numpy.Coor('test.pdb')
     >>> visu.get_view(coor)
 
@@ -58,17 +66,21 @@ def get_view(coor, ref=None, cartoon=True, licorice=False, unitcell=False, color
     if ref is not None:
         ref_str = nv.TextStructure(pdb.get_pdb_string(ref))
         view.add_component(ref_str, default=False)
-        view.component_2.add_representation(
-            'licorice', selection='ligand', color='red')
+        view.component_2.add_representation("licorice", selection="ligand", color="red")
 
     return view
 
 
-def plot_pseudo_3D(coor, c_field="index", cmap="gist_rainbow",
-                   line_w=1.5, chainbreak=5.0,
-                   sel="name CA",
-                   fig_size=(7, 7)):
-    """ Plot alpha Carbon trace of protein in pseudo 3D.
+def plot_pseudo_3D(
+    coor,
+    c_field="index",
+    cmap="gist_rainbow",
+    line_w=1.5,
+    chainbreak=5.0,
+    sel="name CA",
+    fig_size=(7, 7),
+):
+    """Plot alpha Carbon trace of protein in pseudo 3D.
     Inspired from Colab fold plot_pseudo_3D() function from sokrypton
     https://github.com/sokrypton/ColabFold
 
@@ -95,16 +107,16 @@ def plot_pseudo_3D(coor, c_field="index", cmap="gist_rainbow",
         selection to plot, by default "name CA"
     fig_size : tupple, optional
         Figure size, by default (7, 7)
-    
+
     Returns
     -------
     matplotlib ax
-        ax object   
-    
+        ax object
+
     Examples
     --------
     >>> import pdb_numpy
-    >>> from pdb_numpy import visu 
+    >>> from pdb_numpy import visu
     >>> coor = pdb_numpy.Coor('test.pdb')
     >>> visu.plot_pseudo_3D(coor)
     """
@@ -122,25 +134,24 @@ def plot_pseudo_3D(coor, c_field="index", cmap="gist_rainbow",
         ca_atoms = coor.select_atoms(sel)
     else:
         ca_atoms = coor
-    
+
     xyz_ca = ca_atoms.xyz
     xy_ca = xyz_ca[:, :2]
     x_size = xy_ca[:, 0].max() - xy_ca[:, 0].min()
     y_size = xy_ca[:, 1].max() - xy_ca[:, 1].min()
-    size = np.max([x_size, y_size])/2 + line_w
-    center = [(xy_ca[:, 0].max() + xy_ca[:, 0].min()) / 2,
-              (xy_ca[:, 1].max() + xy_ca[:, 1].min()) / 2]
-    ax.set_xlim(center[0] - size,
-                center[0] + size)
-    ax.set_ylim(center[1] - size,
-                center[1] + size)
-    ax.axis('off')
+    size = np.max([x_size, y_size]) / 2 + line_w
+    center = [
+        (xy_ca[:, 0].max() + xy_ca[:, 0].min()) / 2,
+        (xy_ca[:, 1].max() + xy_ca[:, 1].min()) / 2,
+    ]
+    ax.set_xlim(center[0] - size, center[0] + size)
+    ax.set_ylim(center[1] - size, center[1] + size)
+    ax.axis("off")
     # determine linewidths
     width = fig.bbox_inches.width * ax.get_position().width
     linewidths = line_w * 72 * width / np.diff(ax.get_xlim())
     # Create segments
-    seg = np.concatenate([xyz_ca[:-1, None, :], xyz_ca[1:, None, :]],
-                         axis=-2)
+    seg = np.concatenate([xyz_ca[:-1, None, :], xyz_ca[1:, None, :]], axis=-2)
     seg_xy = seg[..., :2]
     seg_z = seg[..., 2].mean(-1)
 
@@ -162,23 +173,21 @@ def plot_pseudo_3D(coor, c_field="index", cmap="gist_rainbow",
         }
         field = color_dict[c_field]["field"]
         index = color_dict[c_field]["index"]
-        field = ca_atoms.models[ca_atoms.active_model].atom_dict[field][
-            :, index
-        ]
+        field = ca_atoms.models[ca_atoms.active_model].atom_dict[field][:, index]
         c_label, c = np.unique(field, return_inverse=True)
         c = c[:-1]
-    
-    c = (c - c.min())/(c.max() - c.min())
+
+    c = (c - c.min()) / (c.max() - c.min())
     colors = matplotlib.cm.get_cmap(cmap)(c)
     if chainbreak is not None:
         dist = np.linalg.norm(xyz_ca[:-1] - xyz_ca[1:], axis=-1)
         colors[..., 3] = (dist < chainbreak).astype(np.float32)
-    
+
     # Add shade and tint on colors:
     a = np.copy(seg_z)
     a = (a - a.min()) / (a.max() - a.min())
     z = a[:, None]
-    tint, shade = z/3, (z+2)/3
+    tint, shade = z / 3, (z + 2) / 3
     _, index = np.unique(colors[:, :3], axis=0, return_index=True)
     uniq_color = colors[:, :3][np.sort(index)]
     colors[:, :3] = colors[:, :3] + (1 - colors[:, :3]) * tint
@@ -186,25 +195,26 @@ def plot_pseudo_3D(coor, c_field="index", cmap="gist_rainbow",
 
     # Plot
     lines = matplotlib.collections.LineCollection(
-        seg_xy[order], linewidths=linewidths, colors=colors[order],
-        path_effects=[matplotlib.patheffects.Stroke(capstyle="round")])
+        seg_xy[order],
+        linewidths=linewidths,
+        colors=colors[order],
+        path_effects=[matplotlib.patheffects.Stroke(capstyle="round")],
+    )
     if c_label.dtype.type is np.str_:
         from matplotlib.lines import Line2D
+
         custom_lines = []
         for color in uniq_color:
-            custom_lines.append(
-                Line2D([0], [0],
-                       color=color, lw=linewidths))
+            custom_lines.append(Line2D([0], [0], color=color, lw=linewidths))
         ax.legend(custom_lines, c_label, frameon=False)
     else:
         ax2 = fig.add_axes([0.9, 0.2, 0.02, 0.6])
         cmap = matplotlib.cm.get_cmap(cmap)
-        norm = matplotlib.colors.Normalize(vmin=c_label.min(),
-                                           vmax=c_label.max())
-        cb = matplotlib.colorbar.ColorbarBase(ax2, cmap=cmap,
-                                              norm=norm,
-                                              orientation="vertical")
+        norm = matplotlib.colors.Normalize(vmin=c_label.min(), vmax=c_label.max())
+        cb = matplotlib.colorbar.ColorbarBase(
+            ax2, cmap=cmap, norm=norm, orientation="vertical"
+        )
         cb.set_label(c_field)
         cb.outline.set_linewidth(0)
-    
+
     return ax.add_collection(lines)

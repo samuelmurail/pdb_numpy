@@ -45,8 +45,9 @@ def rmsd(coor_1, coor_2, selection="name CA", index_list=None, frame_ref=0):
 
     """
 
-    assert 0 <= frame_ref < len(coor_2.models),\
-        "Reference frame index is larger than the number of frame in the reference structure"
+    assert (
+        0 <= frame_ref < len(coor_2.models)
+    ), "Reference frame index is larger than the number of frame in the reference structure"
 
     if index_list is None:
         index_1 = coor_1.get_index_select(selection)

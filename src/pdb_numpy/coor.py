@@ -148,7 +148,6 @@ class Coor:
     def z(self):
         return self.models[self.active_model].atom_dict["xyz"][:, 2]
 
-
     @property
     def com(self):
         """Return the center of mass of the active model"""

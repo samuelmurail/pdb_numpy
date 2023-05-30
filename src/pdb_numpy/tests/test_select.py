@@ -242,7 +242,6 @@ def test_select_atoms_multi_frame():
     assert new.len == 58
     assert new.models[10].len == 58
 
-
     selec = "name N CA and residue > 20 and residue < 80"
     new = test.select_atoms(selec, frame=19)
     assert new.len == 16

@@ -488,18 +488,25 @@ def coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0):
     assert len(index_1) != 0, "No atom selected in the first structure"
     assert len(index_1) == len(index_2), "Two structure don't have the same atom number"
 
+    self_align = False
+    if id(coor_1) == id(coor_2):
+        logger.info("Same Coor object, self alignement")
+        self_align = True
+
     centroid_2 = coor_2.models[frame_ref].xyz[index_2].mean(axis=0)
     coor_2.models[frame_ref].xyz -= centroid_2
     ref_coor = coor_2.models[frame_ref].xyz[index_2]
 
-    for model in coor_1.models:
+    for i, model in enumerate(coor_1.models):
         centroid_1 = model.xyz[index_1].mean(axis=0)
-        model.xyz -= centroid_1
+        if not (self_align and (i == frame_ref)):
+            model.xyz -= centroid_1
 
         rot_mat = R.align_vectors(model.xyz[index_1], ref_coor)[0].as_matrix()
 
         model.xyz = np.dot(model.xyz, rot_mat)
-        model.xyz += centroid_2
+        if not (self_align and (i == frame_ref)):
+            model.xyz += centroid_2
 
     coor_2.models[frame_ref].xyz += centroid_2
 

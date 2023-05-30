@@ -244,7 +244,7 @@ def test_multi_chain_permutation():
 def test_self_align_seq_based():
     coor_1 = Coor(PDB_1U85)
 
-    rmsds, _ = alignement.align_seq_based(coor_1, coor_1, chain_1=["A"], chain_2=["A"])
+    rmsds, _ = alignement.align_seq_based(coor_1, coor_1, chain_1=["A"], chain_2=["A"], frame_ref=0)
 
     print(rmsds)
 
@@ -269,6 +269,37 @@ def test_self_align_seq_based():
         2.37029484039453,
         2.127321445579551,
         2.255572952793963
+    ]
+
+    for expected_rmsd, rmsd in zip(expected_rmsds, rmsds):
+        assert expected_rmsd == pytest.approx(rmsd, 0.0001)
+
+
+    rmsds, _ = alignement.align_seq_based(coor_1, coor_1, chain_1=["A"], chain_2=["A"], frame_ref=10)
+
+    print(rmsds)
+
+    expected_rmsds = [
+        1.5410353971077149,
+        2.5717560823283434,
+        2.8534105524539686,
+        2.846761185490669,
+        2.895556238979121,
+        1.8980714373780552,
+        1.710680079133781,
+        2.907562785073643,
+        3.12576890288743,
+        1.6710257366631398,
+        0.0,
+        1.5943742366650597,
+        2.209647513772835,
+        1.9021408514397944,
+        2.322784281548357,
+        2.4462491976596366,
+        1.2169671541649016,
+        2.7952768449042247,
+        2.1940292945466258,
+        2.477113534908977
     ]
 
     for expected_rmsd, rmsd in zip(expected_rmsds, rmsds):

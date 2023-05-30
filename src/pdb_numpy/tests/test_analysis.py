@@ -73,6 +73,34 @@ def test_measure_rmsd(caplog):
     for expected_rmsd, rmsd in zip(expected_rmsds, rmsds):
         assert expected_rmsd == pytest.approx(rmsd, 0.0001)
 
+    rmsds = analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2])
+    print(rmsds)
+    expected_rmsds = [
+        5.1201007697145995,
+        4.325464568500979,
+        3.814838140492011,
+        3.7162291711703648,
+        3.885813512555148,
+        5.148095052210754,
+        5.296391465950272,
+        4.135615244634669,
+        3.8189144358192806,
+        4.597449831608669,
+        5.271310413581032,
+        5.517576912040033,
+        4.6082437633178115,
+        4.2097575131149885,
+        4.996842582024358,
+        5.006402154252272,
+        5.256112097498127,
+        3.7419617535551613,
+        4.184792438296149,
+        4.178818177627158,
+    ]
+
+    for expected_rmsd, rmsd in zip(expected_rmsds, rmsds):
+        assert expected_rmsd == pytest.approx(rmsd, 0.0001)
+
 
 def test_dockq_bad(tmp_path):
     """

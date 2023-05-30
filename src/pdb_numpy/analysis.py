@@ -11,7 +11,7 @@ from . import alignement
 from . import select as select
 
 
-def rmsd(coor_1, coor_2, selection="name CA", index_list=None):
+def rmsd(coor_1, coor_2, selection="name CA", index_list=None, frame_ref=0):
     r"""Compute RMSD between two sets of coordinates.
 
     The RMSD (Root Mean Square Deviation) measures the similarity between two sets of coordinates by calculating the
@@ -35,6 +35,8 @@ def rmsd(coor_1, coor_2, selection="name CA", index_list=None):
         A list of two arrays containing the indices of the atoms to include in the RMSD calculation. This option is
         provided as an alternative to the `selection` argument, and can be used if you need to calculate the RMSD for a
         custom set of atoms. If this argument is provided, the `selection` argument is ignored.
+    frame_ref : int, optional
+        The frame number of the reference structure. By default, it is set to 0.
 
     Returns
     -------
@@ -42,6 +44,9 @@ def rmsd(coor_1, coor_2, selection="name CA", index_list=None):
         RMSD value
 
     """
+
+    assert 0 <= frame_ref < len(coor_2.models),\
+        "Reference frame index is larger than the number of frame in the reference structure"
 
     if index_list is None:
         index_1 = coor_1.get_index_select(selection)
@@ -53,7 +58,7 @@ def rmsd(coor_1, coor_2, selection="name CA", index_list=None):
     rmsd_list = []
 
     for model in coor_1.models:
-        diff = model.xyz[index_1] - coor_2.models[0].xyz[index_2]
+        diff = model.xyz[index_1] - coor_2.models[frame_ref].xyz[index_2]
         rmsd_list.append(np.sqrt((diff * diff).sum() / len(index_1)))
 
     return rmsd_list

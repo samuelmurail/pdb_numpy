@@ -487,6 +487,8 @@ def coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0):
 
     assert len(index_1) != 0, "No atom selected in the first structure"
     assert len(index_1) == len(index_2), "Two structure don't have the same atom number"
+    assert 0 <= frame_ref < len(coor_2.models),\
+        "Reference frame index is larger than the number of frame in the reference structure"
 
     self_align = False
     if id(coor_1) == id(coor_2):
@@ -518,6 +520,7 @@ def align_seq_based(
     chain_2=["A"],
     back_names=["C", "N", "O", "CA"],
     compute_rmsd=True,
+    frame_ref=0,
 ):
     """Align two structure based on sequence alignement.
 
@@ -535,7 +538,9 @@ def align_seq_based(
         List of backbone atom names, by default ["C", "N", "O", "CA"]
     compute_rmsd : bool, optional
         Compute RMSD between the two structure, by default True
-
+    frame_ref : int, optional
+        Frame to use as reference for coor_2, by default 0
+    
     Returns
     -------
     rmsd : float, optional
@@ -545,12 +550,14 @@ def align_seq_based(
     sel_index_2 : list
         List of index of the second coordinate
     """
+    assert 0 <= frame_ref < len(coor_2.models),\
+        "Reference frame index is larger than the number of frame in the reference structure"
 
     index_1, index_2 = get_common_atoms(coor_1, coor_2, chain_1, chain_2, back_names)
-    coor_align(coor_1, coor_2, index_1, index_2)
+    coor_align(coor_1, coor_2, index_1, index_2, frame_ref=frame_ref)
 
     if compute_rmsd:
-        return analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2]), [
+        return analysis.rmsd(coor_1, coor_2, index_list=[index_1, index_2], frame_ref=frame_ref), [
             index_1,
             index_2,
         ]

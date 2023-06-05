@@ -38,6 +38,9 @@ def parse(pdb_lines, pqr_format=False):
 
     pdb_coor = coor.Coor()
 
+    # To parse hexadecimal resid:
+    resid_base = 10
+
     atom_index = 0
     uniq_resid = -1
     old_resid = -np.inf
@@ -108,7 +111,9 @@ def parse(pdb_lines, pqr_format=False):
             atom_name = line[12:16].strip()
             res_name = line[17:20].strip()
             chain = line[21]
-            resid = int(line[22:26])
+            resid = int(line[22:26], base=resid_base)
+            if resid >= 9999:
+                resid_base = 16
             insert_res = line[26:27].strip()
             xyz = [float(line[30:38]), float(line[38:46]), float(line[46:54])]
             if pqr_format:
@@ -329,6 +334,10 @@ def get_pdb_string(pdb_coor):
             name = model.atom_dict["name_resname_elem"][i, 0].astype(np.str_)
             if len(name) <= 3 and name[0] in ["C", "H", "O", "N", "S", "P"]:
                 name = " " + name
+            # To use resid > 9999, we need to convert the resid in hexa
+            resid = model.atom_dict["num_resid_uniqresid"][i, 1]
+            if resid > 9999:
+                resid = hex(resid).lstrip("0x")
 
             # Note : Here we use 4 letter residue name.
             str_out += (
@@ -341,7 +350,7 @@ def get_pdb_string(pdb_coor):
                     model.atom_dict["alterloc_chain_insertres"][i, 0].astype(np.str_),
                     model.atom_dict["name_resname_elem"][i, 1].astype(np.str_),
                     model.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_),
-                    model.atom_dict["num_resid_uniqresid"][i, 1],
+                    resid,
                     model.atom_dict["alterloc_chain_insertres"][i, 2].astype(np.str_),
                     model.atom_dict["xyz"][i, 0],
                     model.atom_dict["xyz"][i, 1],

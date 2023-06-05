@@ -111,7 +111,9 @@ def parse(pdb_lines, pqr_format=False):
             atom_name = line[12:16].strip()
             res_name = line[17:20].strip()
             chain = line[21]
+            # To parse hexadecimal resid:
             resid = int(line[22:26], base=resid_base)
+            # If resid is hexadecimal, resid_base is set to 16
             if resid >= 9999:
                 resid_base = 16
             insert_res = line[26:27].strip()

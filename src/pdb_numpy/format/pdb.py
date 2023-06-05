@@ -340,10 +340,12 @@ def get_pdb_string(pdb_coor):
             resid = model.atom_dict["num_resid_uniqresid"][i, 1]
             if resid > 9999:
                 resid = hex(resid).lstrip("0x")
+            else:
+                resid = str(resid)
 
             # Note : Here we use 4 letter residue name.
             str_out += (
-                "{:6s}{:5d} {:4s}{:1s}{:4s}{:1s}{:4d}{:1s}"
+                "{:6s}{:5d} {:4s}{:1s}{:4s}{:1s}{:4s}{:1s}"
                 "   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}"
                 "          {:2s}\n".format(
                     FIELD_DICT[model.atom_dict["field"][i]],

@@ -369,7 +369,7 @@ def get_pdb_string(pdb_coor):
     return str_out
 
 
-def write(coor, pdb_out, check_file_out=True):
+def write(coor, pdb_out, overwrite=False):
     """Write a pdb file.
 
     Parameters
@@ -378,8 +378,8 @@ def write(coor, pdb_out, check_file_out=True):
         Coor object
     pdb_out : str
         path of the pdb file to write
-    check_file_out : bool, optional, default=True
-        flag to check or not if file has already been created.
+    overwrite : bool, optional, default=False
+        flag to overwrite or not if file has already been created.
 
     Returns
     -------
@@ -392,7 +392,7 @@ def write(coor, pdb_out, check_file_out=True):
     Succeed to save file tmp.pdb
     """
 
-    if check_file_out and os.path.exists(pdb_out):
+    if not overwrite and os.path.exists(pdb_out):
         logger.info(f"PDB file {pdb_out} already exist, file not saved")
         return
 

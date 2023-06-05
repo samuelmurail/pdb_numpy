@@ -169,7 +169,7 @@ def get_gro_string(gro_coor):
     return str_out
 
 
-def write(coor, gro_out, check_file_out=True):
+def write(coor, gro_out, overwrite=False):
     """Write a gro file.
 
     Parameters
@@ -178,8 +178,8 @@ def write(coor, gro_out, check_file_out=True):
         Coor object
     gro_out : str
         path of the gro file to write
-    check_file_out : bool, optional, default=True
-        flag to check or not if file has already been created.
+    overwrite : bool, optional, default=False
+        flag to overwrite or not if file has already been created.
 
     Returns
     -------
@@ -192,7 +192,7 @@ def write(coor, gro_out, check_file_out=True):
     Succeed to save file tmp.gro
     """
 
-    if check_file_out and os.path.exists(gro_out):
+    if not overwrite and os.path.exists(gro_out):
         logger.info(f"GRO file {gro_out} already exist, file not saved")
         return
 

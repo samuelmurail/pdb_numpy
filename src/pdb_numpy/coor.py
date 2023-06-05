@@ -241,7 +241,7 @@ class Coor:
             f"{self.len} atoms found"
         )
 
-    def write(self, file_out, check_file_out=True):
+    def write(self, file_out, overwrite=False):
         """Write a pdb/pqr/gro/cif file from a Coor object. It determines the
         file format based on the file extension and writes the lines
         accordingly. If the file extension is not recognized, it assumes it
@@ -251,9 +251,9 @@ class Coor:
         ----------
         file_out : str
             Path of the pdb file to write
-        check_file_out : bool
-            If True, check if the file exists and don't
-            overwrite it. If False, overwrite the file without asking for
+        overwrite : bool
+            If False, check if the file exists and don't
+            overwrite it. If True, overwrite the file without asking for
             confirmation.
 
         Returns
@@ -263,18 +263,18 @@ class Coor:
         """
 
         if str(file_out).endswith(".pdb"):
-            pdb.write(self, file_out, check_file_out)
+            pdb.write(self, file_out, overwrite)
         elif str(file_out).endswith(".pqr"):
-            pqr.write(self, file_out, check_file_out)
+            pqr.write(self, file_out, overwrite)
         elif str(file_out).endswith(".cif"):
-            mmcif.write(self, file_out, check_file_out)
+            mmcif.write(self, file_out, overwrite)
         elif str(file_out).endswith(".gro"):
-            gro.write(self, file_out, check_file_out)
+            gro.write(self, file_out, overwrite)
         else:
             logger.warning(
                 "File name doesn't finish with .pdb" " read it as .pdb anyway"
             )
-            pdb.write(self, file_out, check_file_out)
+            pdb.write(self, file_out, overwrite)
 
     def change_order(self, field, order_list):
         """Change the order of the atoms in the model. The `change_order()`

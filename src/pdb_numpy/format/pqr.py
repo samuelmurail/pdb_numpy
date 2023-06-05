@@ -101,7 +101,7 @@ def get_pqr_string(coor):
     return str_out
 
 
-def write(coor, pqr_out, check_file_out=True):
+def write(coor, pqr_out, overwrite=False):
     """Write a pdb file.
 
     Parameters
@@ -110,8 +110,8 @@ def write(coor, pqr_out, check_file_out=True):
         Coor object
     pqr_out : str
         path of the pqr file to write
-    check_file_out : bool, optional, default=True
-        flag to check or not if file has already been created.
+    overwrite : bool, optional, default=False
+        flag to overwrite or not if file has already been created.
     
     Returns
     -------
@@ -129,7 +129,7 @@ def write(coor, pqr_out, check_file_out=True):
 
     """
 
-    if check_file_out and os.path.exists(pqr_out):
+    if not overwrite and os.path.exists(pqr_out):
         logger.info("PQR file {} already exist, file not saved".format(pqr_out))
         return
 

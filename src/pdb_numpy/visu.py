@@ -66,7 +66,8 @@ def get_view(
     if ref is not None:
         ref_str = nv.TextStructure(pdb.get_pdb_string(ref))
         view.add_component(ref_str, default=False)
-        view.component_2.add_representation("licorice", selection="ligand", color="red")
+        view[1].add_cartoon(selection="protein", color='red')
+        view[1].add_representation("licorice", selection="ligand", color="red")
 
     return view
 

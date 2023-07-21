@@ -44,6 +44,14 @@ pdb\_numpy.tests.test\_geom module
    :undoc-members:
    :show-inheritance:
 
+pdb\_numpy.tests.test\_gro module
+---------------------------------
+
+.. automodule:: pdb_numpy.tests.test_gro
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pdb\_numpy.tests.test\_mmcif module
 -----------------------------------
 
@@ -60,10 +68,26 @@ pdb\_numpy.tests.test\_pdb module
    :undoc-members:
    :show-inheritance:
 
+pdb\_numpy.tests.test\_pqr module
+---------------------------------
+
+.. automodule:: pdb_numpy.tests.test_pqr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pdb\_numpy.tests.test\_select module
 ------------------------------------
 
 .. automodule:: pdb_numpy.tests.test_select
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pdb\_numpy.tests.test\_sym\_trans module
+----------------------------------------
+
+.. automodule:: pdb_numpy.tests.test_sym_trans
    :members:
    :undoc-members:
    :show-inheritance:

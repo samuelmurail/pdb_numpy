@@ -585,39 +585,38 @@ def read(file_in):
     return parse(lines)
 
 
-def write(coor, mmcif_out, overwrite=False):
-    """Write a mmcif file.
+def get_mmcif_string(coor):
+    """Return a coor object as a mmcif string.
 
     Parameters
     ----------
     coor : Coor
         Coor object to write
-    mmcif_out : str
-        path of the mmcif file to write
-    overwrite : bool, optional, default=False
-        flag to overwrite or not if file has already been created.
 
     Returns
     -------
-    None
+    str
+        Coor object as a pdb string
 
     """
 
-    if not overwrite and os.path.exists(mmcif_out):
-        logger.info(f"MMCIF file {mmcif_out} already exist, file not saved")
-        return
+    str_out = ""
 
-    filout = open(mmcif_out, "w")
     line_max_len = 135
     old_category = ""
 
+    if len(coor.data_mmCIF) == 0:
+        coor.data_mmCIF = {"title" : {"title": "untitled"},
+                           "entry": {"id": "XXXX"},
+                           "_atom_site": None}
+
     for category in coor.data_mmCIF:
         if category == "title":
-            filout.write(f"{coor.data_mmCIF[category]['title']}\n")
+            str_out += f"{coor.data_mmCIF[category]['title']}\n"
         elif category == "_atom_site":
             atom_num = coor.total_len
             model_num = 1
-            filout.write(MMCIF_ATOM_SITE)
+            str_out += MMCIF_ATOM_SITE
             # Get column size
             atom_num_size = len(
                 str(coor.models[-1].atom_dict["num_resid_uniqresid"][-1, 0])
@@ -662,7 +661,7 @@ def write(coor, mmcif_out, overwrite=False):
                             np.str_
                         )
                     )
-                    filout.write(
+                    str_out += (
                         "{:6s} {:<{atom_num_size}d} {:{elem_size}s} {:{name_size}s} {:1s} {:{resname_size}s} "
                         "{:{chain_size}s} 1 {:<{resnum_size}d} {:1s} {:<{x_size}.3f} {:<{y_size}.3f} "
                         "{:<{z_size}.3f} {:<4.2f} {:<{beta_size}.2f} {:1s} {:<{resid_size}d}"
@@ -708,14 +707,14 @@ def write(coor, mmcif_out, overwrite=False):
         else:
             # Add a # for each new category
             if category != old_category:
-                filout.write("# \n")
+                str_out += "# \n"
                 old_category = category
             # Write the loop
             if "col_names" in coor.data_mmCIF[category]:
-                filout.write("loop_\n")
+                str_out += "loop_\n"
                 raw_width = []
                 for i, col_name in enumerate(coor.data_mmCIF[category]["col_names"]):
-                    filout.write(f"{category}.{col_name} \n")
+                    str_out += f"{category}.{col_name} \n"
                     # Extract the word with no column
                     list_no_column = [
                         elem
@@ -734,7 +733,6 @@ def write(coor, mmcif_out, overwrite=False):
                         break_list.append(i)
                         tot_width = 0
                 for i in range(len(coor.data_mmCIF[category]["value"][0])):
-                    str_out = ""
                     for j in range(len(coor.data_mmCIF[category]["col_names"])):
                         word = coor.data_mmCIF[category]["value"][j][i]
                         # If the word starts with a ";", we add a new line
@@ -751,7 +749,6 @@ def write(coor, mmcif_out, overwrite=False):
                             else:
                                 str_out += f"{word:{raw_width[j]}} "
                     str_out += f"\n"
-                    filout.write(str_out)
             # Write the data
             else:
                 max_len = (
@@ -759,18 +756,46 @@ def write(coor, mmcif_out, overwrite=False):
                 )
                 for attribute in coor.data_mmCIF[category]:
                     if coor.data_mmCIF[category][attribute].startswith(";"):
-                        filout.write(
+                        str_out += (
                             f"{'.'.join([category, attribute]):{max_len}} \n{coor.data_mmCIF[category][attribute]}"
                         )
                     else:
                         local_str = f"{'.'.join([category, attribute]):{max_len}} {coor.data_mmCIF[category][attribute]} \n"
                         if len(local_str) > line_max_len:
-                            filout.write(
+                            str_out += (
                                 f"{'.'.join([category, attribute]):{max_len}} \n{coor.data_mmCIF[category][attribute]} \n"
                             )
                         else:
-                            filout.write(local_str)
+                            str_out += local_str
+    str_out += "#\n"
 
+    return str_out
+
+
+def write(coor, mmcif_out, overwrite=False):
+    """Write a mmcif file.
+
+    Parameters
+    ----------
+    coor : Coor
+        Coor object
+    mmcif_out : str
+        path of the mmcif file to write
+    overwrite : bool, optional, default=False
+        flag to overwrite or not if file has already been created.
+
+    Returns
+    -------
+    None
+
+    """
+
+    if not overwrite and os.path.exists(mmcif_out):
+        logger.info(f"MMCIF file {mmcif_out} already exist, file not saved")
+        return
+
+    filout = open(mmcif_out, "w")
+    filout.write(get_mmcif_string(coor))
     filout.close()
     logger.info(f"Succeed to save file {os.path.relpath(mmcif_out)}")
     return

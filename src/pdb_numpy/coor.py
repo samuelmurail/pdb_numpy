@@ -160,6 +160,7 @@ class Coor:
         self.data_mmCIF = None
         self.symmetry = ""
         self.transformation = ""
+        self.data_mmCIF = {}
 
         if coor_in is not None:
             self.read(coor_in)

@@ -35,7 +35,7 @@ setup(
         ],
     },
     classifiers=[
-        "Development Status :: 5 - Devloppment/Beta",
+        "Development Status :: 4 - Beta",
         "Environment :: Console",
         "Intended Audience :: Developers",
         "Natural Language :: English",

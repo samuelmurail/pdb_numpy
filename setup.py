@@ -29,6 +29,11 @@ setup(
     install_requires=requirements,
     license='GNUv2.0',
     zip_safe=False,
+    package_data={
+        'pdb_numpy.data': [
+            'blosum62.txt',
+        ],
+    },
     classifiers=[
         "Development Status :: 5 - Devloppment/Beta",
         "Environment :: Console",

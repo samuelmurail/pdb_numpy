@@ -606,9 +606,71 @@ def get_mmcif_string(coor):
     old_category = ""
 
     if len(coor.data_mmCIF) == 0:
-        coor.data_mmCIF = {"title" : {"title": "untitled"},
-                           "entry": {"id": "XXXX"},
-                           "_atom_site": None}
+        coor.data_mmCIF = {
+            "title" : {"title": "untitled"},
+            "_entry": {"id": "XXXX"}
+        }
+
+        if coor.crystal_pack.startswith("CRYST1"):
+            line = coor.crystal_pack
+            a = float(line[6:15])
+            b = float(line[15:24])
+            c = float(line[24:33])
+            alpha = float(line[33:40])
+            beta = float(line[40:47])
+            gamma = float(line[47:54])
+            sGroup = line[56:66]
+            try:
+                z = int(line[67:70])
+            except ValueError:
+                z = 1
+
+            coor.data_mmCIF["_cell"] = {
+                "length_a": str(a),
+                "length_b": str(b),
+                "length_c": str(c),
+                "angle_alpha": str(alpha),
+                "angle_beta": str(beta),
+                "angle_gamma": str(gamma),
+                "Z_PDB": str(z),
+            }
+        elif len(coor.crystal_pack) > 0:
+            line_split = coor.crystal_pack.split()
+            #  v1(x) v2(y) v3(z) v1(y) v1(z) v2(x) v2(z) v3(x) v3(y)
+            if len(line_split) == 3:
+                v1 = np.array([float(line_split[0]), 0.0, 0.0])
+                v2 = np.array([0.0, float(line_split[1]), 0.0])
+                v3 = np.array([0.0, 0.0, float(line_split[2])])
+            elif len(line_split) == 9:
+                v1 = np.array(
+                    [float(line_split[0]), float(line_split[3]), float(line_split[4])]
+                )
+                v2 = np.array(
+                    [float(line_split[5]), float(line_split[1]), float(line_split[6])]
+                )
+                v3 = np.array(
+                    [float(line_split[7]), float(line_split[8]), float(line_split[2])]
+                )
+            a = sum(v1**2) ** 0.5 * 10
+            b = sum(v2**2) ** 0.5 * 10
+            c = sum(v3**2) ** 0.5 * 10
+            alpha = np.rad2deg(angle_vec(v2, v3))
+            beta = np.rad2deg(angle_vec(v1, v3))
+            gamma = np.rad2deg(angle_vec(v1, v2))
+            # Following is wrong, to check !!!
+            sGroup = "1"
+            z = 1
+            coor.data_mmCIF["_cell"] = {
+                "length_a": str(a),
+                "length_b": str(b),
+                "length_c": str(c),
+                "angle_alpha": str(alpha),
+                "angle_beta": str(beta),
+                "angle_gamma": str(gamma),
+                "Z_PDB": str(z),
+            }
+        coor.data_mmCIF["_atom_site"] = None
+
 
     for category in coor.data_mmCIF:
         if category == "title":

@@ -44,6 +44,32 @@ Main features:
 For more examples and documentation, see the ``pdb_numpy`` documentation at
 https://pdb-numpy.readthedocs.io/en/latest/readme.html.
 
+Installation
+------------
+
+``pdb_numpy`` is available on PyPI and can be installed using ``pip``:
+
+.. code-block:: bash
+
+    pip install pdb_numpy
+
+Alternatively, you can install ``pdb_numpy`` from source:
+
+.. code-block:: bash
+
+    git clone https://github.com/samuelmurail/pdb_numpy
+    cd pdb_numpy
+    python setup.py install
+
+Dependencies
+------------
+
+``pdb_numpy`` requires the following dependencies:
+
+- ``numpy``
+- ``scipy``
+
+
 Contributing
 ------------
 

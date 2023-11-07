@@ -114,11 +114,11 @@ def parse(mmcif_lines):
     # "name_resname"
     col_index = data_mmCIF["_atom_site"]["col_names"].index("label_atom_id")
     # dtype set to U5 to avoid truncation of long atom names like "O5\'"
-    name_array = np.array(data_mmCIF["_atom_site"]["value"][col_index], dtype="U")
+    name_array = np.array(data_mmCIF["_atom_site"]["value"][col_index], dtype="|U4")
     col_index = data_mmCIF["_atom_site"]["col_names"].index("label_comp_id")
-    resname_array = np.array(data_mmCIF["_atom_site"]["value"][col_index], dtype="U")
+    resname_array = np.array(data_mmCIF["_atom_site"]["value"][col_index], dtype="|U4")
     col_index = data_mmCIF["_atom_site"]["col_names"].index("type_symbol")
-    ele_array = np.array(data_mmCIF["_atom_site"]["value"][col_index], dtype="U")
+    ele_array = np.array(data_mmCIF["_atom_site"]["value"][col_index], dtype="|U4")
 
     name_resname_array = np.column_stack((name_array, resname_array, ele_array))
 

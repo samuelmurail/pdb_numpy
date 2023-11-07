@@ -76,9 +76,9 @@ def parse(pdb_lines, pqr_format=False):
                     "num_resid_uniqresid": np.array(
                         num_resid_uniqresid_list, dtype="int32"
                     ),
-                    "name_resname_elem": np.array(name_resname_elem_list, dtype="U"),
+                    "name_resname_elem": np.array(name_resname_elem_list, dtype="|U4"),
                     "alterloc_chain_insertres": np.array(
-                        alter_chain_insert_list, dtype="|U1"
+                        alter_chain_insert_list, dtype="|U2"
                     ),
                     "xyz": np.array(xyz_list, dtype="float32"),
                     "occ_beta": np.array(occ_beta_list, dtype="float32"),
@@ -155,8 +155,8 @@ def parse(pdb_lines, pqr_format=False):
         local_model.atom_dict = {
             "field": np.array(field_list, dtype="|U1"),
             "num_resid_uniqresid": np.array(num_resid_uniqresid_list, dtype="int32"),
-            "name_resname_elem": np.array(name_resname_elem_list, dtype="U"),
-            "alterloc_chain_insertres": np.array(alter_chain_insert_list, dtype="|U1"),
+            "name_resname_elem": np.array(name_resname_elem_list, dtype="|U4"),
+            "alterloc_chain_insertres": np.array(alter_chain_insert_list, dtype="|U2"),
             "xyz": np.array(xyz_list, dtype="float32"),
             "occ_beta": np.array(occ_beta_list, dtype="float32"),
         }

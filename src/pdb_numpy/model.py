@@ -530,6 +530,7 @@ class Model:
             Atom object
 
         """
+        
         self.atom_dict["field"] = np.insert(
             self.atom_dict["field"], index, ["ATOM"], axis=0
         )
@@ -540,16 +541,33 @@ class Model:
             [num, resid, uniq_resid],
             axis=0,
         )
-        self.atom_dict["name_resname"] = np.insert(
-            self.atom_dict["name_resname"], index, [name, resname], axis=0
+        self.atom_dict["name_resname_elem"] = np.insert(
+            self.atom_dict["name_resname_elem"], index, [name, resname, elem], axis=0
         )
         self.atom_dict["alterloc_chain_insertres"] = np.insert(
             self.atom_dict["alterloc_chain_insertres"],
             index,
-            [altloc, chain, insertres, elem],
+            [altloc, chain, insertres],
             axis=0,
         )
         self.atom_dict["occ_beta"] = np.insert(
             self.atom_dict["occ_beta"], index, [bfactor, occupancy], axis=0
         )
         self.atom_dict["xyz"] = np.insert(self.atom_dict["xyz"], index, xyz, axis=0)
+
+        if len(self.atom_dict["field"]) == 1:
+            atom_num = 1
+            #self.atom_dict["field"] = self.atom_dict["field"].reshape((atom_num, 1))
+            self.atom_dict["num_resid_uniqresid"] = self.atom_dict[
+                "num_resid_uniqresid"
+            ].reshape((atom_num, 3))
+            self.atom_dict["name_resname_elem"] = self.atom_dict[
+                "name_resname_elem"
+            ].reshape((atom_num, 3))
+            self.atom_dict["alterloc_chain_insertres"] = self.atom_dict[
+                "alterloc_chain_insertres"
+            ].reshape((atom_num, 3))
+            self.atom_dict["occ_beta"] = self.atom_dict["occ_beta"].reshape(
+                (atom_num, 2)
+            )
+            self.atom_dict["xyz"] = self.atom_dict["xyz"].reshape((atom_num, 3))

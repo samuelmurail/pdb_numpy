@@ -271,7 +271,7 @@ def test_pdockq(tmp_path):
 
     pdockq = analysis.compute_pdockQ(model_coor)  # , rec_chain=["B"], lig_chain=["C"])
 
-    assert pytest.approx(pdockq[0], 0.001) == 0.2924
+    assert pytest.approx(pdockq[0], 0.001) == 0.4222
 
 
 def test_pdockq_sel(tmp_path):
@@ -285,4 +285,4 @@ def test_pdockq_sel(tmp_path):
         model_coor, rec_sel="chain B", lig_sel="chain C"
     )  # , rec_chain=["B"], lig_chain=["C"])
 
-    assert pytest.approx(pdockq[0], 0.001) == 0.2924
+    assert pytest.approx(pdockq[0], 0.001) == 0.4222

@@ -3,6 +3,7 @@
 
 import numpy as np
 import logging
+from scipy.spatial import distance_matrix
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -533,7 +534,9 @@ def compute_pdockQ(
             f"chain {' '.join(lig_chain)} and within {cutoff} of chain {' '.join(rec_chain)}"
         )
 
-        contact_num = rec_in_contact.len + lig_in_contact.len
+        dist_mat = distance_matrix(rec_in_contact.xyz, lig_in_contact.xyz)
+        contact_num = np.sum(dist_mat < cutoff)
+
         if contact_num == 0:
             pdockq = 0.0
             pdockq_list.append(pdockq)
@@ -542,7 +545,7 @@ def compute_pdockQ(
         avg_plddt = rec_in_contact.len * np.average(
             rec_in_contact.beta
         ) + lig_in_contact.len * np.average(lig_in_contact.beta)
-        avg_plddt /= contact_num
+        avg_plddt /= (rec_in_contact.len + lig_in_contact.len)
 
         x = avg_plddt * np.log10(contact_num)
         pdockq = 0.724 / (1 + np.exp(-0.052 * (x - 152.611))) + 0.018
@@ -612,7 +615,9 @@ def compute_pdockQ_sel(
             f"({lig_sel}) and within {cutoff} of ({rec_sel})"
         )
 
-        contact_num = rec_in_contact.len + lig_in_contact.len
+        dist_mat = distance_matrix(rec_in_contact.xyz, lig_in_contact.xyz)
+        contact_num = np.sum(dist_mat < cutoff)
+
         if contact_num == 0:
             pdockq = 0.0
             pdockq_list.append(pdockq)
@@ -621,7 +626,7 @@ def compute_pdockQ_sel(
         avg_plddt = rec_in_contact.len * np.average(
             rec_in_contact.beta
         ) + lig_in_contact.len * np.average(lig_in_contact.beta)
-        avg_plddt /= contact_num
+        avg_plddt /= (rec_in_contact.len + lig_in_contact.len)
 
         x = avg_plddt * np.log10(contact_num)
         pdockq = 0.724 / (1 + np.exp(-0.052 * (x - 152.611))) + 0.018

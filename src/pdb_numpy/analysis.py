@@ -634,3 +634,144 @@ def compute_pdockQ_sel(
         pdockq_list.append(pdockq)
 
     return pdockq_list
+
+
+def compute_pdockQ2(
+    coor,
+    pae_array,
+    rec_chain=None,
+    lig_chain=None,
+    cutoff=8.0,
+):
+    r"""Compute the pdockQ2 score as define in [1]_.
+
+    .. math::
+        pDockQ_2 = \frac{L}{1 + exp [-k*(X_i-X_0)]} + b
+
+    whith:
+
+    .. math::
+        X_i = \langle \frac{1}{1+(\frac{PAE_{int}}{d_0})^2} \rangle - \langle pLDDT \rangle_{int}
+
+    :math:`L = 0.724` is the maximum value of the sigmoid,
+    :math:`k = 0.052` is the slope of the sigmoid, :math:`x_{0} = 152.611`
+    is the midpoint of the sigmoid, and :math:`b = 0.018` is the y-intercept
+    of the sigmoid.
+
+    Implementation was inspired from https://gitlab.com/ElofssonLab/afm-benchmark/-/blob/main/src/pdockq2.py
+
+    Parameters
+    ----------
+    coor : Coor
+        object containing the coordinates of the model
+    rec_chain : list
+        list of receptor chain
+    lig_chain : list
+        list of ligand chain
+    cutoff : float
+        cutoff for native contacts, default is 8.0 A
+
+    Returns
+    -------
+    list
+        pdockQ scores
+
+    References
+    ----------
+    .. [1] Zhu W, Shenoy A, Kundrotras P and Elofsson A. Evaluation of AlphaFold-Multimer prediction
+        on multi-chain protein complexes. *Bioinformatics*.
+        vol. 39, 7 (2023) btad424
+        https://academic.oup.com/bioinformatics/article/39/7/btad424/7219714
+    """
+
+    cutoff = 8.0
+    L ,x0, k, b = 1.31034849e+00, 8.47326239e+01, 7.47157696e-02, 5.01886443e-03
+    d0 = 10.0
+
+    models_CA = coor.select_atoms('name CA')
+    models_chains = np.unique(models_CA.chain)
+
+    pdockq2_list = []
+    for chain in models_chains:
+        pdockq2_list.append([])
+
+    for model in models_CA.models:
+
+        for i, chain in enumerate(models_chains):
+
+            chain_sel = model.select_atoms(f"(chain {chain} and within {cutoff} of not chain {chain})")
+            inter_chain_sel = model.select_atoms(f"(not chain {chain} {chain} and within {cutoff} of chain {chain})")
+
+            dist_mat = distance_matrix(chain_sel.xyz, inter_chain_sel.xyz)
+            
+            indexes = np.where(dist_mat < cutoff)
+            x_indexes = chain_sel.uniq_resid[indexes[0]]
+            y_indexes = inter_chain_sel.uniq_resid[indexes[1]]
+            pae_sel = pae_array[x_indexes, y_indexes]
+            
+            norm_if_interpae = np.mean(1/(1+(pae_sel/d0)**2))
+
+            plddt_avg = np.mean(model.beta[x_indexes])
+
+            x = norm_if_interpae * plddt_avg
+            y = L / (1 + np.exp(-k*(x-x0)))+b
+            pdockq2_list[i].append(y)
+
+    return pdockq2_list
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    coor_CA_CB = coor.select_atoms("name CB or (resname GLY and name CA)")
+
+    model_seq = coor.get_aa_seq()
+
+    if lig_chain is None:
+        lig_chain = [
+            min(model_seq.items(), key=lambda x: len(x[1].replace("-", "")))[0]
+        ]
+    logger.info(f'Model ligand chain : {" ".join(lig_chain)}')
+    if rec_chain is None:
+        rec_chain = [chain for chain in model_seq if chain not in lig_chain]
+    logger.info(f'Model receptor chain : {" ".join(rec_chain)}')
+
+    pdockq_list = []
+
+    for model in coor_CA_CB.models:
+        rec_in_contact = model.select_atoms(
+            f"chain {' '.join(rec_chain)} and within {cutoff} of chain {' '.join(lig_chain)}"
+        )
+
+        lig_in_contact = model.select_atoms(
+            f"chain {' '.join(lig_chain)} and within {cutoff} of chain {' '.join(rec_chain)}"
+        )
+
+        dist_mat = distance_matrix(rec_in_contact.xyz, lig_in_contact.xyz)
+        contact_num = np.sum(dist_mat < cutoff)
+
+        if contact_num == 0:
+            pdockq = 0.0
+            pdockq_list.append(pdockq)
+            continue
+
+        avg_plddt = rec_in_contact.len * np.average(
+            rec_in_contact.beta
+        ) + lig_in_contact.len * np.average(lig_in_contact.beta)
+        avg_plddt /= (rec_in_contact.len + lig_in_contact.len)
+
+        x = avg_plddt * np.log10(contact_num)
+        pdockq = 0.724 / (1 + np.exp(-0.052 * (x - 152.611))) + 0.018
+
+        pdockq_list.append(pdockq)
+
+    return pdockq_list

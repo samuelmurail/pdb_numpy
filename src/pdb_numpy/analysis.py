@@ -468,8 +468,14 @@ def compute_pdockQ(
     rec_chain=None,
     lig_chain=None,
     cutoff=8.0,
+    L = 0.724,
+    x0 = 152.611,
+    k = 0.052,
+    b = 0.018,
 ):
     r"""Compute the pdockQ score as define in [1]_.
+
+    pDockQ is computed using this equation [1]_:
 
     .. math::
         pDockQ = \frac{L}{1 + e^{-k (x-x_{0})}} + b
@@ -484,6 +490,10 @@ def compute_pdockQ(
     is the midpoint of the sigmoid, and :math:`b = 0.018` is the y-intercept
     of the sigmoid.
 
+    For the *multiple* pdockQ or `mpDockQ` [2]_ you should use this values:
+    
+    :math:`L = 0.728`, :math:`x0 = 309.375`, :math:`k = 0.098` and :math:`b = 0.262`.
+
     Implementation was inspired from https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
 
     Parameters
@@ -496,11 +506,21 @@ def compute_pdockQ(
         list of ligand chain
     cutoff : float
         cutoff for native contacts, default is 8.0 A
+    L : float
+        maximum value of the sigmoid, default is 0.728
+    x0 : float
+        midpoint of the sigmoid, default is 309.375
+    k : float
+        slope of the sigmoid, default is 0.098
+    b : float
+        y-intercept of the sigmoid, default is 0.262
+    
 
     Returns
     -------
     list
         pdockQ scores
+
 
     References
     ----------
@@ -508,6 +528,11 @@ def compute_pdockQ(
         protein-protein interactions using AlphaFold2. *Nature Communications*.
         vol. 13, 1265 (2022)
         https://www.nature.com/articles/s41467-022-28865-w
+    .. [2] Bryant P, Pozzati G, Zhu W, Shenoy A, Kundrotas P & Elofsson A. Predicting
+        the structure of large protein complexes using AlphaFold and Monte Carlo
+        tree search. *Nature Communications*.
+        vol. 13, 6028 (2022)
+        https://www.nature.com/articles/s41467-022-33729-4
     """
 
     coor_CA_CB = coor.select_atoms("name CB or (resname GLY and name CA)")
@@ -548,7 +573,7 @@ def compute_pdockQ(
         avg_plddt /= (rec_in_contact.len + lig_in_contact.len)
 
         x = avg_plddt * np.log10(contact_num)
-        pdockq = 0.724 / (1 + np.exp(-0.052 * (x - 152.611))) + 0.018
+        pdockq = L / (1 + np.exp(-k * (x - x0))) + b
 
         pdockq_list.append(pdockq)
 
@@ -560,8 +585,13 @@ def compute_pdockQ_sel(
     rec_sel,
     lig_sel,
     cutoff=8.0,
+    L = 0.724,
+    x0 = 152.611,
+    k = 0.052,
+    b = 0.018,
 ):
-    r"""Compute the pdockQ score as define in [1]_. Using two selection strings.
+    r"""Compute the pdockQ score as define in [1]_. Using two selection strings.     
+    pDockQ is computed using this equation [1]_:
 
     .. math::
         pDockQ = \frac{L}{1 + e^{-k (x-x_{0})}} + b
@@ -576,6 +606,10 @@ def compute_pdockQ_sel(
     is the midpoint of the sigmoid, and :math:`b = 0.018` is the y-intercept
     of the sigmoid.
 
+    For the *multiple* pdockQ or `mpDockQ` [2]_ you should use this values:
+    
+    :math:`L = 0.728`, :math:`x0 = 309.375`, :math:`k = 0.098` and :math:`b = 0.262`.
+
     Implementation was inspired from https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
 
     Parameters
@@ -588,11 +622,21 @@ def compute_pdockQ_sel(
         selection string for ligand
     cutoff : float
         cutoff for native contacts, default is 8.0 A
+    L : float
+        maximum value of the sigmoid, default is 0.728
+    x0 : float
+        midpoint of the sigmoid, default is 309.375
+    k : float
+        slope of the sigmoid, default is 0.098
+    b : float
+        y-intercept of the sigmoid, default is 0.262
 
     Returns
     -------
     float
         pdockQ score
+
+   
 
     References
     ----------
@@ -600,6 +644,11 @@ def compute_pdockQ_sel(
         protein-protein interactions using AlphaFold2. *Nature Communications*.
         vol. 13, 1265 (2022)
         https://www.nature.com/articles/s41467-022-28865-w
+    .. [2] Bryant P, Pozzati G, Zhu W, Shenoy A, Kundrotas P & Elofsson A. Predicting
+        the structure of large protein complexes using AlphaFold and Monte Carlo
+        tree search. *Nature Communications*.
+        vol. 13, 6028 (2022)
+        https://www.nature.com/articles/s41467-022-33729-4
     """
 
     coor_CA_CB = coor.select_atoms("name CB or (resname GLY and name CA)")
@@ -629,7 +678,7 @@ def compute_pdockQ_sel(
         avg_plddt /= (rec_in_contact.len + lig_in_contact.len)
 
         x = avg_plddt * np.log10(contact_num)
-        pdockq = 0.724 / (1 + np.exp(-0.052 * (x - 152.611))) + 0.018
+        pdockq = L / (1 + np.exp(-k * (x - x0))) + b
 
         pdockq_list.append(pdockq)
 
@@ -639,9 +688,12 @@ def compute_pdockQ_sel(
 def compute_pdockQ2(
     coor,
     pae_array,
-    rec_chain=None,
-    lig_chain=None,
     cutoff=8.0,
+    L = 1.31034849e+00,
+    x0 = 8.47326239e+01,
+    k = 7.47157696e-02,
+    b = 5.01886443e-03,
+    d0 = 10.0,
 ):
     r"""Compute the pdockQ2 score as define in [1]_.
 
@@ -683,10 +735,6 @@ def compute_pdockQ2(
         vol. 39, 7 (2023) btad424
         https://academic.oup.com/bioinformatics/article/39/7/btad424/7219714
     """
-
-    cutoff = 8.0
-    L ,x0, k, b = 1.31034849e+00, 8.47326239e+01, 7.47157696e-02, 5.01886443e-03
-    d0 = 10.0
 
     models_CA = coor.select_atoms('name CA')
     models_chains = np.unique(models_CA.chain)

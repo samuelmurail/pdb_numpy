@@ -20,6 +20,14 @@ pdb\_numpy.tests.test\_DSSP module
    :undoc-members:
    :show-inheritance:
 
+pdb\_numpy.tests.test\_abinitio module
+--------------------------------------
+
+.. automodule:: pdb_numpy.tests.test_abinitio
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pdb\_numpy.tests.test\_alignement module
 ----------------------------------------
 

@@ -1,5 +1,12 @@
 # Installation Quick Start
 
+## Throupght Pypi
+
+PDB-numpy can install easily throught Pypi:
+
+```
+pip install pdb_numpy
+```
 
 ## Get sources from the GithubRepo
 

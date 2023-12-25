@@ -85,6 +85,7 @@ def parse(mmcif_lines):
         num_array, np.arange(1, len(num_array) + 1)
     ), "Atom numbering is not consecutive"
 
+
     col_index = data_mmCIF["_atom_site"]["col_names"].index("auth_seq_id")
     resid_array = np.array(data_mmCIF["_atom_site"]["value"][col_index]).astype(
         np.int32
@@ -219,9 +220,15 @@ def parse_crystal_pack(data_mmCIF):
     alpha = float(data_mmCIF["_cell"]["angle_alpha"])
     beta = float(data_mmCIF["_cell"]["angle_beta"])
     gamma = float(data_mmCIF["_cell"]["angle_gamma"])
-    z = int(data_mmCIF["_cell"]["Z_PDB"])
-
-    sGroup = data_mmCIF["_symmetry"]["space_group_name_H-M"].replace("'", "")
+    if "Z_PDB" in data_mmCIF["_cell"]:
+        z = int(data_mmCIF["_cell"]["Z_PDB"])
+    else:
+        z = 1
+    
+    if '_symmetry' in data_mmCIF:
+        sGroup = data_mmCIF["_symmetry"]["space_group_name_H-M"].replace("'", "")
+    else:
+        sGroup = "P 1"
 
     crystal_pack = f"CRYST1{a:9.3f}{b:9.3f}{c:9.3f}{alpha:7.2f}{beta:7.2f}{gamma:7.2f} {sGroup:9} {z:3d}\n"
     return crystal_pack
@@ -711,14 +718,14 @@ def get_mmcif_string(coor):
                 for i in range(model.len):
                     alt_pos = (
                         "."
-                        if model.atom_dict["alterloc_chain_insertres"][i, 0] == b""
+                        if model.atom_dict["alterloc_chain_insertres"][i, 0] in [b"", ""]
                         else model.atom_dict["alterloc_chain_insertres"][i, 0].astype(
                             np.str_
                         )
                     )
                     insert_res = (
                         "?"
-                        if model.atom_dict["alterloc_chain_insertres"][i, 2] == b""
+                        if model.atom_dict["alterloc_chain_insertres"][i, 2] in [b"", ""]
                         else model.atom_dict["alterloc_chain_insertres"][i, 2].astype(
                             np.str_
                         )

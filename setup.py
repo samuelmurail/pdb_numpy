@@ -21,7 +21,7 @@ setup(
     author='Samuel Murail',
     author_email="samuel.murail@u-paris.fr",
     url='https://github.com/samuelmurail/pdb_numpy',
-    packages=['pdb_numpy', 'pdb_numpy.data', 'pdb_numpy.format'],
+    packages=['pdb_numpy', 'pdb_numpy.data', 'pdb_numpy.format', 'pdb_numpy.alignement'],
     package_dir={'pdb_numpy': 'src/pdb_numpy'},
     entry_points={'console_scripts': ['pdb_numpy = pdb_numpy.__main__:main']},
     include_package_data=True,

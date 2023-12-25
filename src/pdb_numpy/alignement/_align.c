@@ -449,8 +449,9 @@ SEDIHKQ";
     short int sub_matrix[MATRIX_SIZE][MATRIX_SIZE];
     printf("Hello World!\n");
     
-    
-    read_matrix("data/blosum62.txt", sub_matrix);
+    printf ("READ MATRIX:\n");
+
+    read_matrix("../data/blosum62.txt", sub_matrix);
 
     printf ("MATRIX:\n");
     for (int i = 0; i < MATRIX_SIZE; i++)
@@ -466,7 +467,7 @@ SEDIHKQ";
 
     Alignment *alignment = NULL;
     
-    alignment = align(seq_1, seq_2, "data/blosum62.txt", -11, -1);
+    alignment = align(seq_1, seq_2, "../data/blosum62.txt", -11, -1);
     printf ("Alignment:\n%s:\n%s:\n", alignment->seq1, alignment->seq2);
 
     //print_alignment(alignment);

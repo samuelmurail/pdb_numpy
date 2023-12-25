@@ -11,7 +11,7 @@ import gzip
 from .. import geom as geom
 from ..model import Model
 from .. import coor
-
+from . import encode
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -107,12 +107,12 @@ def parse(pdb_lines, pqr_format=False):
                 occ_beta_list = []  # real (6.2)
         elif line.startswith("ATOM") or line.startswith("HETATM"):
             field = line[:6].strip()
-            atom_num = int(line[6:11])
+            atom_num = encode.hy36decode(5, line[6:11])
             atom_name = line[12:16].strip()
             res_name = line[17:20].strip()
             chain = line[21]
             # To parse hexadecimal resid:
-            resid = int(line[22:26], base=resid_base)
+            resid = encode.hy36decode(4, line[22:26])
             # If resid is hexadecimal, resid_base is set to 16
             if resid >= 9999:
                 resid_base = 16
@@ -339,17 +339,17 @@ def get_pdb_string(pdb_coor):
             # To use resid > 9999, we need to convert the resid in hexa
             resid = model.atom_dict["num_resid_uniqresid"][i, 1]
             if resid > 9999:
-                resid = hex(resid).lstrip("0x")
+                resid = encode.hy36encode(4, resid)
             else:
                 resid = str(resid)
 
             # Note : Here we use 4 letter residue name.
             str_out += (
-                "{:6s}{:5d} {:4s}{:1s}{:4s}{:1s}{:>4s}{:1s}"
+                "{:6s}{:5s} {:4s}{:1s}{:4s}{:1s}{:>4s}{:1s}"
                 "   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}"
                 "          {:2s}\n".format(
                     FIELD_DICT[model.atom_dict["field"][i]],
-                    i + 1,
+                    encode.hy36encode(5, i + 1),
                     name,
                     model.atom_dict["alterloc_chain_insertres"][i, 0].astype(np.str_),
                     model.atom_dict["name_resname_elem"][i, 1].astype(np.str_),

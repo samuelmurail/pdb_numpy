@@ -8,7 +8,7 @@ import numpy as np
 from .data.aa_dict import AA_DICT
 
 # Logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('__main__.' + __name__)
 
 KEYWORDS = [
     "resname",

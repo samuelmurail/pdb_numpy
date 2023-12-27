@@ -6,7 +6,7 @@ import logging
 from scipy.spatial import distance_matrix
 
 # Logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('__main__.' + __name__)
 
 from . import alignement
 from . import select as select

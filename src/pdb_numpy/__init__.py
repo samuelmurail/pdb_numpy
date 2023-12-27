@@ -16,12 +16,13 @@ __email__ = "samuel.murail@u-paris.fr"
 __status__ = "Beta"
 
 # Logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 def show_log():
     logger.setLevel(logging.INFO)
-    # logger.addHandler(logging.StreamHandler(sys.stdout))
+    if not logger.hasHandlers():
+        logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
 from .coor import Coor

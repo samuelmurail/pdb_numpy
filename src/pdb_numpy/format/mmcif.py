@@ -15,7 +15,7 @@ from ..model import Model
 from .. import coor
 
 # Logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('__main__.' + __name__)
 
 FIELD_DICT = {"A": "ATOM  ", "H": "HETATM"}
 
@@ -81,10 +81,10 @@ def parse(mmcif_lines):
     col_index = data_mmCIF["_atom_site"]["col_names"].index("id")
     num_array = np.array(data_mmCIF["_atom_site"]["value"][col_index]).astype(np.int32)
     # check that num_array is consecutive (Maybe useless)
-    assert np.array_equal(
+    if not np.array_equal(
         num_array, np.arange(1, len(num_array) + 1)
-    ), "Atom numbering is not consecutive"
-
+    ):
+        logger.warning("WARNING: Atom numbering is not consecutive")
 
     col_index = data_mmCIF["_atom_site"]["col_names"].index("auth_seq_id")
     resid_array = np.array(data_mmCIF["_atom_site"]["value"][col_index]).astype(
@@ -454,7 +454,6 @@ def _parse_raw_mmcif_lines(mmcif_lines):
     -------
     dict
         dictionary with atom information
-
     """
 
     data_mmCIF = OrderedDict()
@@ -715,6 +714,7 @@ def get_mmcif_string(coor):
                 coor.models[0].atom_dict["occ_beta"][:, 1], dec_num=2
             )
             for model in coor.models:
+                atom_num = 1
                 for i in range(model.len):
                     alt_pos = (
                         "."
@@ -736,7 +736,7 @@ def get_mmcif_string(coor):
                         "{:<{z_size}.3f} {:<4.2f} {:<{beta_size}.2f} {:1s} {:<{resid_size}d}"
                         " {:{resname_size}s} {:{chain_size}s} {:{name_size}s} {:1d}\n".format(
                             FIELD_DICT[model.atom_dict["field"][i]],
-                            model.atom_dict["num_resid_uniqresid"][i, 0],
+                            atom_num,
                             model.atom_dict["name_resname_elem"][i, 2].astype(np.str_),
                             model.atom_dict["name_resname_elem"][i, 0].astype(np.str_),
                             alt_pos,
@@ -772,6 +772,7 @@ def get_mmcif_string(coor):
                             chain_size=chain_size,
                         )
                     )
+                    atom_num += 1
                 model_num += 1
         else:
             # Add a # for each new category

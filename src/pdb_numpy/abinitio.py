@@ -5,7 +5,7 @@ import numpy as np
 import logging
 
 # Logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('__main__.' + __name__)
 
 from .model import Model
 from .coor import Coor

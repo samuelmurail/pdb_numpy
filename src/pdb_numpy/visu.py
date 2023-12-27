@@ -6,7 +6,7 @@ from .format import pdb
 import logging
 
 # Logging
-logger = logging.getLogger('__main__.' + __name__)
+logger = logging.getLogger(__name__)
 
 
 def get_view(

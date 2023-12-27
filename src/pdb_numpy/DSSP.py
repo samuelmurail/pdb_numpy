@@ -7,7 +7,7 @@ from scipy.spatial import distance_matrix
 import logging
 
 # Logging
-logger = logging.getLogger('__main__.' + __name__)
+logger = logging.getLogger(__name__)
 
 
 def add_NH(coor):

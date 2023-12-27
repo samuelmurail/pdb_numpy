@@ -13,7 +13,7 @@ from .format import mmcif, pdb, pqr, gro
 
 
 # Logging
-logger = logging.getLogger('__main__.' + __name__)
+logger = logging.getLogger(__name__)
 
 
 class Coor:

@@ -14,7 +14,7 @@ from .. import coor
 from . import pdb
 
 # Logging
-logger = logging.getLogger('__main__.' + __name__)
+logger = logging.getLogger(__name__)
 
 FIELD_DICT = {"A": "ATOM  ", "H": "HETATM"}
 

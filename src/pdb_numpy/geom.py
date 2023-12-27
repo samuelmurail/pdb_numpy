@@ -5,7 +5,7 @@ import numpy as np
 import logging
 
 # Logging
-logger = logging.getLogger('__main__.' + __name__)
+logger = logging.getLogger(__name__)
 
 
 def angle_vec(vec_a, vec_b):

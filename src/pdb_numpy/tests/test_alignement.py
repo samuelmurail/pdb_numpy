@@ -71,6 +71,8 @@ def test_seq_align(caplog):
     alignement.print_align_seq(align_seq_1, align_seq_2, line_len=80)
     captured = caplog.records
 
+    print(captured)
+
     assert captured[-4].msg == "Identity seq1: 26.50%"
     assert captured[-3].msg == "Identity seq2: 24.56%"
     assert captured[-2].msg == "Similarity seq1: 64.04%"

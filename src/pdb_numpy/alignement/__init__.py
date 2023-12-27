@@ -11,7 +11,7 @@ from .. import geom
 from ..data.blosum import BLOSUM62
 
 # Logging
-logger = logging.getLogger('__main__.' + __name__)
+logger = logging.getLogger(__name__)
 
 def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     """Align two amino acid sequences using the Waterman - Smith Algorithm.

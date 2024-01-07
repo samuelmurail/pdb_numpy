@@ -33,6 +33,10 @@ setup(
         'pdb_numpy.data': [
             'blosum62.txt',
         ],
+        'pdb_numpy.alignement': [
+            '_align.so',
+            '_align.dylib'
+        ],
     },
     classifiers=[
         "Development Status :: 4 - Beta",

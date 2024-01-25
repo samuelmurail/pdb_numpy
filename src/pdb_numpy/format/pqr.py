@@ -130,7 +130,7 @@ def write(coor, pqr_out, overwrite=False):
     """
 
     if not overwrite and os.path.exists(pqr_out):
-        logger.info("PQR file {} already exist, file not saved".format(pqr_out))
+        logger.warning("PQR file {} already exist, file not saved".format(pqr_out))
         return
 
     filout = open(pqr_out, "w")

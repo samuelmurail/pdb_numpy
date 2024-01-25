@@ -193,7 +193,7 @@ def write(coor, gro_out, overwrite=False):
     """
 
     if not overwrite and os.path.exists(gro_out):
-        logger.info(f"GRO file {gro_out} already exist, file not saved")
+        logger.warning(f"GRO file {gro_out} already exist, file not saved")
         return
 
     filout = open(gro_out, "w")

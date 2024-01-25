@@ -861,7 +861,7 @@ def write(coor, mmcif_out, overwrite=False):
     """
 
     if not overwrite and os.path.exists(mmcif_out):
-        logger.info(f"MMCIF file {mmcif_out} already exist, file not saved")
+        logger.warning(f"MMCIF file {mmcif_out} already exist, file not saved")
         return
 
     filout = open(mmcif_out, "w")

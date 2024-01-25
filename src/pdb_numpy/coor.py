@@ -273,7 +273,7 @@ class Coor:
             gro.write(self, file_out, overwrite)
         else:
             logger.warning(
-                "File name doesn't finish with .pdb" " read it as .pdb anyway"
+                "File name doesn't finish with pdb/pqr/cif/gro read it as ``.pdb``."
             )
             pdb.write(self, file_out, overwrite)
 

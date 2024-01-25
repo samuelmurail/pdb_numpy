@@ -393,7 +393,7 @@ def write(coor, pdb_out, overwrite=False):
     """
 
     if not overwrite and os.path.exists(pdb_out):
-        logger.info(f"PDB file {pdb_out} already exist, file not saved")
+        logger.warning(f"PDB file {pdb_out} already exist, file not saved")
         return
 
     filout = open(pdb_out, "w")

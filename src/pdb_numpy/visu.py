@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def get_view(
+def get_nglview(
     coor,
     ref=None,
     cartoon=True,
@@ -43,7 +43,7 @@ def get_view(
     >>> import pdb_numpy
     >>> from pdb_numpy import visu
     >>> coor = pdb_numpy.Coor('test.pdb')
-    >>> visu.get_view(coor)
+    >>> visu.get_nglview(coor)
 
     """
 
@@ -68,6 +68,63 @@ def get_view(
         view.add_component(ref_str, default=False)
         view[1].add_cartoon(selection="protein", color='red')
         view[1].add_representation("licorice", selection="ligand", color="red")
+
+    return view
+
+
+def get_py3dmolview(
+    coor,
+    ref=None,
+    cartoon=True,
+    licorice=False,
+    unitcell=False,
+    color="chainid",
+    **kwargs
+):
+    """Return a `py3dmol` object to be view in
+    a jupyter notebook.
+
+    Parameters
+    ----------
+    coor : Coor
+        Coor object
+    ref : Coor
+        Reference Coor object
+    licorice : bool, optional
+        Add a licorice representation of the ligand, by default False
+    color : str, optional
+        Color representation, by default 'chain'
+
+
+    Returns
+    -------
+    py3dmol.Widget
+        py3dmol object
+
+    Examples
+    --------
+    >>> import pdb_numpy
+    >>> from pdb_numpy import visu
+    >>> coor = pdb_numpy.Coor('test.pdb')
+    >>> visu.get_py3dmolview(coor)
+
+    """
+
+    try:
+        import py3Dmol
+    except ImportError:
+        logger.warning("py3dmol is not installed\n Use `pip install py3dmol`")
+        return
+
+    view = py3Dmol.view(width=400, height=400)
+    view.addModelsAsFrames(pdb.get_pdb_string(coor))
+    view.setStyle({'model': -1}, {"cartoon": {'color': 'spectrum'}})
+
+    if ref is not None:
+        view.addModelsAsFrames(pdb.get_pdb_string(ref))
+        view.setStyle({'model': -1}, {"cartoon": {'color': 'red'}})
+
+    view.zoomTo()
 
     return view
 

@@ -697,6 +697,7 @@ def align_chain_permutation(
             )
             index_common[chain_i, chain_j] = [index_1, index_2]
 
+    # Compute RMSD for all chains permutation
     rmsd_perm = []
     index_perm = []
     for perm_1, perm_2 in zip(chain_1_perm, chain_2_perm):
@@ -724,6 +725,10 @@ def align_chain_permutation(
             if rmsd < min_rmsd:
                 min_index = i
                 min_rmsd = rmsd
+    
+    # Do the alignement with the best permutation
+    min_index_perm = index_perm[min_index]
+    coor_align(coor_1, coor_2, min_index_perm[0], min_index_perm[1])
 
     return (
         rmsd_perm[min_index],

@@ -156,6 +156,12 @@ void read_matrix(const char *matrix_file, short int matrix[MATRIX_SIZE][MATRIX_S
         }
         i++;
     }
+
+    // Free dynamically allocated memory for line
+    free(line);
+
+    // Close file
+    fclose(fp);
 }
 
 Alignment *align_test(const char *seq1, const char *seq2, const char *matrix_file, int GAP_COST, int GAP_EXT)
@@ -186,8 +192,10 @@ void check_seq(const char *seq)
     }
 }
 
-Alignment *align(const char *seq1, const char *seq2, const char *matrix_file, int GAP_COST, int GAP_EXT)
 //void align(const char *seq1, const char *seq2, const char *matrix_file, int GAP_COST, int GAP_EXT)
+
+
+Alignment *align(const char *seq1, const char *seq2, const char *matrix_file, int GAP_COST, int GAP_EXT)
 {
     short int subs_matrix[MATRIX_SIZE][MATRIX_SIZE];
     int seq1_len = strlen(seq1), seq2_len = strlen(seq2);
@@ -258,7 +266,7 @@ Alignment *align(const char *seq1, const char *seq2, const char *matrix_file, in
     //for (int i = seq1_len-show_num; i <= seq1_len; i++)
     //{
     //    for (int j = seq2_len-show_num; j <= seq2_len; j++)
-    //    {
+    //    {const char *seq1, const char *seq2
     //        printf ("%3d ", score_matrix[i][j]);
     //    }
     //    printf("\n");
@@ -381,7 +389,7 @@ Alignment *align(const char *seq1, const char *seq2, const char *matrix_file, in
     //printf ("Alignment len align_len: %d\n", align_len + 1);
 
     int rev_i = 0;
-    for (int i = counter; i >= 0; i--) {
+    for (int i = counter - 1; i >= 0; i--) {
         if ((align_seq_1[i] == '\0') || (align_seq_2[i] == '\0')) {
             continue;
         }
@@ -427,6 +435,25 @@ void free_align(Alignment *align)
         printf("Warning: seq2 is NULL\n");
     }
 
+    // Free memory for the alignment structure
+    free(align);
+
+}
+
+void test(char *seq_1, char *seq_2) {
+
+    printf("Test\n");
+
+    Alignment *alignment = NULL;
+    
+    alignment = align(seq_1, seq_2, "../data/blosum62.txt", -11, -1);
+    printf ("Alignment:\n%s:\n%s:\n", alignment->seq1, alignment->seq2);
+
+    //print_alignment(alignment);
+
+    free_align(alignment);
+
+
 }
 
 int main(int argc, char *argv[])
@@ -446,12 +473,12 @@ SEDIHKQ";
     /*char *seq_1 = "AQDMVSPPPPIADEPLTVNT";
     char *seq_2 = "VSPPPPIADEP";*/
 
-    short int sub_matrix[MATRIX_SIZE][MATRIX_SIZE];
+    //short int sub_matrix[MATRIX_SIZE][MATRIX_SIZE];
     printf("Hello World!\n");
     
     printf ("READ MATRIX:\n");
 
-    read_matrix("../data/blosum62.txt", sub_matrix);
+    /*read_matrix("../data/blosum62.txt", sub_matrix);
 
     printf ("MATRIX:\n");
     for (int i = 0; i < MATRIX_SIZE; i++)
@@ -461,21 +488,20 @@ SEDIHKQ";
             printf("%2d ", sub_matrix[i][j]);
         }
         printf("\n");
-    }
+    }*/
 
     //Alignment *alignment;
 
-    Alignment *alignment = NULL;
-    
-    alignment = align(seq_1, seq_2, "../data/blosum62.txt", -11, -1);
-    printf ("Alignment:\n%s:\n%s:\n", alignment->seq1, alignment->seq2);
-
-    //print_alignment(alignment);
-
-    free_align(alignment);
-
     //free(alignment->seq2);
     //free(alignment->seq1);
+
+    int iter_num = 1000;
+
+    for (int i = 0; i < iter_num; i++) {
+        printf("Test %d\n", i);
+        test(seq_1, seq_2);
+    }
+
 
     return EXIT_SUCCESS;
 

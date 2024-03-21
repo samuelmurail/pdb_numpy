@@ -100,6 +100,17 @@ def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
 
     return seq_1_aligned.decode("ascii"), seq_2_aligned.decode("ascii")
 
+def align_seq_cython(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
+    from . import align_cython
+
+    return align_cython.align_seq(seq_1, seq_2, gap_cost, gap_extension)
+
+
+def align_seq_cython_2(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
+    from . import align_cython
+
+    return align_cython.align_seq_2(seq_1.encode('utf-8'), seq_2.encode('utf-8'), gap_cost, gap_extension)
+
 
 def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     """Align two amino acid sequences using the Waterman - Smith Algorithm.

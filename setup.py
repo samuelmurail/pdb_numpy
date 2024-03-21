@@ -1,13 +1,21 @@
+import numpy as np
+
 from setuptools import setup, find_packages
+from distutils.extension import Extension
+from Cython.Distutils import build_ext
 
 version="0.0.2"
 
 with open('README.rst', encoding='utf-8') as readme_file:
     readme = readme_file.read()
 
+ext_modules = [Extension("pdb_numpy.alignement.align_cython", ["src/pdb_numpy/alignement/align_cython.pyx"],
+                          include_dirs=[np.get_include()])]
+
 requirements = [
     'numpy>=1.2',
     'scipy>=1.5',
+    'cython>=3.0',
 ]
 
 setup(
@@ -29,6 +37,7 @@ setup(
     install_requires=requirements,
     license='GNUv2.0',
     zip_safe=False,
+    ext_modules = ext_modules,
     package_data={
         'pdb_numpy.data': [
             'blosum62.txt',

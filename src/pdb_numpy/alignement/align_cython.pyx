@@ -190,56 +190,57 @@ def align_seq(str seq_1, str seq_2, int gap_cost=-11, int gap_extension=-1):
 
     return align_1, align_2
 
-cdef int convert_aa(char aa):
+cdef int convert_aa(str aa):
 
-    if aa == b'A':
+    if aa == 'A':
         return 0
-    if aa == b'R':
+    if aa == 'R':
         return 1
-    if aa == b'N':
+    if aa == 'N':
         return 2
-    if aa == b'D':
+    if aa == 'D':
         return 3
-    if aa == b'C':
+    if aa == 'C':
         return 4
-    if aa == b'Q':
+    if aa == 'Q':
         return 5
-    if aa == b'E':
+    if aa == 'E':
         return 6
-    if aa == b'G':
+    if aa == 'G':
         return 7
-    if aa == b'H':
+    if aa == 'H':
         return 8
-    if aa == b'I':
+    if aa == 'I':
         return 9
-    if aa == b'L':
+    if aa == 'L':
         return 10
-    if aa == b'K':
+    if aa == 'K':
         return 11
-    if aa == b'M':
+    if aa == 'M':
         return 12
-    if aa == b'F':
+    if aa == 'F':
         return 13
-    if aa == b'P':
+    if aa == 'P':
         return 14
-    if aa == b'S':
+    if aa == 'S':
         return 15
-    if aa == b'T':
+    if aa == 'T':
         return 16
-    if aa == b'W':
+    if aa == 'W':
         return 17
-    if aa == b'Y':
+    if aa == 'Y':
         return 18
-    if aa == b'V':
+    if aa == 'V':
         return 19
 
+    print(f"Warning {aa} not recognize")
     return -1;
 
-cdef np.ndarray[np.int8_t, ndim=1] convert_seq(char* seq):
+cdef np.ndarray[np.int8_t, ndim=1] convert_seq(str seq):
 
     cdef unsigned int i, seq_len = 0;
     
-    for i in range(strlen(seq)):
+    for i in range(len(seq)):
         if seq[i] != b'-':
             seq_len += 1
     
@@ -247,7 +248,7 @@ cdef np.ndarray[np.int8_t, ndim=1] convert_seq(char* seq):
 
     cdef int k = 0
 
-    for i in range(strlen(seq)):
+    for i in range(len(seq)):
         if seq[i] != b'-':
             new_seq[k] = convert_aa(seq[i])
             k += 1
@@ -255,7 +256,7 @@ cdef np.ndarray[np.int8_t, ndim=1] convert_seq(char* seq):
     return new_seq
     #print("new seq:", new_seq)
     
-def align_seq_2(char* seq_1, char* seq_2, short int gap_cost=-11, short int gap_extension=-1):
+def align_seq_2(str seq_1, str seq_2, short int gap_cost=-11, short int gap_extension=-1):
     """Align two amino acid sequences using the Waterman - Smith Algorithm.
 
     Parameters
@@ -293,21 +294,17 @@ def align_seq_2(char* seq_1, char* seq_2, short int gap_cost=-11, short int gap_
     len_2 = len(seq_2_int)
 
     cdef:
-        #str seq_1_nogap = "", seq_2_nogap = ""
-        char * seq_1_nogap = <char *> malloc((len_1 + 1) * sizeof(char))
-        char * seq_2_nogap = <char *> malloc((len_2 + 1) * sizeof(char))
-        int i_nogap = 0
+        str seq_1_nogap = "", seq_2_nogap = ""
+        #char * seq_1_nogap = <char *> malloc((len_1 + 1) * sizeof(char))
+        #char * seq_2_nogap = <char *> malloc((len_2 + 1) * sizeof(char))
     
-    for i in range(strlen(seq_1)):
+    for i in range(len(seq_1)):
         if seq_1[i] != b'-':
-            seq_1_nogap[i_nogap] = seq_1[i]
-            i_nogap += 1
+            seq_1_nogap += seq_1[i]
             
-    i_nogap = 0
-    for i in range(strlen(seq_2)):
+    for i in range(len(seq_2)):
         if seq_2[i] != b'-':
-            seq_2_nogap[i_nogap] = seq_2[i]
-            i_nogap += 1
+            seq_2_nogap += seq_2[i]
 
     # Initialize the matrix
     cdef:
@@ -318,6 +315,9 @@ def align_seq_2(char* seq_1, char* seq_2, short int gap_cost=-11, short int gap_
         short [:, ::1] BLOSUM_62_array = get_blosum62()
 
     choices[:] = [0,0,0]
+
+    #print(matrix[0,0], matrix[0,1])
+    #print(BLOSUM_62_array[0,0], BLOSUM_62_array[1,0])
 
     # Fill the matrix
     for i in range(len_1):
@@ -344,6 +344,8 @@ def align_seq_2(char* seq_1, char* seq_2, short int gap_cost=-11, short int gap_
                     max_index = 1
                 else:
                     max_index = 2
+            
+            #print(choices, max_index)
             
             matrix[i + 1, j + 1] = choices[max_index]
             prev_line[j + 1] = False
@@ -405,8 +407,8 @@ def align_seq_2(char* seq_1, char* seq_2, short int gap_cost=-11, short int gap_
     if j != len_2:
         align_1 = (len_2 - j) * "-"
 
-    align_1 += seq_1_nogap[i:].decode('utf-8')
-    align_2 += seq_2_nogap[j:].decode('utf-8')
+    align_1 += seq_1_nogap[i:]
+    align_2 += seq_2_nogap[j:]
 
     # i -= 1
     # j -= 1
@@ -416,27 +418,27 @@ def align_seq_2(char* seq_1, char* seq_2, short int gap_cost=-11, short int gap_
             matrix[i, j]
             == matrix[i - 1, j - 1] + BLOSUM_62_array[(seq_1_int[i - 1], seq_2_int[j - 1])]
         ):
-            align_1 = str(seq_1_nogap[i - 1]) + align_1
-            align_2 = str(seq_2_nogap[j - 1]) + align_2
+            align_1 = seq_1_nogap[i - 1] + align_1
+            align_2 = seq_2_nogap[j - 1] + align_2
             i -= 1
             j -= 1
         elif (
             matrix[i, j] == matrix[i - 1, j] + gap_cost
             or matrix[i, j] == matrix[i - 1, j] + gap_extension
         ):
-            align_1 = str(seq_1_nogap[i - 1]) + align_1
-            align_2 = "-" + align_2
+            align_1 = seq_1_nogap[i - 1] + align_1
+            align_2 = str("-") + align_2
             i -= 1
         elif (
             matrix[i, j] == matrix[i, j - 1] + gap_cost
             or matrix[i, j] == matrix[i, j - 1] + gap_extension
         ):
-            align_1 = "-" + align_1
-            align_2 = str(seq_2_nogap[j - 1]) + align_2
+            align_1 = str("-") + align_1
+            align_2 = seq_2_nogap[j - 1] + align_2
             j -= 1
 
-    align_1 = seq_1_nogap[:i].decode('utf-8') + align_1
-    align_2 = seq_2_nogap[:j].decode('utf-8') + align_2
+    align_1 = seq_1_nogap[:i] + align_1
+    align_2 = seq_2_nogap[:j] + align_2
 
     if i != 0:
         align_2 = i * "-" + align_2
@@ -447,12 +449,9 @@ def align_seq_2(char* seq_1, char* seq_2, short int gap_cost=-11, short int gap_
     #print(align_2)
     #print(align_1.encode('utf-8'), align_2.encode('utf-8'))
 
-    #assert len(align_1) == len(align_2)
+    assert len(align_1) == len(align_2)
 
-    free(seq_1_nogap)
-    free(seq_2_nogap)
-
-    #return align_1, align_2
+    return align_1, align_2
 
 """    
 

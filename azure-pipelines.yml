@@ -31,7 +31,7 @@ steps:
 
 - script: |
     pip install pytest pytest-azurepipelines pytest-cov
-    python setup.py build
+    python setup.py pytest
     pytest --cov-report=xml --cov=pdb_numpy
   displayName: 'pytest'
 

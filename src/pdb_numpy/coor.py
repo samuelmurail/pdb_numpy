@@ -406,9 +406,18 @@ class Coor:
             a new Coor object with the selected atoms
         """
 
-        new_coor = copy.deepcopy(self)
-        for i in range(len(new_coor.models)):
-            new_coor.models[i] = new_coor.models[i].select_index(indexes)
+        #new_coor = copy.deepcopy(self)
+        #for i in range(len(new_coor.models)):
+        #    new_coor.models[i] = new_coor.models[i].select_index(indexes)
+
+        new_coor = Coor()
+        new_coor.models = [model.select_index(indexes) for model in self.models]
+        new_coor.active_model = self.active_model
+        new_coor.crystal_pack = self.crystal_pack
+        new_coor.data_mmCIF = self.data_mmCIF
+        new_coor.symmetry = self.symmetry
+        new_coor.transformation = self.transformation
+        new_coor.data_mmCIF = self.data_mmCIF
 
         return new_coor
 
@@ -587,12 +596,22 @@ class Coor:
 
         # Get CA atoms
         CA_index = self.get_index_select("name CA and not altloc B C D", frame=frame)
+        CA_sel = self.select_atoms("name CA", frame=frame)
+
         N_C_CB_sel = self.select_atoms("name N C CB and not altloc B C D", frame=frame)
 
         seq_dict = {}
         aa_num_dict = {}
 
-        for i in CA_index:
+        for i, chain, res_name, resid, uniq_resid in zip(
+            CA_index,
+            CA_sel.models[frame].atom_dict["alterloc_chain_insertres"][:, 1],
+            CA_sel.models[frame].atom_dict["name_resname_elem"][:, 1],
+            CA_sel.models[frame].atom_dict["num_resid_uniqresid"][:, 1],
+            CA_sel.models[frame].atom_dict["num_resid_uniqresid"][:, 2]
+        ):
+            """"
+            for i in CA_index:
             chain = (
                 self.models[frame]
                 .atom_dict["alterloc_chain_insertres"][i, 1]
@@ -603,6 +622,7 @@ class Coor:
             )
             resid = self.models[frame].atom_dict["num_resid_uniqresid"][i, 1]
             uniq_resid = self.models[frame].atom_dict["num_resid_uniqresid"][i, 2]
+            """
 
             if chain not in seq_dict:
                 seq_dict[chain] = ""

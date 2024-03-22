@@ -13,6 +13,21 @@ from . import select
 logger = logging.getLogger(__name__)
 
 
+KEYWORD_DICT = {
+    "num": ["num_resid_uniqresid", 0],
+    "resname": ["name_resname_elem", 1],
+    "chain": ["alterloc_chain_insertres", 1],
+    "name": ["name_resname_elem", 0],
+    "altloc": ["alterloc_chain_insertres", 0],
+    "resid": ["num_resid_uniqresid", 1],
+    "residue": ["num_resid_uniqresid", 2],
+    "beta": ["occ_beta", 1],
+    "occupancy": ["occ_beta", 0],
+    "x": ["xyz", 0],
+    "y": ["xyz", 1],
+    "z": ["xyz", 2],
+}
+
 class Model:
     """Model class for pdb_numpy
 
@@ -253,24 +268,9 @@ class Model:
             a list of boolean values for each atom in the PDB file
         """
 
-        keyword_dict = {
-            "num": ["num_resid_uniqresid", 0],
-            "resname": ["name_resname_elem", 1],
-            "chain": ["alterloc_chain_insertres", 1],
-            "name": ["name_resname_elem", 0],
-            "altloc": ["alterloc_chain_insertres", 0],
-            "resid": ["num_resid_uniqresid", 1],
-            "residue": ["num_resid_uniqresid", 2],
-            "beta": ["occ_beta", 1],
-            "occupancy": ["occ_beta", 0],
-            "x": ["xyz", 0],
-            "y": ["xyz", 1],
-            "z": ["xyz", 2],
-        }
-
-        if column in keyword_dict:
-            col = keyword_dict[column][0]
-            index = keyword_dict[column][1]
+        if column in KEYWORD_DICT:
+            col = KEYWORD_DICT[column][0]
+            index = KEYWORD_DICT[column][1]
         else:
             raise ValueError(f"Column {column} not recognized")
 
@@ -420,10 +420,10 @@ class Model:
         Coor
             a new Coor object with the selected atoms
         """
-
-        new_model = copy.deepcopy(self)
-
-        for key in new_model.atom_dict:
+        
+        new_model = Model()
+        new_model.atom_dict = {}
+        for key in self.atom_dict:
             new_model.atom_dict[key] = self.atom_dict[key][indexes]
 
         return new_model
@@ -501,7 +501,7 @@ class Model:
             return np.array([False] * self.xyz.shape[0])
         dist_mat = distance_matrix(self.xyz, sel_2.xyz)
 
-        # Retrun column under cutoff_max:
+        # Return column under cutoff_max:
         return dist_mat.min(1) < cutoff
 
     def add_atom(

@@ -6,9 +6,12 @@ import numpy as np
 from itertools import permutations
 import logging
 
+#from . import align_cython
+
 from .. import analysis
 from .. import geom
 from ..data.blosum import BLOSUM62
+
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -98,18 +101,12 @@ def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     free_align.argtypes = [ctypes.POINTER(test)]
     free_align(alignement_res)
 
+    #print(f"Max score: {alignement_res.contents.score}")
     return seq_1_aligned.decode("ascii"), seq_2_aligned.decode("ascii")
 
 def align_seq_cython(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     from . import align_cython
-
     return align_cython.align_seq(seq_1, seq_2, gap_cost, gap_extension)
-
-
-def align_seq_cython_2(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
-    from . import align_cython
-
-    return align_cython.align_seq_2(seq_1, seq_2, gap_cost, gap_extension)
 
 
 def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
@@ -179,7 +176,7 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     show_num = 10
     # print(matrix[:show_num, :show_num])
 
-    # print("Max score:", max_score, max_index)
+    #print("Max score:", max_score, max_index)
 
     index_list = []
     for i in range(len(max_index[0])):
@@ -191,6 +188,7 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
 
     i = index_list[0][0]
     j = index_list[0][1]
+    #print(i,j)
 
     # Traceback and compute the alignment
     align_1 = ""
@@ -241,6 +239,7 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
         align_1 = j * "-" + align_1
 
     assert len(align_1) == len(align_2)
+    #print(f"Max score: {max_score}")
 
     return align_1, align_2
 

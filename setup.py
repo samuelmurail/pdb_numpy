@@ -2,7 +2,6 @@ import numpy as np
 
 from setuptools import setup, find_packages
 from distutils.extension import Extension
-from Cython.Distutils import build_ext
 
 version="0.0.2"
 
@@ -35,6 +34,8 @@ setup(
     include_package_data=True,
     python_requires='>=3.7',
     install_requires=requirements,
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
     license='GNUv2.0',
     zip_safe=False,
     ext_modules = ext_modules,

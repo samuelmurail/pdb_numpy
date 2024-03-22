@@ -30,7 +30,8 @@ steps:
   displayName: 'Install dependencies'
 
 - script: |
-    pip install pytest pytest-azurepipelines pytest-cov pytest-runner
+    pip install pytest pytest-azurepipelines pytest-cov
+    python setup.py build
     pytest --cov-report=xml --cov=pdb_numpy
   displayName: 'pytest'
 

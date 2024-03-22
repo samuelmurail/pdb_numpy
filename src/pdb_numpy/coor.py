@@ -513,19 +513,11 @@ class Coor:
         seq_dict = {}
         aa_num_dict = {}
 
-        for i in range(CA_sel.len):
-            chain = (
-                CA_sel.models[frame]
-                .atom_dict["alterloc_chain_insertres"][i, 1]
-                .astype(np.str_)
-            )
-            res_name = (
-                CA_sel.models[frame]
-                .atom_dict["name_resname_elem"][i, 1]
-                .astype(np.str_)
-            )
-            resid = CA_sel.models[frame].atom_dict["num_resid_uniqresid"][i, 1]
-
+        for chain, res_name, resid in zip(
+            CA_sel.models[frame].atom_dict["alterloc_chain_insertres"][:, 1],
+            CA_sel.models[frame].atom_dict["name_resname_elem"][:, 1],
+            CA_sel.models[frame].atom_dict["num_resid_uniqresid"][:, 1],
+        ):
             if chain not in seq_dict:
                 seq_dict[chain] = ""
                 aa_num_dict[chain] = resid
@@ -542,7 +534,7 @@ class Coor:
                 seq_dict[chain] += AA_DICT[res_name]
                 aa_num_dict[chain] = resid
             else:
-                logger.warning(f"Residue {res_name} in chain {chain} not " "recognized")
+                logger.warning(f"Residue {res_name} in chain {chain} not recognized")
 
         return seq_dict
 

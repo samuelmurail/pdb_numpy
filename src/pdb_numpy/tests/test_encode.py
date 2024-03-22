@@ -7,19 +7,19 @@ Tests for _alignement functions
 
 from pdb_numpy.format import encode
 
-def test_encode_pure():
 
+def test_encode_pure():
     for value in range(1000):
-      s = encode.encode_pure(digits=encode.digits_upper, value=value)
-      d = encode.decode_pure(digits_values=encode.digits_upper_values, s=s)
-      assert d == value
+        s = encode.encode_pure(digits=encode.digits_upper, value=value)
+        d = encode.decode_pure(digits_values=encode.digits_upper_values, s=s)
+        assert d == value
 
     def recycle4(value, encoded):
         s = encode.hy36encode(width=4, value=value)
         assert s == encoded
         d = encode.hy36decode(width=4, s=s)
         assert d == value
-    
+
     assert encode.hy36decode(width=4, s="    ") == 0
     assert encode.hy36decode(width=4, s="  -0") == 0
     recycle4(-999, "-999")
@@ -67,25 +67,27 @@ def test_encode_pure():
     recycle4(10046, "A01A")
     recycle4(10071, "A01Z")
     recycle4(10072, "A020")
-    recycle4(10000+36**2-1, "A0ZZ")
-    recycle4(10000+36**2, "A100")
-    recycle4(10000+36**3-1, "AZZZ")
-    recycle4(10000+36**3, "B000")
-    recycle4(10000+26*36**3-1, "ZZZZ")
-    recycle4(10000+26*36**3, "a000")
-    recycle4(10000+26*36**3+35, "a00z")
-    recycle4(10000+26*36**3+36, "a010")
-    recycle4(10000+26*36**3+36**2-1, "a0zz")
-    recycle4(10000+26*36**3+36**2, "a100")
-    recycle4(10000+26*36**3+36**3-1, "azzz")
-    recycle4(10000+26*36**3+36**3, "b000")
-    recycle4(10000+2*26*36**3-1, "zzzz")
+    recycle4(10000 + 36**2 - 1, "A0ZZ")
+    recycle4(10000 + 36**2, "A100")
+    recycle4(10000 + 36**3 - 1, "AZZZ")
+    recycle4(10000 + 36**3, "B000")
+    recycle4(10000 + 26 * 36**3 - 1, "ZZZZ")
+    recycle4(10000 + 26 * 36**3, "a000")
+    recycle4(10000 + 26 * 36**3 + 35, "a00z")
+    recycle4(10000 + 26 * 36**3 + 36, "a010")
+    recycle4(10000 + 26 * 36**3 + 36**2 - 1, "a0zz")
+    recycle4(10000 + 26 * 36**3 + 36**2, "a100")
+    recycle4(10000 + 26 * 36**3 + 36**3 - 1, "azzz")
+    recycle4(10000 + 26 * 36**3 + 36**3, "b000")
+    recycle4(10000 + 2 * 26 * 36**3 - 1, "zzzz")
+
     #
     def recycle5(value, encoded):
         s = encode.hy36encode(width=5, value=value)
         assert s == encoded
         d = encode.hy36decode(width=5, s=s)
         assert d == value
+
     #
     assert encode.hy36decode(width=5, s="     ") == 0
     assert encode.hy36decode(width=5, s="   -0") == 0
@@ -105,27 +107,27 @@ def test_encode_pure():
     recycle5(100046, "A001A")
     recycle5(100071, "A001Z")
     recycle5(100072, "A0020")
-    recycle5(100000+36**2-1, "A00ZZ")
-    recycle5(100000+36**2, "A0100")
-    recycle5(100000+36**3-1, "A0ZZZ")
-    recycle5(100000+36**3, "A1000")
-    recycle5(100000+36**4-1, "AZZZZ")
-    recycle5(100000+36**4, "B0000")
-    recycle5(100000+2*36**4, "C0000")
-    recycle5(100000+26*36**4-1, "ZZZZZ")
-    recycle5(100000+26*36**4, "a0000")
-    recycle5(100000+26*36**4+36-1, "a000z")
-    recycle5(100000+26*36**4+36, "a0010")
-    recycle5(100000+26*36**4+36**2-1, "a00zz")
-    recycle5(100000+26*36**4+36**2, "a0100")
-    recycle5(100000+26*36**4+36**3-1, "a0zzz")
-    recycle5(100000+26*36**4+36**3, "a1000")
-    recycle5(100000+26*36**4+36**4-1, "azzzz")
-    recycle5(100000+26*36**4+36**4, "b0000")
-    recycle5(100000+2*26*36**4-1, "zzzzz")
+    recycle5(100000 + 36**2 - 1, "A00ZZ")
+    recycle5(100000 + 36**2, "A0100")
+    recycle5(100000 + 36**3 - 1, "A0ZZZ")
+    recycle5(100000 + 36**3, "A1000")
+    recycle5(100000 + 36**4 - 1, "AZZZZ")
+    recycle5(100000 + 36**4, "B0000")
+    recycle5(100000 + 2 * 36**4, "C0000")
+    recycle5(100000 + 26 * 36**4 - 1, "ZZZZZ")
+    recycle5(100000 + 26 * 36**4, "a0000")
+    recycle5(100000 + 26 * 36**4 + 36 - 1, "a000z")
+    recycle5(100000 + 26 * 36**4 + 36, "a0010")
+    recycle5(100000 + 26 * 36**4 + 36**2 - 1, "a00zz")
+    recycle5(100000 + 26 * 36**4 + 36**2, "a0100")
+    recycle5(100000 + 26 * 36**4 + 36**3 - 1, "a0zzz")
+    recycle5(100000 + 26 * 36**4 + 36**3, "a1000")
+    recycle5(100000 + 26 * 36**4 + 36**4 - 1, "azzzz")
+    recycle5(100000 + 26 * 36**4 + 36**4, "b0000")
+    recycle5(100000 + 2 * 26 * 36**4 - 1, "zzzzz")
     #
-    for width in [4,5]:
-        for value in [-(10**(width-1)), 10**width+2*26*36**(width-1)]:
+    for width in [4, 5]:
+        for value in [-(10 ** (width - 1)), 10**width + 2 * 26 * 36 ** (width - 1)]:
             try:
                 encode.hy36encode(width=width, value=value)
             except (ValueError, RuntimeError) as e:
@@ -133,9 +135,10 @@ def test_encode_pure():
             else:
                 raise RuntimeError("Exception expected.")
     #
-    for width,ss in [
+    for width, ss in [
         (4, ["", "    0", " abc", "abc-", "A=BC", "40a0", "40A0"]),
-        (5, ["", "     0", " abcd", "ABCD-", "a=bcd", "410b0", "410B0"])]:
+        (5, ["", "     0", " abcd", "ABCD-", "a=bcd", "410b0", "410B0"]),
+    ]:
         for s in ss:
             try:
                 encode.hy36decode(width, s=s)

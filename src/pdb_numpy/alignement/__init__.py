@@ -6,7 +6,7 @@ import numpy as np
 from itertools import permutations
 import logging
 
-#from . import align_cython
+# from . import align_cython
 
 from .. import analysis
 from .. import geom
@@ -15,6 +15,7 @@ from ..data.blosum import BLOSUM62
 
 # Logging
 logger = logging.getLogger(__name__)
+
 
 def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     """Align two amino acid sequences using the Waterman - Smith Algorithm.
@@ -36,11 +37,11 @@ def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
         Aligned sequence 1
     str
         Aligned sequence 2
-    
+
     .note:: This function is based on the C implementation of the Waterman - Smith Algorithm.
 
         To compile the C code, run the following command in the src/pdb_numpy/alignement folder:
-        
+
         in Linux:
         ```
         gcc -shared -o _align.so -fPIC _align.c
@@ -101,11 +102,13 @@ def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     free_align.argtypes = [ctypes.POINTER(test)]
     free_align(alignement_res)
 
-    #print(f"Max score: {alignement_res.contents.score}")
+    # print(f"Max score: {alignement_res.contents.score}")
     return seq_1_aligned.decode("ascii"), seq_2_aligned.decode("ascii")
+
 
 def align_seq_cython(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     from . import align_cython
+
     return align_cython.align_seq(seq_1, seq_2, gap_cost, gap_extension)
 
 
@@ -176,7 +179,7 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     show_num = 10
     # print(matrix[:show_num, :show_num])
 
-    #print("Max score:", max_score, max_index)
+    # print("Max score:", max_score, max_index)
 
     index_list = []
     for i in range(len(max_index[0])):
@@ -188,7 +191,7 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
 
     i = index_list[0][0]
     j = index_list[0][1]
-    #print(i,j)
+    # print(i,j)
 
     # Traceback and compute the alignment
     align_1 = ""
@@ -239,7 +242,7 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
         align_1 = j * "-" + align_1
 
     assert len(align_1) == len(align_2)
-    #print(f"Max score: {max_score}")
+    # print(f"Max score: {max_score}")
 
     return align_1, align_2
 
@@ -735,7 +738,7 @@ def align_chain_permutation(
             if rmsd < min_rmsd:
                 min_index = i
                 min_rmsd = rmsd
-    
+
     # Do the alignement with the best permutation
     min_index_perm = index_perm[min_index]
     coor_align(coor_1, coor_2, min_index_perm[0], min_index_perm[1])

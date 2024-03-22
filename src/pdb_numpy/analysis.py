@@ -468,10 +468,10 @@ def compute_pdockQ(
     rec_chain=None,
     lig_chain=None,
     cutoff=8.0,
-    L = 0.724,
-    x0 = 152.611,
-    k = 0.052,
-    b = 0.018,
+    L=0.724,
+    x0=152.611,
+    k=0.052,
+    b=0.018,
 ):
     r"""Compute the pdockQ score as define in [1]_.
 
@@ -491,7 +491,7 @@ def compute_pdockQ(
     of the sigmoid.
 
     For the *multiple* pdockQ or `mpDockQ` [2]_ you should use this values:
-    
+
     :math:`L = 0.728`, :math:`x0 = 309.375`, :math:`k = 0.098` and :math:`b = 0.262`.
 
     Implementation was inspired from https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
@@ -514,7 +514,7 @@ def compute_pdockQ(
         slope of the sigmoid, default is 0.098
     b : float
         y-intercept of the sigmoid, default is 0.262
-    
+
 
     Returns
     -------
@@ -570,7 +570,7 @@ def compute_pdockQ(
         avg_plddt = rec_in_contact.len * np.average(
             rec_in_contact.beta
         ) + lig_in_contact.len * np.average(lig_in_contact.beta)
-        avg_plddt /= (rec_in_contact.len + lig_in_contact.len)
+        avg_plddt /= rec_in_contact.len + lig_in_contact.len
 
         x = avg_plddt * np.log10(contact_num)
         pdockq = L / (1 + np.exp(-k * (x - x0))) + b
@@ -585,12 +585,12 @@ def compute_pdockQ_sel(
     rec_sel,
     lig_sel,
     cutoff=8.0,
-    L = 0.724,
-    x0 = 152.611,
-    k = 0.052,
-    b = 0.018,
+    L=0.724,
+    x0=152.611,
+    k=0.052,
+    b=0.018,
 ):
-    r"""Compute the pdockQ score as define in [1]_. Using two selection strings.     
+    r"""Compute the pdockQ score as define in [1]_. Using two selection strings.
     pDockQ is computed using this equation [1]_:
 
     .. math::
@@ -607,7 +607,7 @@ def compute_pdockQ_sel(
     of the sigmoid.
 
     For the *multiple* pdockQ or `mpDockQ` [2]_ you should use this values:
-    
+
     :math:`L = 0.728`, :math:`x0 = 309.375`, :math:`k = 0.098` and :math:`b = 0.262`.
 
     Implementation was inspired from https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
@@ -636,7 +636,7 @@ def compute_pdockQ_sel(
     float
         pdockQ score
 
-   
+
 
     References
     ----------
@@ -675,7 +675,7 @@ def compute_pdockQ_sel(
         avg_plddt = rec_in_contact.len * np.average(
             rec_in_contact.beta
         ) + lig_in_contact.len * np.average(lig_in_contact.beta)
-        avg_plddt /= (rec_in_contact.len + lig_in_contact.len)
+        avg_plddt /= rec_in_contact.len + lig_in_contact.len
 
         x = avg_plddt * np.log10(contact_num)
         pdockq = L / (1 + np.exp(-k * (x - x0))) + b
@@ -689,11 +689,11 @@ def compute_pdockQ2(
     coor,
     pae_array,
     cutoff=8.0,
-    L = 1.31034849e+00,
-    x0 = 8.47326239e+01,
-    k = 7.47157696e-02,
-    b = 5.01886443e-03,
-    d0 = 10.0,
+    L=1.31034849e00,
+    x0=8.47326239e01,
+    k=7.47157696e-02,
+    b=5.01886443e-03,
+    d0=10.0,
 ):
     r"""Compute the pdockQ2 score as define in [1]_.
 
@@ -736,7 +736,7 @@ def compute_pdockQ2(
         https://academic.oup.com/bioinformatics/article/39/7/btad424/7219714
     """
 
-    models_CA = coor.select_atoms('name CA')
+    models_CA = coor.select_atoms("name CA")
     models_chains = np.unique(models_CA.chain)
 
     pdockq2_list = []
@@ -744,25 +744,27 @@ def compute_pdockQ2(
         pdockq2_list.append([])
 
     for model in models_CA.models:
-
         for i, chain in enumerate(models_chains):
-
-            chain_sel = model.select_atoms(f"(chain {chain} and within {cutoff} of not chain {chain})")
-            inter_chain_sel = model.select_atoms(f"(not chain {chain} {chain} and within {cutoff} of chain {chain})")
+            chain_sel = model.select_atoms(
+                f"(chain {chain} and within {cutoff} of not chain {chain})"
+            )
+            inter_chain_sel = model.select_atoms(
+                f"(not chain {chain} {chain} and within {cutoff} of chain {chain})"
+            )
 
             dist_mat = distance_matrix(chain_sel.xyz, inter_chain_sel.xyz)
-            
+
             indexes = np.where(dist_mat < cutoff)
             x_indexes = chain_sel.uniq_resid[indexes[0]]
             y_indexes = inter_chain_sel.uniq_resid[indexes[1]]
             pae_sel = pae_array[x_indexes, y_indexes]
-            
-            norm_if_interpae = np.mean(1/(1+(pae_sel/d0)**2))
+
+            norm_if_interpae = np.mean(1 / (1 + (pae_sel / d0) ** 2))
 
             plddt_avg = np.mean(model.beta[x_indexes])
 
             x = norm_if_interpae * plddt_avg
-            y = L / (1 + np.exp(-k*(x-x0)))+b
+            y = L / (1 + np.exp(-k * (x - x0))) + b
             pdockq2_list[i].append(y)
 
     return pdockq2_list

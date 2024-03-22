@@ -12,27 +12,22 @@ import pdb_numpy.abinitio as abinitio
 
 
 def test_no_ter():
-    coor = abinitio.make_peptide('ACCCPPPPPPWWWCA', n_term='')
+    coor = abinitio.make_peptide("ACCCPPPPPPWWWCA", n_term="")
 
-    assert coor.get_aa_seq()['P'] == 'ACCCPPPPPPWWWCA'
+    assert coor.get_aa_seq()["P"] == "ACCCPPPPPPWWWCA"
     assert coor.len == 118
 
     SS_list = DSSP.compute_DSSP(coor)
 
-    assert (
-        SS_list[0]["P"]
-        == "               "
-    )
+    assert SS_list[0]["P"] == "               "
+
 
 def test_no_ter():
-    coor = abinitio.make_peptide('ACCCPPPPPPWWWCA', n_term='ACE')
+    coor = abinitio.make_peptide("ACCCPPPPPPWWWCA", n_term="ACE")
 
-    assert coor.get_aa_seq()['P'] == 'ACCCPPPPPPWWWCA'
+    assert coor.get_aa_seq()["P"] == "ACCCPPPPPPWWWCA"
     assert coor.len == 121
 
     SS_list = DSSP.compute_DSSP(coor)
 
-    assert (
-        SS_list[0]["P"]
-        == "               "
-    )
+    assert SS_list[0]["P"] == "               "

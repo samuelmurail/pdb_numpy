@@ -152,7 +152,6 @@ def get_gro_string(gro_coor):
         str_out += f"{model.len:6}\n"
 
         for i in range(model.len):
-
             # Note : Here we use 4 letter residue name.
             str_out += "{:5d}{:5s}{:>5s}{:5d}" "{:8.3f}{:8.3f}{:8.3f}\n".format(
                 model.atom_dict["num_resid_uniqresid"][i, 1],

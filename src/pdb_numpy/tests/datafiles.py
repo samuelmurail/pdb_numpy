@@ -37,14 +37,44 @@ MMCIF_3FTK = os.path.join(TEST_FILE_PATH, "3ftk.cif")
 PDB_2OL9 = os.path.join(TEST_FILE_PATH, "2ol9.pdb")
 MMCIF_2OL9 = os.path.join(TEST_FILE_PATH, "2ol9.cif")
 
-PDB_1RXZ_Colabfold_1 = os.path.join(TEST_FILE_PATH, "1rxz_11587_unrelaxed_rank_001_alphafold2_multimer_v3_model_4_seed_000.pdb")
-PDB_1RXZ_Colabfold_2 = os.path.join(TEST_FILE_PATH, "1rxz_11587_unrelaxed_rank_002_alphafold2_multimer_v3_model_5_seed_000.pdb")
-PDB_1RXZ_Colabfold_3 = os.path.join(TEST_FILE_PATH, "1rxz_11587_unrelaxed_rank_003_alphafold2_multimer_v3_model_2_seed_000.pdb")
-PDB_1RXZ_Colabfold_4 = os.path.join(TEST_FILE_PATH, "1rxz_11587_unrelaxed_rank_004_alphafold2_multimer_v3_model_1_seed_000.pdb")
-PDB_1RXZ_Colabfold_5 = os.path.join(TEST_FILE_PATH, "1rxz_11587_unrelaxed_rank_005_alphafold2_multimer_v3_model_3_seed_000.pdb")
+PDB_1RXZ_Colabfold_1 = os.path.join(
+    TEST_FILE_PATH,
+    "1rxz_11587_unrelaxed_rank_001_alphafold2_multimer_v3_model_4_seed_000.pdb",
+)
+PDB_1RXZ_Colabfold_2 = os.path.join(
+    TEST_FILE_PATH,
+    "1rxz_11587_unrelaxed_rank_002_alphafold2_multimer_v3_model_5_seed_000.pdb",
+)
+PDB_1RXZ_Colabfold_3 = os.path.join(
+    TEST_FILE_PATH,
+    "1rxz_11587_unrelaxed_rank_003_alphafold2_multimer_v3_model_2_seed_000.pdb",
+)
+PDB_1RXZ_Colabfold_4 = os.path.join(
+    TEST_FILE_PATH,
+    "1rxz_11587_unrelaxed_rank_004_alphafold2_multimer_v3_model_1_seed_000.pdb",
+)
+PDB_1RXZ_Colabfold_5 = os.path.join(
+    TEST_FILE_PATH,
+    "1rxz_11587_unrelaxed_rank_005_alphafold2_multimer_v3_model_3_seed_000.pdb",
+)
 
-JSON_1RXZ_Colabfold_1 = os.path.join(TEST_FILE_PATH, "1rxz_11587_scores_rank_001_alphafold2_multimer_v3_model_4_seed_000.json")
-JSON_1RXZ_Colabfold_2 = os.path.join(TEST_FILE_PATH, "1rxz_11587_scores_rank_002_alphafold2_multimer_v3_model_5_seed_000.json")
-JSON_1RXZ_Colabfold_3 = os.path.join(TEST_FILE_PATH, "1rxz_11587_scores_rank_003_alphafold2_multimer_v3_model_2_seed_000.json")
-JSON_1RXZ_Colabfold_4 = os.path.join(TEST_FILE_PATH, "1rxz_11587_scores_rank_004_alphafold2_multimer_v3_model_1_seed_000.json")
-JSON_1RXZ_Colabfold_5 = os.path.join(TEST_FILE_PATH, "1rxz_11587_scores_rank_005_alphafold2_multimer_v3_model_3_seed_000.json")
+JSON_1RXZ_Colabfold_1 = os.path.join(
+    TEST_FILE_PATH,
+    "1rxz_11587_scores_rank_001_alphafold2_multimer_v3_model_4_seed_000.json",
+)
+JSON_1RXZ_Colabfold_2 = os.path.join(
+    TEST_FILE_PATH,
+    "1rxz_11587_scores_rank_002_alphafold2_multimer_v3_model_5_seed_000.json",
+)
+JSON_1RXZ_Colabfold_3 = os.path.join(
+    TEST_FILE_PATH,
+    "1rxz_11587_scores_rank_003_alphafold2_multimer_v3_model_2_seed_000.json",
+)
+JSON_1RXZ_Colabfold_4 = os.path.join(
+    TEST_FILE_PATH,
+    "1rxz_11587_scores_rank_004_alphafold2_multimer_v3_model_1_seed_000.json",
+)
+JSON_1RXZ_Colabfold_5 = os.path.join(
+    TEST_FILE_PATH,
+    "1rxz_11587_scores_rank_005_alphafold2_multimer_v3_model_3_seed_000.json",
+)

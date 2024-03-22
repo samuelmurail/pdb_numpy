@@ -95,57 +95,74 @@ digits_lower_values = dict([pair for pair in zip(digits_lower, range(36))])
 
 
 def encode_pure(digits, value):
-  "encodes value using the given digits"
-  assert value >= 0
-  if (value == 0): return digits[0]
-  n = len(digits)
-  result = []
-  while (value != 0):
-    rest = value // n
-    result.append(digits[value - rest * n])
-    value = rest
-  result.reverse()
-  return "".join(result)
+    "encodes value using the given digits"
+    assert value >= 0
+    if value == 0:
+        return digits[0]
+    n = len(digits)
+    result = []
+    while value != 0:
+        rest = value // n
+        result.append(digits[value - rest * n])
+        value = rest
+    result.reverse()
+    return "".join(result)
+
 
 def decode_pure(digits_values, s):
-  "decodes the string s using the digit, value associations for each character"
-  result = 0
-  n = len(digits_values)
-  for c in s:
-    result *= n
-    result += digits_values[c]
-  return result
+    "decodes the string s using the digit, value associations for each character"
+    result = 0
+    n = len(digits_values)
+    for c in s:
+        result *= n
+        result += digits_values[c]
+    return result
+
 
 def hy36encode(width, value):
-  "encodes value as base-10/upper-case base-36/lower-case base-36 hybrid"
-  i = value
-  if (i >= 1-10**(width-1)):
-    if (i < 10**width):
-      return ("%%%dd" % width) % i
-    i -= 10**width
-    if (i < 26*36**(width-1)):
-      i += 10*36**(width-1)
-      return encode_pure(digits_upper, i)
-    i -= 26*36**(width-1)
-    if (i < 26*36**(width-1)):
-      i += 10*36**(width-1)
-      return encode_pure(digits_lower, i)
-  raise ValueError("value out of range.")
+    "encodes value as base-10/upper-case base-36/lower-case base-36 hybrid"
+    i = value
+    if i >= 1 - 10 ** (width - 1):
+        if i < 10**width:
+            return ("%%%dd" % width) % i
+        i -= 10**width
+        if i < 26 * 36 ** (width - 1):
+            i += 10 * 36 ** (width - 1)
+            return encode_pure(digits_upper, i)
+        i -= 26 * 36 ** (width - 1)
+        if i < 26 * 36 ** (width - 1):
+            i += 10 * 36 ** (width - 1)
+            return encode_pure(digits_lower, i)
+    raise ValueError("value out of range.")
+
 
 def hy36decode(width, s):
-  "decodes base-10/upper-case base-36/lower-case base-36 hybrid"
-  if (len(s) == width):
-    f = s[0]
-    if (f == "-" or f == " " or f.isdigit()):
-      try: return int(s)
-      except ValueError: pass
-      if (s == " "*width): return 0
-    elif (f in digits_upper_values):
-      try: return decode_pure(
-        digits_values=digits_upper_values, s=s) - 10*36**(width-1) + 10**width
-      except KeyError: pass
-    elif (f in digits_lower_values):
-      try: return decode_pure(
-        digits_values=digits_lower_values, s=s) + 16*36**(width-1) + 10**width
-      except KeyError: pass
-  raise ValueError("invalid number literal.")
+    "decodes base-10/upper-case base-36/lower-case base-36 hybrid"
+    if len(s) == width:
+        f = s[0]
+        if f == "-" or f == " " or f.isdigit():
+            try:
+                return int(s)
+            except ValueError:
+                pass
+            if s == " " * width:
+                return 0
+        elif f in digits_upper_values:
+            try:
+                return (
+                    decode_pure(digits_values=digits_upper_values, s=s)
+                    - 10 * 36 ** (width - 1)
+                    + 10**width
+                )
+            except KeyError:
+                pass
+        elif f in digits_lower_values:
+            try:
+                return (
+                    decode_pure(digits_values=digits_lower_values, s=s)
+                    + 16 * 36 ** (width - 1)
+                    + 10**width
+                )
+            except KeyError:
+                pass
+    raise ValueError("invalid number literal.")

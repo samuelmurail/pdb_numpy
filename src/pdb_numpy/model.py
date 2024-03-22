@@ -530,7 +530,7 @@ class Model:
             Atom object
 
         """
-        
+
         self.atom_dict["field"] = np.insert(
             self.atom_dict["field"], index, ["ATOM"], axis=0
         )
@@ -557,7 +557,7 @@ class Model:
 
         if len(self.atom_dict["field"]) == 1:
             atom_num = 1
-            #self.atom_dict["field"] = self.atom_dict["field"].reshape((atom_num, 1))
+            # self.atom_dict["field"] = self.atom_dict["field"].reshape((atom_num, 1))
             self.atom_dict["num_resid_uniqresid"] = self.atom_dict[
                 "num_resid_uniqresid"
             ].reshape((atom_num, 3))

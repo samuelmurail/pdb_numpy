@@ -287,7 +287,7 @@ def test_pdockq(tmp_path):
     pDockQ = 0.407 for src/pdb_numpy/tests/input/1rxz_11587_unrelaxed_rank_001_alphafold2_multimer_v3_model_4_seed_000.pdb
     This corresponds to a PPV of at least 0.87116417
 
-    python pdockq.py --pdbfile src/pdb_numpy/tests/input/1rxz_11587_unrelaxed_rank_002_alphafold2_multimer_v3_model_5_seed_000.pdb 
+    python pdockq.py --pdbfile src/pdb_numpy/tests/input/1rxz_11587_unrelaxed_rank_002_alphafold2_multimer_v3_model_5_seed_000.pdb
     pDockQ = 0.375 for src/pdb_numpy/tests/input/1rxz_11587_unrelaxed_rank_002_alphafold2_multimer_v3_model_5_seed_000.pdb
     This corresponds to a PPV of at least 0.85453785
 
@@ -295,18 +295,18 @@ def test_pdockq(tmp_path):
     pDockQ = 0.399 for src/pdb_numpy/tests/input/1rxz_11587_unrelaxed_rank_003_alphafold2_multimer_v3_model_2_seed_000.pdb
     This corresponds to a PPV of at least 0.86040801
 
-    python pdockq.py --pdbfile src/pdb_numpy/tests/input/1rxz_11587_unrelaxed_rank_004_alphafold2_multimer_v3_model_1_seed_000.pdb 
+    python pdockq.py --pdbfile src/pdb_numpy/tests/input/1rxz_11587_unrelaxed_rank_004_alphafold2_multimer_v3_model_1_seed_000.pdb
     pDockQ = 0.395 for src/pdb_numpy/tests/input/1rxz_11587_unrelaxed_rank_004_alphafold2_multimer_v3_model_1_seed_000.pdb
     This corresponds to a PPV of at least 0.86040801
 
-    python pdockq.py --pdbfile src/pdb_numpy/tests/input/1rxz_11587_unrelaxed_rank_005_alphafold2_multimer_v3_model_3_seed_000.pdb 
+    python pdockq.py --pdbfile src/pdb_numpy/tests/input/1rxz_11587_unrelaxed_rank_005_alphafold2_multimer_v3_model_3_seed_000.pdb
     pDockQ = 0.407 for src/pdb_numpy/tests/input/1rxz_11587_unrelaxed_rank_005_alphafold2_multimer_v3_model_3_seed_000.pdb
     This corresponds to a PPV of at least 0.87116417
 
 
     ```
 
-    Expected pDockQ = 0.422 
+    Expected pDockQ = 0.422
     """
 
     pdb_numpy.logger.setLevel(level=logging.INFO)
@@ -337,6 +337,7 @@ def test_pdockq(tmp_path):
     pdockq = analysis.compute_pdockQ(model_coor)
     assert pytest.approx(pdockq[0], 0.001) == 0.407
 
+
 def test_pdockq_sel(tmp_path):
     """ """
 
@@ -356,7 +357,7 @@ def test_pdockq2(tmp_path):
 
     Raw pDockQ2 results:
     ```bash
-    python pdock2.py -pdb src/pdb_numpy/tests/input/1rxz_11587_unrelaxed_rank_001_alphafold2_multimer_v3_model_4_seed_000.pdb -pkl src/pdb_numpy/tests/input/1rxz_11587_scores_rank_001_alphafold2_multimer_v3_model_4_seed_000.json 
+    python pdock2.py -pdb src/pdb_numpy/tests/input/1rxz_11587_unrelaxed_rank_001_alphafold2_multimer_v3_model_4_seed_000.pdb -pkl src/pdb_numpy/tests/input/1rxz_11587_scores_rank_001_alphafold2_multimer_v3_model_4_seed_000.json
     contact_chain_lst B: len:  1 IF_plddt: 93.407 [96.0, 96.12, 96.12, 96.12, 97.38, 97.38, 97.38, 97.38, 98.06, 98.06, 90.31, 89.31, 85.44, 85.44, 88.0, 88.0, 91.69, 98.12, 97.94, 97.94, 98.5, 98.06, 98.06, 98.06, 98.06, 97.94, 97.94, 97.94, 97.25, 97.25, 97.25, 97.25, 93.88, 93.88, 93.88, 93.88, 86.25, 86.25, 86.25, 77.69, 77.69, 77.69]
     contact_chain_lst A: len:  1 IF_plddt: 92.580 [81.38, 81.38, 87.12, 87.12, 87.12, 87.12, 93.62, 93.62, 93.62, 93.62, 95.88, 95.88, 95.88, 95.88, 95.88, 95.88, 96.56, 96.56, 96.56, 96.56, 96.56, 96.25, 96.25, 96.25, 96.25, 96.25, 96.25, 95.94, 95.94, 95.94, 95.94, 95.94, 95.94, 93.44, 91.75, 91.75, 91.75, 91.75, 82.75, 82.75, 82.75, 82.75]
     remain_contact_lst [['B'], ['A']]
@@ -423,13 +424,13 @@ def test_pdockq2(tmp_path):
 
     ```
 
-    Expected pDockQ = 0.422 
+    Expected pDockQ = 0.422
     """
 
     model_coor = Coor(PDB_1RXZ_Colabfold_1)
     with open(JSON_1RXZ_Colabfold_1) as f:
         local_json = json.load(f)
-    pae_array = np.array(local_json['pae'])
+    pae_array = np.array(local_json["pae"])
     pdockq2 = analysis.compute_pdockQ2(model_coor, pae_array)
     print(pdockq2)
     assert pytest.approx(pdockq2[0][0], 0.001) == 0.7723799686385427
@@ -438,7 +439,7 @@ def test_pdockq2(tmp_path):
     model_coor = Coor(PDB_1RXZ_Colabfold_2)
     with open(JSON_1RXZ_Colabfold_2) as f:
         local_json = json.load(f)
-    pae_array = np.array(local_json['pae'])
+    pae_array = np.array(local_json["pae"])
     pdockq2 = analysis.compute_pdockQ2(model_coor, pae_array)
     print(pdockq2)
     assert pytest.approx(pdockq2[0][0], 0.001) == 0.7431191913145573
@@ -447,7 +448,7 @@ def test_pdockq2(tmp_path):
     model_coor = Coor(PDB_1RXZ_Colabfold_3)
     with open(JSON_1RXZ_Colabfold_3) as f:
         local_json = json.load(f)
-    pae_array = np.array(local_json['pae'])
+    pae_array = np.array(local_json["pae"])
     pdockq2 = analysis.compute_pdockQ2(model_coor, pae_array)
     print(pdockq2)
     assert pytest.approx(pdockq2[0][0], 0.001) == 0.7558449074983005
@@ -456,7 +457,7 @@ def test_pdockq2(tmp_path):
     model_coor = Coor(PDB_1RXZ_Colabfold_4)
     with open(JSON_1RXZ_Colabfold_4) as f:
         local_json = json.load(f)
-    pae_array = np.array(local_json['pae'])
+    pae_array = np.array(local_json["pae"])
     pdockq2 = analysis.compute_pdockQ2(model_coor, pae_array)
     print(pdockq2)
     assert pytest.approx(pdockq2[0][0], 0.001) == 0.7290416719781467
@@ -465,7 +466,7 @@ def test_pdockq2(tmp_path):
     model_coor = Coor(PDB_1RXZ_Colabfold_5)
     with open(JSON_1RXZ_Colabfold_5) as f:
         local_json = json.load(f)
-    pae_array = np.array(local_json['pae'])
+    pae_array = np.array(local_json["pae"])
     pdockq2 = analysis.compute_pdockQ2(model_coor, pae_array)
     print(pdockq2)
     assert pytest.approx(pdockq2[0][0], 0.001) == 0.7464011302124822

@@ -81,9 +81,7 @@ def parse(mmcif_lines):
     col_index = data_mmCIF["_atom_site"]["col_names"].index("id")
     num_array = np.array(data_mmCIF["_atom_site"]["value"][col_index]).astype(np.int32)
     # check that num_array is consecutive (Maybe useless)
-    if not np.array_equal(
-        num_array, np.arange(1, len(num_array) + 1)
-    ):
+    if not np.array_equal(num_array, np.arange(1, len(num_array) + 1)):
         logger.warning("WARNING: Atom numbering is not consecutive")
 
     col_index = data_mmCIF["_atom_site"]["col_names"].index("auth_seq_id")
@@ -224,8 +222,8 @@ def parse_crystal_pack(data_mmCIF):
         z = int(data_mmCIF["_cell"]["Z_PDB"])
     else:
         z = 1
-    
-    if '_symmetry' in data_mmCIF:
+
+    if "_symmetry" in data_mmCIF:
         sGroup = data_mmCIF["_symmetry"]["space_group_name_H-M"].replace("'", "")
     else:
         sGroup = "P 1"
@@ -277,7 +275,6 @@ def parse_transformation(data_mmCIF):
 
         if "value" in data_mmCIF["_pdbx_struct_oper_list"]:
             for i in range(len(data_mmCIF["_pdbx_struct_oper_list"]["value"][0])):
-
                 for matrix_index in matrix_indexes:
                     local_matrix = []
                     for index in matrix_index:
@@ -612,10 +609,7 @@ def get_mmcif_string(coor):
     old_category = ""
 
     if len(coor.data_mmCIF) == 0:
-        coor.data_mmCIF = {
-            "title" : {"title": "untitled"},
-            "_entry": {"id": "XXXX"}
-        }
+        coor.data_mmCIF = {"title": {"title": "untitled"}, "_entry": {"id": "XXXX"}}
 
         if coor.crystal_pack.startswith("CRYST1"):
             line = coor.crystal_pack
@@ -677,7 +671,6 @@ def get_mmcif_string(coor):
             }
         coor.data_mmCIF["_atom_site"] = None
 
-
     for category in coor.data_mmCIF:
         if category == "title":
             str_out += f"{coor.data_mmCIF[category]['title']}\n"
@@ -718,14 +711,16 @@ def get_mmcif_string(coor):
                 for i in range(model.len):
                     alt_pos = (
                         "."
-                        if model.atom_dict["alterloc_chain_insertres"][i, 0] in [b"", ""]
+                        if model.atom_dict["alterloc_chain_insertres"][i, 0]
+                        in [b"", ""]
                         else model.atom_dict["alterloc_chain_insertres"][i, 0].astype(
                             np.str_
                         )
                     )
                     insert_res = (
                         "?"
-                        if model.atom_dict["alterloc_chain_insertres"][i, 2] in [b"", ""]
+                        if model.atom_dict["alterloc_chain_insertres"][i, 2]
+                        in [b"", ""]
                         else model.atom_dict["alterloc_chain_insertres"][i, 2].astype(
                             np.str_
                         )
@@ -826,15 +821,11 @@ def get_mmcif_string(coor):
                 )
                 for attribute in coor.data_mmCIF[category]:
                     if coor.data_mmCIF[category][attribute].startswith(";"):
-                        str_out += (
-                            f"{'.'.join([category, attribute]):{max_len}} \n{coor.data_mmCIF[category][attribute]}"
-                        )
+                        str_out += f"{'.'.join([category, attribute]):{max_len}} \n{coor.data_mmCIF[category][attribute]}"
                     else:
                         local_str = f"{'.'.join([category, attribute]):{max_len}} {coor.data_mmCIF[category][attribute]} \n"
                         if len(local_str) > line_max_len:
-                            str_out += (
-                                f"{'.'.join([category, attribute]):{max_len}} \n{coor.data_mmCIF[category][attribute]} \n"
-                            )
+                            str_out += f"{'.'.join([category, attribute]):{max_len}} \n{coor.data_mmCIF[category][attribute]} \n"
                         else:
                             str_out += local_str
     str_out += "#\n"

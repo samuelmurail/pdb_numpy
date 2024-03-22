@@ -66,7 +66,7 @@ def get_nglview(
     if ref is not None:
         ref_str = nv.TextStructure(pdb.get_pdb_string(ref))
         view.add_component(ref_str, default=False)
-        view[1].add_cartoon(selection="protein", color='red')
+        view[1].add_cartoon(selection="protein", color="red")
         view[1].add_representation("licorice", selection="ligand", color="red")
 
     return view
@@ -118,11 +118,11 @@ def get_py3dmolview(
 
     view = py3Dmol.view(width=400, height=400)
     view.addModelsAsFrames(pdb.get_pdb_string(coor))
-    view.setStyle({'model': -1}, {"cartoon": {'color': 'spectrum'}})
+    view.setStyle({"model": -1}, {"cartoon": {"color": "spectrum"}})
 
     if ref is not None:
         view.addModelsAsFrames(pdb.get_pdb_string(ref))
-        view.setStyle({'model': -1}, {"cartoon": {'color': 'red'}})
+        view.setStyle({"model": -1}, {"cartoon": {"color": "red"}})
 
     view.zoomTo()
 

@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 FIELD_DICT = {"A": "ATOM  ", "H": "HETATM"}
 
+CHAIN_LIST = [chr(i) for i in list(range(65, 91)) + list(range(48, 58)) + list(range(97, 123)) + list(range(192, 500))]
 
 def parse(pdb_lines, pqr_format=False):
     """Parse the pdb lines and return atom information's as a dictionary
@@ -293,6 +294,21 @@ def fetch_BioAssembly(pdb_ID, index=1):
 
     return parse(pdb_lines)
 
+def convert_chain_2_letter(chain: str) -> str:
+    """ For Coor coming from `.mmcif` format,
+    chain ID can be 2 letters long.
+    It has to converted to one letter long.
+    """
+    count = 0
+    base = 65
+    for i, letter in enumerate(chain):
+        if i > 0:
+            base = 64
+        count += 26**i * (ord(letter) - base)
+    if count < len(CHAIN_LIST):
+        return CHAIN_LIST[count]
+    else:
+        return "0"
 
 def get_pdb_string(pdb_coor):
     """Return a coor object as a pdb string.
@@ -329,9 +345,9 @@ def get_pdb_string(pdb_coor):
         str_out += f"MODEL    {model_index:4d}\n"
 
         for i in range(model.len):
-            # Atom name should start a column 14, with the type of atom ex:
+            # Atom name should start at column 14, with the type of atom ex:
             #   - with atom type 'C': ' CH3'
-            # for 2 letters atom type, it should start at coulumn 13 ex:
+            # for 2 letters atom type, it should start at column 13 ex:
             #   - with atom type 'FE': 'FE1'
             name = model.atom_dict["name_resname_elem"][i, 0].astype(np.str_)
             if len(name) <= 3 and name[0] in ["C", "H", "O", "N", "S", "P"]:
@@ -342,6 +358,10 @@ def get_pdb_string(pdb_coor):
                 resid = encode.hy36encode(4, resid)
             else:
                 resid = str(resid)
+            
+            chain = model.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_)
+            if len(chain) > 1:
+                chain = convert_chain_2_letter(chain)
 
             # Note : Here we use 4 letter residue name.
             str_out += (
@@ -353,7 +373,7 @@ def get_pdb_string(pdb_coor):
                     name,
                     model.atom_dict["alterloc_chain_insertres"][i, 0].astype(np.str_),
                     model.atom_dict["name_resname_elem"][i, 1].astype(np.str_),
-                    model.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_),
+                    chain,
                     resid,
                     model.atom_dict["alterloc_chain_insertres"][i, 2].astype(np.str_),
                     model.atom_dict["xyz"][i, 0],

@@ -74,6 +74,7 @@ Dependencies
 
 - ``numpy``
 - ``scipy``
+- ``cython``
 
 
 Contributing

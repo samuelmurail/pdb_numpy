@@ -7,9 +7,11 @@ Welcome to PDB-numpy's documentation!
 =====================================
 
 .. image:: https://raw.githubusercontent.com/samuelmurail/pdb_numpy/master/docs/source/logo.jpeg
-  :width: 400
+  :width: 300
   :align: center
   :alt: PDB Numpy Logo
+
+|
 
 ``pdb_numpy`` is a python library designed to facilitate working with coordinates files
 in the context of structural bioinformatics. The library builds upon the

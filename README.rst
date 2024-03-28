@@ -14,7 +14,7 @@
 About PDB-numpy
 ===============
 
-.. image:: docs/source/logo.jpep
+.. image:: docs/source/logo.jpeg
   :width: 400
   :alt: PDB Numpy Logo
 

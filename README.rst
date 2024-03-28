@@ -14,6 +14,9 @@
 About PDB-numpy
 ===============
 
+<img src="./docs/source/logo.jpep" alt="My cool logo">
+
+
 ``pdb_numpy`` is a python library designed to facilitate working with PDB files
 in the context of structural bioinformatics. The library builds upon the
 powerful ``numpy`` library to provide efficient and easy-to-use tools for

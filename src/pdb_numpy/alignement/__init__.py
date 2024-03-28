@@ -6,7 +6,7 @@ import numpy as np
 from itertools import permutations
 import logging
 
-# from . import align_cython
+from . import align_cython
 
 from .. import analysis
 from .. import geom
@@ -107,7 +107,6 @@ def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
 
 
 def align_seq_cython(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
-    from . import align_cython
 
     return align_cython.align_seq(seq_1, seq_2, gap_cost, gap_extension)
 
@@ -486,7 +485,7 @@ def get_common_atoms(
         back_names
     ), "Incomplete backbone atoms for second Coor object, you might consider using the remove_incomplete_residues method before."
 
-    align_seq_1, align_seq_2 = align_seq_C(seq_1, seq_2)
+    align_seq_1, align_seq_2 = align_seq_cython(seq_1, seq_2)
     # print_align_seq(align_seq_1, align_seq_2)
 
     align_sel_1 = []

@@ -1,6 +1,6 @@
 import numpy as np
 
-from setuptools import setup, find_packages
+from setuptools import setup
 from distutils.extension import Extension
 
 version="0.0.2"
@@ -8,9 +8,15 @@ version="0.0.2"
 with open('README.rst', encoding='utf-8') as readme_file:
     readme = readme_file.read()
 
-ext_modules = [Extension("pdb_numpy.alignement.align_cython",
-                         ["src/pdb_numpy/alignement/align_cython.pyx"],
-                         include_dirs=[np.get_include()])]
+ext_modules = [
+    Extension(
+        "pdb_numpy.alignement.align_cython",
+        ["src/pdb_numpy/alignement/align_cython.pyx"],
+        include_dirs=[np.get_include()]),
+    Extension(
+        "pdb_numpy.format.split_cython",
+        ["src/pdb_numpy/format/split_cython.pyx"])
+]
 
 requirements = [
     'numpy>=1.2',

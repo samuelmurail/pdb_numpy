@@ -297,7 +297,17 @@ def fetch_BioAssembly(pdb_ID, index=1):
 def convert_chain_2_letter(chain: str) -> str:
     """ For Coor coming from `.mmcif` format,
     chain ID can be 2 letters long.
-    It has to converted to one letter long.
+    It has to converted to one letter long in `.pdb` format.
+
+    Parameters
+    ----------
+    chain : str
+        chain ID
+
+    Returns
+    -------
+    str
+        chain ID in one letter long
     """
     count = 0
     base = 65
@@ -343,6 +353,16 @@ def get_pdb_string(pdb_coor):
 
     for model_index, model in enumerate(pdb_coor.models):
         str_out += f"MODEL    {model_index:4d}\n"
+        old_chain = ""
+
+        # Replace mmcif `.` altloc by `''` and `?` insertres by `''`
+        alterloc = ['' if altloc == '.' else altloc for altloc in model.atom_dict["alterloc_chain_insertres"][:, 0]]
+        insertres = ['' if altloc == '?' else altloc for altloc in model.atom_dict["alterloc_chain_insertres"][:, 2]]
+
+        # If resname in 3 letters or less, we add a space at the end
+        mylen = np.vectorize(len)
+        if max(mylen(model.atom_dict["name_resname_elem"][:, 1])) <= 3:
+            resname = np.char.add(model.atom_dict["name_resname_elem"][:, 1], " ")
 
         for i in range(model.len):
             # Atom name should start at column 14, with the type of atom ex:
@@ -352,7 +372,7 @@ def get_pdb_string(pdb_coor):
             name = model.atom_dict["name_resname_elem"][i, 0].astype(np.str_)
             if len(name) <= 3 and name[0] in ["C", "H", "O", "N", "S", "P"]:
                 name = " " + name
-            # To use resid > 9999, we need to convert the resid in hexa
+            # To use resid > 9999, we need to convert the resid in hexadecimal format 
             resid = model.atom_dict["num_resid_uniqresid"][i, 1]
             if resid > 9999:
                 resid = encode.hy36encode(4, resid)
@@ -360,22 +380,28 @@ def get_pdb_string(pdb_coor):
                 resid = str(resid)
             
             chain = model.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_)
-            if len(chain) > 1:
-                chain = convert_chain_2_letter(chain)
+
+            if chain != old_chain:
+                old_chain = chain
+                if len(chain) > 1:
+                    out_chain = convert_chain_2_letter(chain)
+                else:
+                    out_chain = chain
+
 
             # Note : Here we use 4 letter residue name.
             str_out += (
-                "{:6s}{:5s} {:4s}{:1s}{:4s}{:1s}{:>4s}{:1s}"
+                "{:6s}{:5s} {:4s}{:1s}{:>4s}{:1s}{:>4s}{:1s}"
                 "   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}"
-                "          {:2s}\n".format(
+                "          {:>2s}\n".format(
                     FIELD_DICT[model.atom_dict["field"][i]],
                     encode.hy36encode(5, i + 1),
                     name,
-                    model.atom_dict["alterloc_chain_insertres"][i, 0].astype(np.str_),
-                    model.atom_dict["name_resname_elem"][i, 1].astype(np.str_),
-                    chain,
+                    alterloc[i],
+                    resname[i],
+                    out_chain,
                     resid,
-                    model.atom_dict["alterloc_chain_insertres"][i, 2].astype(np.str_),
+                    insertres[i],
                     model.atom_dict["xyz"][i, 0],
                     model.atom_dict["xyz"][i, 1],
                     model.atom_dict["xyz"][i, 2],

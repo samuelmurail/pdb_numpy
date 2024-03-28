@@ -2,7 +2,6 @@
 # coding: utf-8
 
 import os
-import shlex
 from collections import OrderedDict
 import urllib.request
 import logging
@@ -13,6 +12,8 @@ import gzip
 from .. import geom
 from ..model import Model
 from .. import coor
+
+from . import split_cython
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -45,6 +46,24 @@ MMCIF_ATOM_SITE = (
     "_atom_site.pdbx_PDB_model_num \n"
 )
 
+def remove_double_quote(string):
+    """Remove double quote from a string
+
+    Parameters
+    ----------
+    string : str
+        string with double quote
+
+    Returns
+    -------
+    str
+        string without double quote
+
+    """
+
+    if string[0] == '"':
+        string = string[1:-1]
+    return string
 
 def parse(mmcif_lines):
     """Parse the mmcif lines and return atom information as a dictionary
@@ -113,7 +132,7 @@ def parse(mmcif_lines):
     # "name_resname"
     col_index = data_mmCIF["_atom_site"]["col_names"].index("label_atom_id")
     # dtype set to U5 to avoid truncation of long atom names like "O5\'"
-    name_array = np.array(data_mmCIF["_atom_site"]["value"][col_index], dtype="|U4")
+    name_array = np.array([remove_double_quote(name) for name in data_mmCIF["_atom_site"]["value"][col_index]], dtype="|U4")
     col_index = data_mmCIF["_atom_site"]["col_names"].index("label_comp_id")
     resname_array = np.array(data_mmCIF["_atom_site"]["value"][col_index], dtype="|U4")
     col_index = data_mmCIF["_atom_site"]["col_names"].index("type_symbol")
@@ -471,7 +490,8 @@ def _parse_raw_mmcif_lines(mmcif_lines):
             col_names = []
 
         elif line.startswith("_"):
-            token = shlex.split(line, posix=False)
+            #token = shlex.split(line, posix=False)
+            token = split_cython.string_split(line[:-1])
             category, attribute = token[0].split(".")
 
             if tabular:
@@ -513,9 +533,16 @@ def _parse_raw_mmcif_lines(mmcif_lines):
             mutli_line += line
 
         elif tabular:
-            token = shlex.split(line, posix=False)
+            #token = shlex.split(line, posix=False)
+            token = split_cython.string_split(line[:-1])
+
+            #new_token = line.split()
+            #if set(token) != set(new_token):
+            #    print(line)
+            #    print("shlex:", token)
+            #    print("new  :", new_token)
             token_complete = True
-            # print(final_token, len(final_token), token, len(token), len(data_mmCIF[category]['col_names']))
+            #print(final_token, len(final_token), token, len(token), len(data_mmCIF[category]['col_names']))
 
             # TO FIX !!
             if len(token) != len(data_mmCIF[category]["col_names"]):
@@ -536,7 +563,9 @@ def _parse_raw_mmcif_lines(mmcif_lines):
                     data_mmCIF[category]["value"][i].append(token[i])
                 final_token = []
         else:
-            token = shlex.split(line, posix=False)
+            #token = shlex.split(line, posix=False)
+            token = split_cython.string_split(line[:-1])
+
             if category not in data_mmCIF:
                 data_mmCIF[category] = OrderedDict()
             data_mmCIF[category][attribute] = token[0]

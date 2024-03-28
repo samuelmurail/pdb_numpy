@@ -14,7 +14,9 @@
 About PDB-numpy
 ===============
 
-<img src="./docs/source/logo.jpep" alt="My cool logo">
+.. image:: docs/source/logo.jpep
+  :width: 400
+  :alt: PDB Numpy Logo
 
 
 ``pdb_numpy`` is a python library designed to facilitate working with PDB files

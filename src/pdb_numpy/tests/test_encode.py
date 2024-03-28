@@ -5,13 +5,13 @@
 Tests for _alignement functions
 """
 
-from pdb_numpy.format import encode
+from pdb_numpy.format import encode_cython as encode
 
 
 def test_encode_pure():
     for value in range(1000):
         s = encode.encode_pure(digits=encode.digits_upper, value=value)
-        d = encode.decode_pure(digits_values=encode.digits_upper_values, s=s)
+        d = encode.decode_pure_Cap(s=s.encode('utf-8'))
         assert d == value
 
     def recycle4(value, encoded):
@@ -145,4 +145,4 @@ def test_encode_pure():
             except (ValueError, RuntimeError) as e:
                 assert str(e) == "invalid number literal."
             else:
-                raise RuntimeError("Exception expected.")
+                raise RuntimeError(f"Exception expected for {s}.")

@@ -15,7 +15,10 @@ ext_modules = [
         include_dirs=[np.get_include()]),
     Extension(
         "pdb_numpy.format.split_cython",
-        ["src/pdb_numpy/format/split_cython.pyx"])
+        ["src/pdb_numpy/format/split_cython.pyx"]),
+    Extension(
+        "pdb_numpy.format.encode_cython",
+        ["src/pdb_numpy/format/encode_cython.pyx"]),
 ]
 
 requirements = [

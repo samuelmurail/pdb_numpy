@@ -11,7 +11,8 @@ import gzip
 from .. import geom as geom
 from ..model import Model
 from .. import coor
-from . import encode
+from . import encode_cython as encode
+#from . import encode
 
 # Logging
 logger = logging.getLogger(__name__)

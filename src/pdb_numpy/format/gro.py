@@ -42,10 +42,10 @@ def parse(gro_lines):
     occ = 0.0
     beta = 0.0
     field = "A"
-    alter_loc = ""
-    chain = ""
-    insert_res = ""
-    elem_symbol = ""
+    alter_loc = "."
+    chain = "?"
+    insert_res = "?"
+    elem_symbol = "?"
 
     index_list = []
     field_list = []  # 6 char
@@ -117,7 +117,7 @@ def parse(gro_lines):
                 uniq_resid += 1
                 old_resid = resid
 
-            field_list.append("A")
+            field_list.append(field)
             num_resid_uniqresid_list.append([atom_num, resid, uniq_resid])
             index_list.append(atom_index)
             name_resname_elem_list.append([atom_name, res_name, elem_symbol])

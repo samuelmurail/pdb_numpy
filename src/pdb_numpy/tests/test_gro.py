@@ -98,3 +98,34 @@ def test_read_mmcif_write_gro(tmp_path, caplog):
         test_gro.crystal_pack
         == "   2.87480   3.09780   2.97326   0.00000   0.00000   0.00000   0.00000  -0.11006   0.00000\n"
     )
+
+
+def test_read_gro_write_mmcif(tmp_path, caplog):
+    """Test read_file function."""
+
+    test_gro = Coor(GRO_2RRI)
+    test_gro.write(os.path.join(tmp_path, "test_2RRI.cif"))
+    print(os.path.join(tmp_path, "test_2RRI.cif"))
+    test_cif = Coor(os.path.join(tmp_path, "test_2RRI.cif"))
+
+    assert test_cif.len == 479
+    assert test_cif.model_num == 20
+
+    assert test_cif.models[0].atom_dict["name_resname_elem"][0, 1] == "HIS"
+    assert test_cif.models[0].resname[0] == "HIS"
+    assert test_cif.models[0].resid[0] == 1
+    assert test_cif.models[0].uniq_resid[0] == 0
+    assert test_cif.models[0].name[0] == "N"
+    assert test_cif.models[0].num[0] == 1
+    assert test_cif.models[0].x[0] == pytest.approx(-11.43, 0.000001)
+    assert test_cif.models[0].y[0] == pytest.approx(14.76, 0.000001)
+    assert test_cif.models[0].z[0] == pytest.approx(-14.63, 0.000001)
+    assert (
+        test_cif.models[0].atom_dict["xyz"][0, :]
+        == np.array([-11.43, 14.76, -14.63], dtype=np.float32)
+    ).all()
+    assert test_gro.crystal_pack == "   0.10000   0.10000   0.10000\n"
+    assert test_cif.crystal_pack == "CRYST1    1.000    1.000    1.000  90.00  90.00  90.00 P 1         1\n"
+
+    np.testing.assert_allclose(test_cif.xyz, test_gro.xyz, atol=1e-2)
+

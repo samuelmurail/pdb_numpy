@@ -246,7 +246,7 @@ def align_seq(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
     return align_1, align_2
 
 
-def align_seq_WS(seq_1, seq_2, gap_cost=-8):
+def align_seq_WS(seq_1, seq_2, gap_cost=-8, gap_extension=-1):
     """Align two amino acid sequences using the Waterman - Smith Algorithm.
     without gap extensions.
 
@@ -556,7 +556,7 @@ def coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0):
 
         rot_mat = geom.quaternion_rotate(model.xyz[index_1], ref_coor)
         # from scipy.spatial.transform import Rotation as R
-        # rot_mat_2 = R.align_vectors(model.xyz[index_1], ref_coor)[0].as_matrix()
+        # rot_mat = R.align_vectors(model.xyz[index_1], ref_coor)[0].as_matrix()
 
         model.xyz = np.dot(model.xyz, rot_mat)
         if not (self_align and (i == frame_ref)):

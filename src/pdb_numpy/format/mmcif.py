@@ -683,10 +683,10 @@ def get_mmcif_string(coor):
             a = sum(v1**2) ** 0.5 * 10
             b = sum(v2**2) ** 0.5 * 10
             c = sum(v3**2) ** 0.5 * 10
-            alpha = np.rad2deg(angle_vec(v2, v3))
-            beta = np.rad2deg(angle_vec(v1, v3))
-            gamma = np.rad2deg(angle_vec(v1, v2))
-            # Following is wrong, to check !!!
+            alpha = np.rad2deg(geom.angle_vec(v2, v3))
+            beta = np.rad2deg(geom.angle_vec(v1, v3))
+            gamma = np.rad2deg(geom.angle_vec(v1, v2))
+            # Following is probably wrong, to check !!!
             sGroup = "1"
             z = 1
             coor.data_mmCIF["_cell"] = {

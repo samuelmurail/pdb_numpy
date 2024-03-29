@@ -358,7 +358,9 @@ def get_pdb_string(pdb_coor):
 
         # Replace mmcif `.` altloc by `''` and `?` insertres by `''`
         alterloc = ['' if altloc == '.' else altloc for altloc in model.atom_dict["alterloc_chain_insertres"][:, 0]]
-        insertres = ['' if altloc == '?' else altloc for altloc in model.atom_dict["alterloc_chain_insertres"][:, 2]]
+        insertres = ['' if insert == '?' else insert for insert in model.atom_dict["alterloc_chain_insertres"][:, 2]]
+        chain_list = ['' if chain == '?' else chain for chain in model.atom_dict["alterloc_chain_insertres"][:, 1]]
+        elem_symbol = ['' if elem == '?' else elem for elem in model.atom_dict["name_resname_elem"][:, 2]]
 
         # If resname in 3 letters or less, we add a space at the end
         mylen = np.vectorize(len)
@@ -380,14 +382,14 @@ def get_pdb_string(pdb_coor):
             else:
                 resid = str(resid)
             
-            chain = model.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_)
+            #chain = model.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_)
 
-            if chain != old_chain:
-                old_chain = chain
-                if len(chain) > 1:
-                    out_chain = convert_chain_2_letter(chain)
+            if chain_list[i] != old_chain:
+                old_chain = chain_list[i]
+                if len(old_chain) > 1:
+                    out_chain = convert_chain_2_letter(old_chain)
                 else:
-                    out_chain = chain
+                    out_chain = old_chain
 
 
             # Note : Here we use 4 letter residue name.
@@ -408,7 +410,7 @@ def get_pdb_string(pdb_coor):
                     model.atom_dict["xyz"][i, 2],
                     model.atom_dict["occ_beta"][i, 0],
                     model.atom_dict["occ_beta"][i, 1],
-                    model.atom_dict["name_resname_elem"][i, 2].astype(np.str_),
+                    elem_symbol[i],
                 )
             )
         str_out += "ENDMDL\n"

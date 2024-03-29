@@ -342,8 +342,6 @@ class Model:
             Model object
         tokens : list
             List of nested tokens
-        frame : int
-            Frame number for the selection, default is 0
 
         Returns
         -------

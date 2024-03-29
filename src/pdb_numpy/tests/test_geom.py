@@ -58,3 +58,32 @@ def test_cryst_convert():
         np.array([float(i) for i in cryst_gro_line.split()]),
         atol=1e-2,
     )
+
+
+def test_cryst_convert_pdb_to_pdb():
+    cryst_pdb_line = (
+        "CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P 1 21 1      2\n"
+    )
+    expected_output = cryst_pdb_line
+    assert geom.cryst_convert(cryst_pdb_line, format_out="pdb") == expected_output
+
+def test_cryst_convert_pdb_to_gro():
+    cryst_pdb_line = (
+        "CRYST1   28.748   30.978   29.753  90.00  92.12  90.00 P 1 21 1      2\n"
+    )
+    expected_output = (
+        "   2.87480   3.09780   2.97326   0.00000   0.00000   0.00000   0.00000  -0.11006   0.00000\n"
+    )
+    assert geom.cryst_convert(cryst_pdb_line, format_out="gro") == expected_output
+
+def test_cryst_convert_gro_to_pdb():
+    cryst_gro_line = "   2.87480   3.09780   2.97333   0.00000   0.00000   0.00000   0.00000  -0.11006   0.00000\n"
+    expected_output = (
+        "CRYST1   28.748   30.978   29.754  90.00  92.12  90.00 P1           1\n"
+    )
+    assert geom.cryst_convert(cryst_gro_line, format_out="pdb") == expected_output
+
+def test_cryst_convert_gro_to_gro():
+    cryst_gro_line = "   2.87480   3.09780   2.97333   0.00000   0.00000   0.00000   0.00000  -0.11006   0.00000\n"
+    expected_output = cryst_gro_line
+    assert geom.cryst_convert(cryst_gro_line, format_out="gro") == expected_output

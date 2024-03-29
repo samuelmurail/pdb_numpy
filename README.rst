@@ -96,21 +96,3 @@ License
 --------------
 
 This project is licensed under the GNU General Public License v2.0 - see the ``LICENSE`` file for details.
-
-
-Create a simple logo for a library called "PDB Numpy". This library is a python
-library designed to facilitate working with Protein Data Bank (PDB) files in the
-context of structural bioinformatics. 
-
-The logo should be simple and modern, and should include the name of the library
-("PDB Numpy") as well as an icon or symbol that represents the library's focus on
-structural bioinformatics and PDB files. 
-
-You could show a protein structure, like a DNA helix, chemical compounds and multiple sequence alignement.
-
-The logo should be suitable for use on
-the library's website, documentation, and other promotional materials.
-
-As the library is developed in Paris Cité university, it should show the Eiffel tower
-surrounded by an alpha helix and chemical compounds. The logo should have Blue color
-as dominant color. The logo should be square.

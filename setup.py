@@ -23,7 +23,6 @@ ext_modules = [
 
 requirements = [
     'numpy>=1.2',
-    'scipy>=1.5',
     'cython>=3.0',
 ]
 

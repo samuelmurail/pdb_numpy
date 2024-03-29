@@ -3,13 +3,13 @@
 
 import numpy as np
 import logging
-from scipy.spatial import distance_matrix
 
 # Logging
 logger = logging.getLogger(__name__)
 
 from . import alignement
 from . import select as select
+from .geom import distance_matrix
 
 
 def rmsd(coor_1, coor_2, selection="name CA", index_list=None, frame_ref=0):

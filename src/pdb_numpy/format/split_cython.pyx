@@ -3,19 +3,15 @@
 #cython: wraparound=False
 #cython: linetrace=True
 
-###cython: profile=True
-
 import cython
 from libc.string cimport strcpy, strlen
 
-@cython.wraparound(False) # Deactivate negative indexing.
 cdef bint is_space (char c):
     if c == b" ":
         return True
     else:
         return False
 
-@cython.wraparound(False) # Deactivate negative indexing.
 cdef bint is_quote (char c):
     if c == b"'" or c ==b'"':
         return True

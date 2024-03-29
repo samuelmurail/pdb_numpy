@@ -73,7 +73,6 @@ Dependencies
 ``pdb_numpy`` requires the following dependencies:
 
 - ``numpy``
-- ``scipy``
 - ``cython``
 
 

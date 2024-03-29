@@ -3,7 +3,6 @@
 
 import numpy as np
 from . import geom
-from scipy.spatial import distance_matrix
 import logging
 
 # Logging
@@ -259,7 +258,7 @@ def compute_Hbond_matrix(model):
     CA_array = model.select_atoms("protein and name CA and not altloc B C D E").xyz
     n_res = len(CA_array)
 
-    dist_mat = distance_matrix(CA_array, CA_array)
+    dist_mat = geom.distance_matrix(CA_array, CA_array)
     Hbond_mat = np.zeros_like(dist_mat, dtype=bool)
 
     O_array = model.select_atoms("protein and name O and not altloc B C D E").xyz

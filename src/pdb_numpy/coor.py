@@ -5,11 +5,11 @@ import logging
 import os
 import copy
 import numpy as np
-from scipy.spatial import distance_matrix
 
 from .data.aa_dict import AA_DICT
 from . import geom
 from .format import mmcif, pdb, pqr, gro
+from .geom import distance_matrix
 
 
 # Logging
@@ -891,6 +891,7 @@ class Coor:
             avg = np.average(chain_sel.xyz, axis=0)
             center_list.append(avg)
 
+        center_list = np.array(center_list)
         dist_matrix = distance_matrix(center_list, center_list)
         mask = dist_matrix < cutoff
         # Remove lower triangle and i, (k=0)

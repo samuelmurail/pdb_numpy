@@ -5,9 +5,9 @@ import logging
 import os
 import copy
 import numpy as np
-from scipy.spatial import distance_matrix
 
 from . import select
+from .geom import distance_matrix
 
 # Logging
 logger = logging.getLogger(__name__)

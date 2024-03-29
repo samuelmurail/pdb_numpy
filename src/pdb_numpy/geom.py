@@ -326,3 +326,108 @@ def atom_dihed_angle(atom_a, atom_b, atom_c, atom_d):
     angle = np.arctan2(y, x)
 
     return np.degrees(angle)
+
+
+def distance_matrix(x, y):
+    """Compute the minkowski distance 2th power of the L**p distance
+    between two arrays.
+
+    Taken from:
+    https://github.com/scipy/scipy/blob/main/scipy/spatial/_kdtree.py
+
+    Parameters
+    ----------
+    x : (..., K) array_like
+        Input array.
+    y : (..., K) array_like
+        Input array.
+    p : float, 1 <= p <= infinity
+        Which Minkowski p-norm to use.
+
+    Returns
+    -------
+    dist : ndarray
+        pth power of the distance between the input arrays.
+    """
+    x = np.asarray(x[:,np.newaxis,:])
+    y = np.asarray(y[np.newaxis,:,:])
+    p = 2
+
+    # Find smallest common datatype with float64 (return type of this
+    # function) - addresses #10262.
+    # Don't just cast to float64 for complex input case.
+    common_datatype = np.promote_types(np.promote_types(x.dtype, y.dtype),
+                                       'float64')
+
+    # Make sure x and y are NumPy arrays of correct datatype.
+    x = x.astype(common_datatype)
+    y = y.astype(common_datatype)
+
+    return np.sum(np.abs(y-x)**p, axis=-1)**(1./p)
+
+def makeW(r1, r2, r3, r4=0):
+    """
+    Source: https://github.com/charnley/rmsd/blob/master/rmsd/\
+    calculate_rmsd.py
+    matrix involved in quaternion rotation
+    """
+    W = np.asarray([
+        [r4, r3, -r2, r1],
+        [-r3, r4, r1, r2],
+        [r2, -r1, r4, r3],
+        [-r1, -r2, -r3, r4]])
+    return W
+
+def makeQ(r1, r2, r3, r4=0):
+    """
+    Source: https://github.com/charnley/rmsd/blob/master/rmsd/\
+    calculate_rmsd.py
+    matrix involved in quaternion rotation
+    """
+    Q = np.asarray([
+        [r4, -r3, r2, r1],
+        [r3, r4, -r1, r2],
+        [-r2, r1, r4, r3],
+        [-r1, -r2, -r3, r4]])
+    return Q
+
+def quaternion_transform(r):
+    """
+    Source: https://github.com/charnley/rmsd/blob/master/rmsd/\
+    calculate_rmsd.py
+    Get optimal rotation
+    note: translation will be zero when the centroids of each
+    molecule are the same.
+    """
+    Wt_r = makeW(*r).T
+    Q_r = makeQ(*r)
+    rot = Wt_r.dot(Q_r)[:3, :3]
+    return rot
+    
+def quaternion_rotate(X, Y):
+        """
+        Source: https://github.com/charnley/rmsd/blob/master/rmsd/\
+        calculate_rmsd.py
+        Calculate the rotation matrix between 2 vectors.
+
+        :param coor_1: coordinates array of size (N, D),\
+            where N is points and D is dimension.
+        :type coor_1: np.array
+
+        :param coor_2: coordinates array of size (N, D),\
+            where N is points and D is dimension.
+        :type coor_2: np.array
+
+        :return: rotation matrix
+        :rtype: np.array of size (D, D)
+        """
+        N = X.shape[0]
+        W = np.asarray([makeW(*Y[k]) for k in range(N)])
+        Q = np.asarray([makeQ(*X[k]) for k in range(N)])
+        Qt_dot_W = np.asarray([np.dot(Q[k].T, W[k]) for k in range(N)])
+        # NOTE UNUSED W_minus_Q = np.asarray([W[k] - Q[k] for k in range(N)])
+        A = np.sum(Qt_dot_W, axis=0)
+        eigen = np.linalg.eigh(A)
+        r = eigen[1][:, eigen[0].argmax()]
+        rot = quaternion_transform(r)
+        return rot

@@ -533,7 +533,6 @@ def coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0):
     None
     """
 
-    from scipy.spatial.transform import Rotation as R
 
     assert len(index_1) != 0, "No atom selected in the first structure"
     assert len(index_1) == len(index_2), "Two structure don't have the same atom number"
@@ -555,7 +554,9 @@ def coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0):
         if not (self_align and (i == frame_ref)):
             model.xyz -= centroid_1
 
-        rot_mat = R.align_vectors(model.xyz[index_1], ref_coor)[0].as_matrix()
+        rot_mat = geom.quaternion_rotate(model.xyz[index_1], ref_coor)
+        # from scipy.spatial.transform import Rotation as R
+        # rot_mat_2 = R.align_vectors(model.xyz[index_1], ref_coor)[0].as_matrix()
 
         model.xyz = np.dot(model.xyz, rot_mat)
         if not (self_align and (i == frame_ref)):

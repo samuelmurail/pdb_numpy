@@ -232,7 +232,7 @@ def remove_incomplete_backbone_residues(coor, back_atom=["CA", "C", "N", "O"]):
     uniq_res_to_remove = []
     for uniq_res in uniq_res_num:
         if sum(backbone.models[0].uniq_resid == uniq_res) != len(back_atom):
-            uniq_res_to_remove.append(uniq_res)
+            uniq_res_to_remove.append(str(uniq_res))
             logger.warning(f"Removing residue {uniq_res} has incomplete backbone atoms")
 
     return no_alter_loc.select_atoms(f'not residue {" ".join(uniq_res_to_remove)}')

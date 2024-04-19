@@ -346,22 +346,34 @@ def parse_transformation(data_mmCIF):
             transformation_dict[i + 1] = {"chains": chain_list, "matrix": []}
 
             # Extract matrix value
-            for j in range(len(data_mmCIF["_pdbx_struct_oper_list"]["value"][0])):
-                matrix_id = data_mmCIF["_pdbx_struct_oper_list"]["value"][0][j]
+            # print(data_mmCIF["_pdbx_struct_oper_list"])
+            if "value" in data_mmCIF["_pdbx_struct_oper_list"]:
+                for j in range(len(data_mmCIF["_pdbx_struct_oper_list"]["value"][0])):
+                    matrix_id = data_mmCIF["_pdbx_struct_oper_list"]["value"][0][j]
 
+                    if matrix_id in matrix_index_list:
+                        for matrix_index in matrix_indexes:
+                            local_matrix = []
+                            for index in matrix_index:
+                                local_index = data_mmCIF["_pdbx_struct_oper_list"][
+                                    "col_names"
+                                ].index(index)
+                                local_matrix.append(
+                                    float(
+                                        data_mmCIF["_pdbx_struct_oper_list"]["value"][
+                                            local_index
+                                        ][j]
+                                    )
+                                )
+                            transformation_dict[i + 1]["matrix"].append(local_matrix)
+            else:
+                matrix_id = data_mmCIF["_pdbx_struct_oper_list"]["id"]
                 if matrix_id in matrix_index_list:
                     for matrix_index in matrix_indexes:
                         local_matrix = []
                         for index in matrix_index:
-                            local_index = data_mmCIF["_pdbx_struct_oper_list"][
-                                "col_names"
-                            ].index(index)
                             local_matrix.append(
-                                float(
-                                    data_mmCIF["_pdbx_struct_oper_list"]["value"][
-                                        local_index
-                                    ][j]
-                                )
+                                float(data_mmCIF["_pdbx_struct_oper_list"][index])
                             )
                         transformation_dict[i + 1]["matrix"].append(local_matrix)
 

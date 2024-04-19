@@ -109,18 +109,23 @@ def interface_rmsd(
         f'chain {" ".join(rec_chain)} and within {cutoff} of chain {" ".join(lig_chain)}'
     )
 
-    interface_rmsd = np.concatenate(
+    interface_resids = np.concatenate(
         (
             np.unique(lig_interface.models[0].resid),
             np.unique(rec_interface.models[0].resid),
         )
     )
-
+    if len(interface_resids) == 0:
+        logger.warning("No interface residues found")
+        # This should be fixed DIRTY
+        return [10000000.0]*len(coor_1.models)
+    
+    # print(f"interface_rmsd= {interface_resids}")
     index_1 = coor_1.get_index_select(
-        f'resid {" ".join([str(i) for i in interface_rmsd])} and name {" ".join(back_atom)}'
+        f'resid {" ".join([str(i) for i in interface_resids])} and name {" ".join(back_atom)}'
     )
     index_2 = coor_2.get_index_select(
-        f'resid {" ".join([str(i) for i in interface_rmsd])} and name {" ".join(back_atom)}'
+        f'resid {" ".join([str(i) for i in interface_resids])} and name {" ".join(back_atom)}'
     )
 
     alignement.coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0)
@@ -700,7 +705,7 @@ def compute_pdockQ2(
     .. math::
         pDockQ_2 = \frac{L}{1 + exp [-k*(X_i-X_0)]} + b
 
-    whith:
+    with:
 
     .. math::
         X_i = \langle \frac{1}{1+(\frac{PAE_{int}}{d_0})^2} \rangle - \langle pLDDT \rangle_{int}
@@ -739,6 +744,8 @@ def compute_pdockQ2(
     models_CA = coor.select_atoms("name CA")
     models_chains = np.unique(models_CA.chain)
 
+    assert pae_array.shape == (models_CA.len, models_CA.len), "PAE array shape mismatch with CA atoms number"
+
     pdockq2_list = []
     for chain in models_chains:
         pdockq2_list.append([])
@@ -768,3 +775,107 @@ def compute_pdockQ2(
             pdockq2_list[i].append(y)
 
     return pdockq2_list
+
+
+def compute_piTM(
+    coor,
+    pae_array,
+    cutoff=8.0,
+):
+    r"""Compute the piTM score as define in [2]_.
+
+    .. math::
+        piTM = \max_{i \in \mathcal{I}} \frac{1}{I} \sum_{j \in \mathcal{I}}  \frac{1}{1 + [\langle e_{ij} \rangle / d_0 (I)]^2}
+
+    with:
+
+    .. math::
+        d_0(I) = \begin{cases} 1.25 \sqrt[3]{I -15} -1.8\text{,} & \text{if } I \geq 22 \\ 0.02 I \text{,} & \text{if } I < 22  \end{cases}
+    
+
+    Implementation was inspired from `predicted_tm_score_v1()` in https://github.com/FreshAirTonight/af2complex/blob/main/src/alphafold/common/confidence.py
+
+    Parameters
+    ----------
+    coor : Coor
+        object containing the coordinates of the model
+    pae_array : np.array
+        array of predicted PAE
+    cutoff : float
+        cutoff for native contacts, default is 8.0 A
+
+    Returns
+    -------
+    list
+        piTM scores
+
+    References
+    ----------
+    .. [2] Mu Gao, Davi Nakajima An, Jerry M. Parks & Jeffrey Skolnick. 
+        AF2Complex predicts direct physical interactions in multimeric proteins with deep learning
+        *Nature Communications*. volume 13, Article number: 1744 (2022).
+        https://www.nature.com/articles/s41467-022-29394-2
+
+    """
+
+    models_CA = coor.select_atoms("name CA")
+    models_chains = np.unique(models_CA.chain)
+
+    # print(models_chains, pae_array.shape, models_CA.len)
+
+    assert pae_array.shape == (models_CA.len, models_CA.len), "PAE array shape mismatch with CA atoms number"
+
+    piTM_list = []
+
+    piTM_Score_list = []
+    for chain in models_chains:
+        piTM_Score_list.append([])
+
+    for model in models_CA.models:
+
+        # Compute I and d0
+        interface_index = []
+        for i, chain in enumerate(models_chains):
+            sel_ndx = model.get_index_select(
+                f"(within {cutoff} of chain {chain}) and (within {cutoff} of not chain {chain})"
+            )
+            interface_index += list(sel_ndx)
+        interface_index = set(interface_index)
+
+        I = len(interface_index)
+        if I == 0:
+            piTM_list.append(0)
+            for i in range(len(models_chains)):
+                piTM_Score_list[i].append(0)
+            continue
+        d0 = 1.25 * (I -15 ) ** (1 / 3) - 1.8 if I >= 22 else 0.02 * I
+
+        piTM_local = []
+        for i in interface_index:
+            #print(pae_array[:10, :10])
+            local_score = 0
+            for j in interface_index:
+                if i!= j:
+                    local_score += 1 / (1 + (pae_array[i, j] / d0) ** 2)
+            piTM_local.append(local_score)
+        piTM_list.append(max(piTM_local)/I)
+
+        for i, chain in enumerate(models_chains):
+
+            chain_sel_ndx = model.get_index_select(
+                f"(chain {chain} and within {cutoff} of not chain {chain})"
+            )
+            inter_chain_ndx = model.get_index_select(
+                f"(not chain {chain} {chain} and within {cutoff} of chain {chain})"
+            )
+            chain_score = []
+            for j in inter_chain_ndx:
+                local_score = 0
+                for k in chain_sel_ndx:
+                    local_score += 1 / (1 + (pae_array[k, j].mean() / d0) ** 2)
+                chain_score.append(local_score)
+
+            piTM_Score_list[i].append(max(chain_score)/I)
+            #piTM_Score_list[i].append(max(chain_score)/len(chain_sel_ndx))
+
+    return piTM_list, piTM_Score_list

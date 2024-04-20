@@ -394,7 +394,7 @@ def print_align_seq(seq_1, seq_2, line_len=80):
             if (seq_1[i], seq_2[i]) in BLOSUM62:
                 mut_score = BLOSUM62[seq_1[i], seq_2[i]]
             else:
-                print(seq_1[i], seq_2[i])
+                # print(seq_1[i], seq_2[i])
                 mut_score = BLOSUM62[seq_2[i], seq_1[i]]
             if mut_score >= 0:
                 sim_seq += "|"
@@ -402,10 +402,10 @@ def print_align_seq(seq_1, seq_2, line_len=80):
         sim_seq += " "
 
     for i in range(1 + len(seq_1) // line_len):
-        logger.info(seq_1[i * line_len : (i + 1) * line_len])
-        logger.info(sim_seq[i * line_len : (i + 1) * line_len])
-        logger.info(seq_2[i * line_len : (i + 1) * line_len])
-        logger.info("\n")
+        print(seq_1[i * line_len : (i + 1) * line_len])
+        print(sim_seq[i * line_len : (i + 1) * line_len])
+        print(seq_2[i * line_len : (i + 1) * line_len])
+        print("\n")
 
     identity = 0
     similarity = 0
@@ -418,11 +418,11 @@ def print_align_seq(seq_1, seq_2, line_len=80):
     len_1 = len(seq_1.replace("-", ""))
     len_2 = len(seq_2.replace("-", ""))
 
-    logger.info(f"Identity seq1: {identity / len_1 * 100:.2f}%")
-    logger.info(f"Identity seq2: {identity / len_2 * 100:.2f}%")
+    print(f"Identity seq1: {identity / len_1 * 100:.2f}%")
+    print(f"Identity seq2: {identity / len_2 * 100:.2f}%")
 
-    logger.info(f"Similarity seq1: {similarity / len_1 * 100:.2f}%")
-    logger.info(f"Similarity seq2: {similarity / len_2 * 100:.2f}%")
+    print(f"Similarity seq1: {similarity / len_1 * 100:.2f}%")
+    print(f"Similarity seq2: {similarity / len_2 * 100:.2f}%")
 
     return
 

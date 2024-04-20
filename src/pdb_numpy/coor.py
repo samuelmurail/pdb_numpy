@@ -382,7 +382,8 @@ class Coor:
                 if model.atom_dict["num_resid_uniqresid"][i, 2] != last_residue:
                     residue += 1
                     last_residue = model.atom_dict["num_resid_uniqresid"][i, 2]
-                model.atom_dict["num_resid_uniqresid"][i, 1] = residue
+                #model.atom_dict["num_resid_uniqresid"][i, 1] = residue
+                model.atom_dict["num_resid_uniqresid"][i, 2] = residue
 
         return
 

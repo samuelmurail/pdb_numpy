@@ -67,7 +67,7 @@ def rmsd(coor_1, coor_2, selection="name CA", index_list=None, frame_ref=0):
 
 
 def interface_rmsd(
-    coor_1, coor_2, rec_chain, lig_chain, cutoff=10.0, back_atom=["CA", "N", "C", "O"]
+    coor, coor_native, rec_chain_native, lig_chain_native, cutoff=10.0, back_atom=["CA", "N", "C", "O"]
 ):
     """Compute the interface RMSD between two models.
     The interface is defined as the distance between the ligand and the receptor
@@ -77,13 +77,13 @@ def interface_rmsd(
 
     Parameters
     ----------
-    coor_1 : Coor
+    coor : Coor
         First coordinates
-    coor_2 : Coor
+    coor_native : Coor
         Second coordinates
-    rec_chain : list
+    rec_chain_native : list
         List of receptor chain
-    lig_chain : list
+    lig_chain_native : list
         List of ligand chain
     cutoff : float, default=10.0
         Cutoff distance for the interface
@@ -102,35 +102,44 @@ def interface_rmsd(
 
     """
 
-    lig_interface = coor_2.select_atoms(
-        f'chain {" ".join(lig_chain)} and within {cutoff} of chain {" ".join(rec_chain)}'
+
+    lig_interface = coor_native.select_atoms(
+        f'chain {" ".join(lig_chain_native)} and within {cutoff} of chain {" ".join(rec_chain_native)}'
     )
-    rec_interface = coor_2.select_atoms(
-        f'chain {" ".join(rec_chain)} and within {cutoff} of chain {" ".join(lig_chain)}'
+    rec_interface = coor_native.select_atoms(
+        f'chain {" ".join(rec_chain_native)} and within {cutoff} of chain {" ".join(lig_chain_native)}'
     )
 
-    interface_resids = np.concatenate(
+    lig_interface_residues = np.unique(lig_interface.models[0].residue)
+    rec_interface_residues = np.unique(rec_interface.models[0].residue)
+
+    interface_residues = np.concatenate(
         (
-            np.unique(lig_interface.models[0].resid),
-            np.unique(rec_interface.models[0].resid),
+            lig_interface_residues,
+            rec_interface_residues,
         )
     )
-    if len(interface_resids) == 0:
+
+    if len(interface_residues) == 0 or len(rec_interface_residues) == 0:
         logger.warning("No interface residues found")
         # This should be fixed DIRTY
         return [10000000.0]*len(coor_1.models)
     
-    # print(f"interface_rmsd= {interface_resids}")
-    index_1 = coor_1.get_index_select(
-        f'resid {" ".join([str(i) for i in interface_resids])} and name {" ".join(back_atom)}'
+    # print(f"lig_interface_resids= {lig_interface_residues} rec_interface_resids= {rec_interface_residues}")
+    index = coor.get_index_select(
+        f'residue {" ".join([str(i) for i in interface_residues])} and name {" ".join(back_atom)}'
     )
-    index_2 = coor_2.get_index_select(
-        f'resid {" ".join([str(i) for i in interface_resids])} and name {" ".join(back_atom)}'
+    index_native = coor_native.get_index_select(
+        f'residue {" ".join([str(i) for i in interface_residues])} and name {" ".join(back_atom)}'
     )
 
-    alignement.coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0)
+    # print(f"index= {index} index_native= {index_native}")
+    # print(f"index= {len(index)} index_native= {len(index_native)}")
+    assert len(index) == len(index_native), "The number of atoms in the interface is not the same in the two models"
 
-    return rmsd(coor_1, coor_2, index_list=[index_1, index_2])
+    alignement.coor_align(coor, coor_native, index, index_native, frame_ref=0)
+    
+    return rmsd(coor, coor_native, index_list=[index, index_native])
 
 
 def native_contact(
@@ -196,6 +205,9 @@ def native_contact(
 
     native_contact_list = []
     native_rec_resid = native_rec_interface.models[0].resid
+
+    # print("native_rec_resid", native_rec_resid)
+
     for residue in np.unique(native_rec_resid):
         res_lig = native_rec_lig_interface.select_atoms(
             f'chain {" ".join(native_lig_chain)} and within {cutoff} of (resid {residue} and chain {" ".join(native_rec_chain)})'
@@ -203,6 +215,8 @@ def native_contact(
         native_contact_list += [
             [residue, lig_res] for lig_res in np.unique(res_lig.models[0].resid)
         ]
+
+    # print("native_contact_list", native_contact_list)
 
     fnat_list = []
     fnonnat_list = []
@@ -220,11 +234,13 @@ def native_contact(
         native_contact_num = 0
         non_native_contact_num = 0
         model_contact_list = []
+
+        # print("model_rec_resid", model_rec_resid)
         for residue in model_rec_resid:
             res_lig = rec_lig_interface.select_atoms(
                 f'chain {" ".join(lig_chain)} and within {cutoff} of (resid {residue} and chain {" ".join(rec_chain)})'
             )
-
+            # print("res_lig", res_lig.resid)
             for lig_res in np.unique(res_lig.resid):
                 if [residue, lig_res] in native_contact_list:
                     native_contact_num += 1
@@ -353,13 +369,17 @@ def dockQ(
         f"protein and not altloc B C D and chain {' '.join(native_rec_chain + native_lig_chain)}"
     )
 
+    # print("1:", clean_native_coor.models[0].resid[:10])
+
     # Remove incomplete backbone residue:
     clean_coor = select.remove_incomplete_backbone_residues(clean_coor)
     clean_native_coor = select.remove_incomplete_backbone_residues(clean_native_coor)
+    # print("2:", clean_native_coor.models[0].resid[:10])
 
     # Put lig chain at the end of the dict:
     clean_coor.change_order("chain", rec_chain + lig_chain)
     clean_native_coor.change_order("chain", native_rec_chain + native_lig_chain)
+    # print("3:", clean_native_coor.models[0].resid[:10])
 
     # Align model on native structure using model back atoms:
     rmsd_prot_list, [
@@ -376,6 +396,7 @@ def dockQ(
     logger.info(
         f"Found {len(align_rec_index)//len(back_atom):d} residues in common (receptor)"
     )
+    # print("4:", clean_native_coor.models[0].resid[:10])
 
     ########################
     # Compute ligand RMSD: #
@@ -392,6 +413,7 @@ def dockQ(
     logger.info(
         f"Found {len(align_lig_index)//len(back_atom):d} residues in common (ligand)"
     )
+    # print("5:", clean_native_coor.models[0].resid[:10])
 
     #############################
     # Set same resid in common: #
@@ -419,10 +441,13 @@ def dockQ(
         f'residue {" ".join([str(i) for i in native_residue_unique])}'
     )
 
-    for model in interface_coor.models:
-        model.resid[:] = -1
-        for res, nat_res in zip(coor_residue_unique, native_resid_unique):
-            model.resid[model.residue == res] = nat_res
+    #for model in interface_coor.models:
+    #    model.resid[:] = -1
+    #    for res, nat_res in zip(coor_residue_unique, native_resid_unique):
+    #        model.resid[model.residue == res] = nat_res
+
+    interface_coor.reset_residue_index()
+    interface_native_coor.reset_residue_index()
 
     irmsd_list = interface_rmsd(
         interface_coor,

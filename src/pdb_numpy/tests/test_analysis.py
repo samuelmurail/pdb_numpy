@@ -158,12 +158,12 @@ def test_dockq_bad(tmp_path):
 
     # dockq = analysis.dockQ(model_coor, native_coor, rec_chain=["A"], lig_chain=["B"], native_rec_chain=["A"], native_lig_chain=["B"])
     dockq = analysis.dockQ(model_coor, native_coor)
-
-    assert pytest.approx(dockq["DockQ"][0], 0.5) == 0.010
+    print("Bad dockq:", dockq)
     assert dockq["Fnat"][0] == 0.0
     assert dockq["Fnonnat"][0] == 1.0
     assert pytest.approx(dockq["LRMS"][0], 0.1) == 54.0
     assert pytest.approx(dockq["iRMS"][0], 0.5) == 15.631
+    assert pytest.approx(dockq["DockQ"][0], 0.5) == 0.010
 
     print(dockq)
 

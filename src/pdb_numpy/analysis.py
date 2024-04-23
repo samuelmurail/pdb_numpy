@@ -120,10 +120,9 @@ def interface_rmsd(
         )
     )
 
-    if len(interface_residues) == 0 or len(rec_interface_residues) == 0:
+    if len(interface_residues) == 0:
         logger.warning("No interface residues found")
-        # This should be fixed DIRTY
-        return [10000000.0]*len(coor_1.models)
+        return [None] * len(coor.models)
     
     # print(f"lig_interface_resids= {lig_interface_residues} rec_interface_resids= {rec_interface_residues}")
     index = coor.get_index_select(
@@ -457,7 +456,7 @@ def dockQ(
         cutoff=10.0,
         back_atom=back_atom,
     )
-    logger.info(f"Interface   RMSD: {irmsd_list[0]:.3f} A")
+    logger.info(f"Interface   RMSD: {irmsd_list[0]} A")
 
     fnat_list, fnonnat_list = native_contact(
         clean_coor,
@@ -471,6 +470,8 @@ def dockQ(
     logger.info(f"Fnat: {fnat_list[0]:.3f}      Fnonnat: {fnonnat_list[0]:.3f}")
 
     def scale_rms(rms, d):
+        if rms is None:
+            return 0.0
         return 1.0 / (1 + (rms / d) ** 2)
 
     d1 = 8.5

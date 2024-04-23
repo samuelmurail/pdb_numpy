@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from . import alignement
-from . import select as select
+from .select import remove_incomplete_backbone_residues
 from .geom import distance_matrix
 
 
@@ -193,13 +193,12 @@ def native_contact(
         Native contact score
     """
 
-    native_rec_interface = native_coor.select_atoms(
-        f'chain {" ".join(native_rec_chain)} and within {cutoff} of chain {" ".join(native_lig_chain)}'
-    )
-
     native_rec_lig_interface = native_coor.select_atoms(
         f'(chain {" ".join(native_rec_chain)} and within {cutoff} of chain {" ".join(native_lig_chain)}) or'
         f'(chain {" ".join(native_lig_chain)} and within {cutoff} of chain {" ".join(native_rec_chain)})'
+    )
+    native_rec_interface = native_rec_lig_interface.select_atoms(
+        f'chain {" ".join(native_rec_chain)} and within {cutoff} of chain {" ".join(native_lig_chain)}'
     )
 
     native_contact_list = []
@@ -224,7 +223,7 @@ def native_contact(
             f'(chain {" ".join(rec_chain)} and within {cutoff} of chain {" ".join(lig_chain)}) or '
             f'(chain {" ".join(lig_chain)} and within {cutoff} of chain {" ".join(rec_chain)})'
         )
-        rec_interface = model.select_atoms(
+        rec_interface = rec_lig_interface.select_atoms(
             f'(chain {" ".join(rec_chain)} and within {cutoff} of chain {" ".join(lig_chain)})'
         )
 
@@ -371,8 +370,8 @@ def dockQ(
     # print("1:", clean_native_coor.models[0].resid[:10])
 
     # Remove incomplete backbone residue:
-    clean_coor = select.remove_incomplete_backbone_residues(clean_coor)
-    clean_native_coor = select.remove_incomplete_backbone_residues(clean_native_coor)
+    clean_coor = remove_incomplete_backbone_residues(clean_coor)
+    clean_native_coor = remove_incomplete_backbone_residues(clean_native_coor)
     # print("2:", clean_native_coor.models[0].resid[:10])
 
     # Put lig chain at the end of the dict:

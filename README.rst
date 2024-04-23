@@ -84,6 +84,12 @@ you find a bug or have a feature request, please open an issue on the GitHub
 repository at https://github.com/samuelmurail/pdb_numpy. If you would like
 to contribute code, please fork the repository and submit a pull request.
 
+To build locally the extension module, you can run the following command:
+
+```bash
+python setup.py build_ext --inplace
+```
+
 Author
 --------------
 

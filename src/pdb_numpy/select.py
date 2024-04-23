@@ -2,7 +2,6 @@
 # coding: utf-8
 
 import logging
-import copy
 import numpy as np
 
 from .data.aa_dict import AA_DICT

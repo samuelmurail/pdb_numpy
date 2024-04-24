@@ -3,7 +3,7 @@
     :target: https://pdb-numpy.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. image:: https://dev.azure.com/samuelmurailRPBS/pdb_numpy/_apis/build/status/samuelmurail.pdb_numpy?branchName=main
+.. image:: https://dev.azure.com/samuelmurailRPBS/pdb_numpy/_apis/build/status%2Fsamuelmurail.pdb_numpy?branchName=main
     :target: https://dev.azure.com/samuelmurailRPBS/pdb_numpy/_build/latest?definitionId=1&branchName=main
     :alt: Build Status
 

@@ -784,6 +784,11 @@ def compute_pdockQ2(
                 f"(not chain {chain} {chain} and within {cutoff} of chain {chain})"
             )
 
+            if chain_sel.len == 0 or inter_chain_sel.len == 0:
+                pdockq2_list[i].append(0.0)
+                logger.warning("No interface residues found for pdockq2 calculation, 0 value return.")
+                continue
+
             dist_mat = distance_matrix(chain_sel.xyz, inter_chain_sel.xyz)
 
             indexes = np.where(dist_mat < cutoff)

@@ -1,7 +1,8 @@
-import numpy as np
-
-from setuptools import setup
+from setuptools import dist, setup
 from distutils.extension import Extension
+dist.Distribution().fetch_build_eggs(['Cython>=0.15.1', 'numpy>=1.10'])
+
+import numpy as np
 
 version="0.0.5"
 

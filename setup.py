@@ -4,7 +4,7 @@ dist.Distribution().fetch_build_eggs(['Cython>=0.15.1', 'numpy>=1.10'])
 
 import numpy as np
 
-version="0.0.5"
+version="0.0.6"
 
 with open('README.rst', encoding='utf-8') as readme_file:
     readme = readme_file.read()

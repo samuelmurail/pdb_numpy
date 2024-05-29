@@ -10,15 +10,15 @@ with open('README.rst', encoding='utf-8') as readme_file:
 
 ext_modules = [
     Extension(
-        "pdb_numpy.alignement.align_cython",
-        ["src/pdb_numpy/alignement/align_cython.pyx"],
+        name="pdb_numpy.alignement.align_cython",
+        sources=["src/pdb_numpy/alignement/align_cython.pyx"],
         include_dirs=[np.get_include()]),
     Extension(
-        "pdb_numpy.format.split_cython",
-        ["src/pdb_numpy/format/split_cython.pyx"]),
+        name="pdb_numpy.format.split_cython",
+        sources=["src/pdb_numpy/format/split_cython.pyx"]),
     Extension(
-        "pdb_numpy.format.encode_cython",
-        ["src/pdb_numpy/format/encode_cython.pyx"]),
+        name="pdb_numpy.format.encode_cython",
+        sources=["src/pdb_numpy/format/encode_cython.pyx"]),
 ]
 
 requirements = [

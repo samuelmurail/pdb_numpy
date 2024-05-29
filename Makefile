@@ -78,9 +78,9 @@ release: dist ## package and upload a release
 	twine upload dist/*
 
 dist: clean ## builds source and wheel package
-	python setup.py sdist
-	python setup.py bdist_wheel
+	#CYTHONIZE=1 python setup.py sdist bdist_wheel
+	CYTHONIZE=1 python setup.py sdist
 	ls -l dist
 
 install: clean ## install the package to the active Python's site-packages
-	python setup.py install
+	CYTHONIZE=1 pip install .

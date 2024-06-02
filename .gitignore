@@ -2,11 +2,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
-*_cython.c
+*cython.c
 *.cpython-*.so
 
 # C extensions
-# *.so
+*.so
+*.dylib
 
 # Distribution / packaging
 .Python

@@ -17,93 +17,93 @@ from ..data.blosum import BLOSUM62
 logger = logging.getLogger(__name__)
 
 
-def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
-    """Align two amino acid sequences using the Waterman - Smith Algorithm.
-
-    Parameters
-    ----------
-    seq_1 : str
-        First sequence to align
-    seq_2 : str
-        Second sequence to align
-    gap_cost : int, optional
-        Cost of gap, by default -8
-    gap_extension : int, optional
-        Cost of gap extension, by default -2
-
-    Returns
-    -------
-    str
-        Aligned sequence 1
-    str
-        Aligned sequence 2
-
-    .note:: This function is based on the C implementation of the Waterman - Smith Algorithm.
-
-        To compile the C code, run the following command in the src/pdb_numpy/alignement folder:
-
-        in Linux:
-        ```
-        gcc -shared -o _align.so -fPIC _align.c
-        ```
-
-        in OSX:
-        ```
-        gcc -shared -o _align.dylib -fPIC _align.c
-        ```
-
-    """
-    import platform
-    import ctypes
-
-    dir_path = os.path.dirname(os.path.abspath(__file__))
-    if platform.uname()[0] == "Darwin":
-        so_file = os.path.join(dir_path, "_align.dylib")
-    else:
-        so_file = os.path.join(dir_path, "_align.so")
-
-    my_functions = ctypes.CDLL(so_file)
-
-    class test(ctypes.Structure):
-        _fields_ = [
-            ("seq1", ctypes.c_char_p),
-            ("seq2", ctypes.c_char_p),
-            ("score", ctypes.c_int),
-        ]
-
-    align = my_functions.align
-    align.restype = ctypes.POINTER(test)
-    align.argtypes = [
-        ctypes.c_char_p,
-        ctypes.c_char_p,
-        ctypes.c_char_p,
-        ctypes.c_int,
-        ctypes.c_int,
-    ]
-
-    seq_1_bytes = seq_1.encode("ascii")
-    seq_2_bytes = seq_2.encode("ascii")
-    blosum_file = os.path.join(dir_path, "../data/blosum62.txt")
-
-    alignement_res = align(
-        ctypes.c_char_p(seq_1_bytes),
-        ctypes.c_char_p(seq_2_bytes),
-        ctypes.c_char_p(blosum_file.encode("ascii")),
-        ctypes.c_int(gap_cost),
-        ctypes.c_int(gap_extension),
-    )
-
-    seq_1_aligned = alignement_res.contents.seq1
-    seq_2_aligned = alignement_res.contents.seq2
-
-    # print(seq_1_aligned)
-
-    free_align = my_functions.free_align
-    free_align.argtypes = [ctypes.POINTER(test)]
-    free_align(alignement_res)
-
-    # print(f"Max score: {alignement_res.contents.score}")
-    return seq_1_aligned.decode("ascii"), seq_2_aligned.decode("ascii")
+#def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
+#    """Align two amino acid sequences using the Waterman - Smith Algorithm.
+#
+#    Parameters
+#    ----------
+#    seq_1 : str
+#        First sequence to align
+#    seq_2 : str
+#        Second sequence to align
+#    gap_cost : int, optional
+#        Cost of gap, by default -8
+#    gap_extension : int, optional
+#        Cost of gap extension, by default -2
+#
+#    Returns
+#    -------
+#    str
+#        Aligned sequence 1
+#    str
+#        Aligned sequence 2
+#
+#    .note:: This function is based on the C implementation of the Waterman - Smith Algorithm.
+#
+#        To compile the C code, run the following command in the src/pdb_numpy/alignement folder:
+#
+#        in Linux:
+#        ```
+#        gcc -shared -o _align.so -fPIC _align.c
+#        ```
+#
+#        in OSX:
+#        ```
+#        gcc -shared -o _align.dylib -fPIC _align.c
+#        ```
+#
+#    """
+#    import platform
+#    import ctypes
+#
+#    dir_path = os.path.dirname(os.path.abspath(__file__))
+#    if platform.uname()[0] == "Darwin":
+#        so_file = os.path.join(dir_path, "_align.dylib")
+#    else:
+#        so_file = os.path.join(dir_path, "_align.so")
+#
+#    my_functions = ctypes.CDLL(so_file)
+#
+#    class test(ctypes.Structure):
+#        _fields_ = [
+#            ("seq1", ctypes.c_char_p),
+#            ("seq2", ctypes.c_char_p),
+#            ("score", ctypes.c_int),
+#        ]
+#
+#    align = my_functions.align
+#    align.restype = ctypes.POINTER(test)
+#    align.argtypes = [
+#        ctypes.c_char_p,
+#        ctypes.c_char_p,
+#        ctypes.c_char_p,
+#        ctypes.c_int,
+#        ctypes.c_int,
+#    ]
+#
+#    seq_1_bytes = seq_1.encode("ascii")
+#    seq_2_bytes = seq_2.encode("ascii")
+#    blosum_file = os.path.join(dir_path, "../data/blosum62.txt")
+#
+#    alignement_res = align(
+#        ctypes.c_char_p(seq_1_bytes),
+#        ctypes.c_char_p(seq_2_bytes),
+#        ctypes.c_char_p(blosum_file.encode("ascii")),
+#        ctypes.c_int(gap_cost),
+#        ctypes.c_int(gap_extension),
+#    )
+#
+#    seq_1_aligned = alignement_res.contents.seq1
+#    seq_2_aligned = alignement_res.contents.seq2
+#
+#    # print(seq_1_aligned)
+#
+#    free_align = my_functions.free_align
+#    free_align.argtypes = [ctypes.POINTER(test)]
+#    free_align(alignement_res)
+#
+#    # print(f"Max score: {alignement_res.contents.score}")
+#    return seq_1_aligned.decode("ascii"), seq_2_aligned.decode("ascii")
 
 
 def align_seq_cython(seq_1, seq_2, gap_cost=-11, gap_extension=-1):

@@ -1,24 +1,25 @@
+from setuptools import dist, setup
+from distutils.extension import Extension
+dist.Distribution().fetch_build_eggs(['Cython>=3.0.', 'numpy>=1.2'])
+
 import numpy as np
 
-from setuptools import setup
-from distutils.extension import Extension
-
-version="0.0.2"
+version="0.0.6"
 
 with open('README.rst', encoding='utf-8') as readme_file:
     readme = readme_file.read()
 
 ext_modules = [
     Extension(
-        "pdb_numpy.alignement.align_cython",
-        ["src/pdb_numpy/alignement/align_cython.pyx"],
+        name="pdb_numpy.alignement.align_cython",
+        sources=["src/pdb_numpy/alignement/align_cython.pyx"],
         include_dirs=[np.get_include()]),
     Extension(
-        "pdb_numpy.format.split_cython",
-        ["src/pdb_numpy/format/split_cython.pyx"]),
+        name="pdb_numpy.format.split_cython",
+        sources=["src/pdb_numpy/format/split_cython.pyx"]),
     Extension(
-        "pdb_numpy.format.encode_cython",
-        ["src/pdb_numpy/format/encode_cython.pyx"]),
+        name="pdb_numpy.format.encode_cython",
+        sources=["src/pdb_numpy/format/encode_cython.pyx"]),
 ]
 
 requirements = [
@@ -41,7 +42,7 @@ setup(
     package_dir={'pdb_numpy': 'src/pdb_numpy'},
     entry_points={'console_scripts': ['pdb_numpy = pdb_numpy.__main__:main']},
     include_package_data=True,
-    python_requires='>=3.7',
+    python_requires='>=3.6',
     install_requires=requirements,
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
@@ -65,6 +66,7 @@ setup(
         "License :: OSI Approved :: BSD License",
         "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",

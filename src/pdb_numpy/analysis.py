@@ -880,7 +880,8 @@ def compute_piTM(
             continue
         d0 = 1.25 * (I -15 ) ** (1 / 3) - 1.8 if I >= 22 else 0.02 * I
 
-        piTM_local = []
+        # Add 0 in case there is no interface residues
+        piTM_local = [0]
         for i in interface_index:
             #print(pae_array[:10, :10])
             local_score = 0
@@ -898,7 +899,8 @@ def compute_piTM(
             inter_chain_ndx = model.get_index_select(
                 f"(not chain {chain} {chain} and within {cutoff} of chain {chain})"
             )
-            chain_score = []
+            # Add 0 in case there is no interface residues
+            chain_score = [0]
             for j in inter_chain_ndx:
                 local_score = 0
                 for k in chain_sel_ndx:

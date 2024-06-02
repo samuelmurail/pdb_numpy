@@ -44,6 +44,14 @@ pdb\_numpy.tests.test\_analysis module
    :undoc-members:
    :show-inheritance:
 
+pdb\_numpy.tests.test\_encode module
+------------------------------------
+
+.. automodule:: pdb_numpy.tests.test_encode
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pdb\_numpy.tests.test\_geom module
 ----------------------------------
 

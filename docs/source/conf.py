@@ -21,7 +21,7 @@ import sys
 sys.path.insert(0, os.path.abspath('../../src/'))
 
 # This command doesn't get any sense for me (previous one should be enough)
-sys.path.insert(0, os.path.abspath('../../src/pdb_numpy/'))
+# sys.path.insert(0, os.path.abspath('../../src/pdb_numpy/'))
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -68,7 +68,9 @@ man_pages = [
      [author], 1)
 ]
 
-autodoc_mock_imports = ["numpy", "scipy", "pytest"]
+# autodoc_mock_imports = ["numpy", "scipy", "pytest"]
 
 # Exclude unit pages (tests and data) from the documentation
-exclude_patterns = ['pdb_numpy.tests.rst', 'pdb_numpy.data.rst', 'modules.rst']
+# exclude_patterns = ['pdb_numpy.tests.rst',
+#                     'pdb_numpy.data.rst',
+#                     ]#'modules.rst',]

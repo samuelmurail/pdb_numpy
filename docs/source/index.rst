@@ -26,7 +26,8 @@ reading, manipulating, and analyzing coordinates files.
    installation
    basic_example
    Github project <https://github.com/samuelmurail/pdb_numpy>
-   pdb_numpy
+   modules
+   
 
 Indices and tables
 ==================

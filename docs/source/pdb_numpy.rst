@@ -30,6 +30,13 @@ Analysis module
    :undoc-members:
    :show-inheritance:
 
+Alignement module
+-----------------
+
+.. toctree::
+   :maxdepth: 4
+
+   pdb_numpy.alignement
 
 DSSP module
 -----------
@@ -47,3 +54,32 @@ Geom module
    :members:
    :undoc-members:
    :show-inheritance:
+
+Format module
+-------------
+
+.. toctree::
+   :maxdepth: 4
+
+   pdb_numpy.format
+
+Data module
+-------------
+
+.. toctree::
+   :maxdepth: 4
+
+   pdb_numpy.data
+
+Test module
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pdb_numpy.tests
+
+
+
+
+

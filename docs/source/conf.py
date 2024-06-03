@@ -68,7 +68,7 @@ man_pages = [
      [author], 1)
 ]
 
-# autodoc_mock_imports = ["numpy", "scipy", "pytest"]
+autodoc_mock_imports = ["numpy", "scipy", "pytest"]
 
 # Exclude unit pages (tests and data) from the documentation
 # exclude_patterns = ['pdb_numpy.tests.rst',

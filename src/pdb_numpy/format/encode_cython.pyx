@@ -89,6 +89,8 @@ Ralf W. Grosse-Kunstleve, Feb 2007.
 The code has been rewritten in cython by Samuel Murail to accelerate it.
 """
 
+#cython: embedsignatures=True 
+
 import cython
 from libc.string cimport strcpy, strlen
 

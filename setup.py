@@ -1,6 +1,7 @@
 from setuptools import dist, setup
 from distutils.extension import Extension
-dist.Distribution().fetch_build_eggs(['Cython>=3.0.', 'numpy>=1.2'])
+dist.Distribution().fetch_build_eggs([
+    'Cython>=3.0', 'numpy>=1.2'])
 
 import numpy as np
 
@@ -52,10 +53,6 @@ setup(
     package_data={
         'pdb_numpy.data': [
             'blosum62.txt',
-        ],
-        'pdb_numpy.alignement': [
-            '_align.so',
-            '_align.dylib'
         ],
     },
     classifiers=[

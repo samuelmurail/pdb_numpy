@@ -2,12 +2,15 @@
 #cython: boundscheck=False
 #cython: wraparound=False
 #cython: linetrace=True
+#cython: embedsignatures=True 
 
 ###cython: profile=True
 
 import cython
 import numpy as np
-cimport numpy as np
+cimport numpy as cnp
+np.import_array()
+cnp.import_array()
 
 cdef short [:, ::1] BLOSUM_62_array = np.array([
     [ 4, -1, -2, -2,  0, -1, -1,  0, -2, -1, -1, -1, -1, -2, -1,  1,  0, -3, -2,  0, -2, -1,  0, -4,], # A
@@ -82,7 +85,7 @@ cdef short int convert_aa(str aa):
     print(f"Warning convert_aa() of '{aa}' not recognize, returning -1.")
     return -1
 
-cdef np.ndarray[np.int8_t, ndim=1] convert_seq(str seq):
+cdef cnp.ndarray[cnp.int8_t, ndim=1] convert_seq(str seq):
 
     cdef:
         unsigned short int i, k=0, seq_len=0;
@@ -92,7 +95,7 @@ cdef np.ndarray[np.int8_t, ndim=1] convert_seq(str seq):
             seq_len += 1
 
     cdef:
-        np.ndarray[np.int8_t, ndim=1] new_seq = np.empty((seq_len), dtype=np.int8)
+        cnp.ndarray[cnp.int8_t, ndim=1] new_seq = np.empty((seq_len), dtype=np.int8)
 
     for i in range(len(seq)):
         if seq[i] != '-':
@@ -124,7 +127,7 @@ def align_seq(str seq_1, str seq_2, short int gap_cost=-11, short int gap_extens
     """
 
     cdef:
-        np.ndarray[np.int8_t, ndim=1] seq_1_int, seq_2_int
+        cnp.ndarray[cnp.int8_t, ndim=1] seq_1_int, seq_2_int
         unsigned short int len_1, len_2, i, j, k, max_index
         str seq_1_nogap = "", seq_2_nogap = ""
 
@@ -146,7 +149,7 @@ def align_seq(str seq_1, str seq_2, short int gap_cost=-11, short int gap_extens
     # Initialize the matrix
     cdef:
         int[:, ::1] matrix = np.zeros((len_1 + 1, len_2 + 1), dtype=np.int32)
-        np.ndarray[np.npy_bool, ndim=1] prev_line = np.zeros((len_2 + 1), dtype=np.bool_)
+        cnp.ndarray[cnp.npy_bool, ndim=1] prev_line = np.zeros((len_2 + 1), dtype=np.bool_)
         int choices[3]
         bint prev
 

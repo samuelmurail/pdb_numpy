@@ -2,6 +2,7 @@
 #cython: boundscheck=False
 #cython: wraparound=False
 #cython: linetrace=True
+#cython: embedsignatures=True 
 
 import cython
 from libc.string cimport strcpy, strlen

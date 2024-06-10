@@ -13,6 +13,7 @@ build:
 python:
   install:
     - requirements: docs/requirements.txt
+    - requirements: requirements.txt
     - method: pip # runs setup.py
       path: .
 

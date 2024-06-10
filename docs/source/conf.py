@@ -18,7 +18,10 @@ release = '0.0.6'
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../src/'))
+
+
+# https://stackoverflow.com/questions/13238736/how-to-document-cython-function-on-readthedocs
+# sys.path.insert(0, os.path.abspath('../../src/'))
 
 # This command doesn't get any sense for me (previous one should be enough)
 # sys.path.insert(0, os.path.abspath('../../src/pdb_numpy/'))

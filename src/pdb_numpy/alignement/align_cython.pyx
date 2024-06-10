@@ -9,10 +9,15 @@
 import cython
 import numpy as np
 cimport numpy as cnp
-np.import_array()
+
+# It's necessary to call "import_array" if you use any part of the
+# numpy PyArray_* API. From Cython 3, accessing attributes like
+# ".shape" on a typed Numpy array use this API. Therefore we recommend
+# always calling "import_array" whenever you "cimport numpy"
 cnp.import_array()
 
-cdef short [:, ::1] BLOSUM_62_array = np.array([
+
+cdef cnp.int16_t[:, ::1] BLOSUM_62_array = np.array([
     [ 4, -1, -2, -2,  0, -1, -1,  0, -2, -1, -1, -1, -1, -2, -1,  1,  0, -3, -2,  0, -2, -1,  0, -4,], # A
     [-1,  5,  0, -2, -3,  1,  0, -2,  0, -3, -2,  2, -1, -3, -2, -1, -1, -3, -2, -3, -1,  0, -1, -4,], # R 
     [-2,  0,  6,  1, -3,  0,  0,  0,  1, -3, -3,  0, -2, -3, -2,  1,  0, -4, -2, -3,  3,  0, -1, -4,], # N 
@@ -88,7 +93,7 @@ cdef short int convert_aa(str aa):
 cdef cnp.ndarray[cnp.int8_t, ndim=1] convert_seq(str seq):
 
     cdef:
-        unsigned short int i, k=0, seq_len=0;
+        unsigned short int i, k=0, seq_len=0
     
     for i in range(len(seq)):
         if seq[i] != '-':

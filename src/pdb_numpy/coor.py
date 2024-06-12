@@ -320,20 +320,21 @@ class Coor:
 
         if field not in keyword_dict:
             raise ValueError("Field not found")
-        else:
-            keyword = keyword_dict[field][0]
-            index = keyword_dict[field][1]
 
-            field_uniqs = np.unique(self.models[0].atom_dict[keyword][:, index])
-            if isinstance(order_list[0], str):
-                order_list = np.array(order_list, dtype="U")
+        keyword = keyword_dict[field][0]
+        index = keyword_dict[field][1]
 
-            for field_uniq in field_uniqs:
-                if field_uniq not in order_list:
-                    logger.info(
-                        f"Field {field_uniq} not found in order list, will be added at the end"
-                    )
-                    order_list.append(field_uniq)
+        field_uniqs = np.unique(self.models[0].atom_dict[keyword][:, index])
+
+        for field_uniq in field_uniqs:
+            if field_uniq not in order_list:
+                logger.info(
+                    f"Field {field_uniq} not found in order list, will be added at the end"
+                )
+                order_list.append(field_uniq)
+        
+        if isinstance(order_list[0], str):
+            order_list = np.array(order_list, dtype="U")
 
         new_order = np.array([], dtype=np.int32)
         for value in order_list:

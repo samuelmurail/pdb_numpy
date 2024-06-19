@@ -80,7 +80,7 @@ release: dist ## package and upload a release
 dist: clean ## builds source and wheel package
 	# CYTHONIZE=1 python setup.py sdist bdist_wheel
 	# CYTHONIZE=1 python setup.py sdist
-	python -m build --sdist --wheel
+	CYTHONIZE=1 python -m build --sdist
 	ls -l dist
 
 install: clean ## install the package to the active Python's site-packages

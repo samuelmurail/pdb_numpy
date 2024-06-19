@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pdb-numpy"
-version = "0.0.6"
+version = "0.0.9"
 dynamic = ["readme", "dependencies"]
 description = "Pdb_Numpy is a python library allowing simple operations on pdb coor files."
 license = {file = "LICENSE"}

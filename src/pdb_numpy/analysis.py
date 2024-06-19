@@ -67,7 +67,7 @@ def rmsd(coor_1, coor_2, selection="name CA", index_list=None, frame_ref=0):
 
 
 def interface_rmsd(
-    coor, coor_native, rec_chain_native, lig_chain_native, cutoff=10.0, back_atom=["CA", "N", "C", "O"]
+    coor, coor_native, rec_chains_native, lig_chains_native, cutoff=10.0, back_atom=["CA", "N", "C", "O"]
 ):
     """Compute the interface RMSD between two models.
     The interface is defined as the distance between the ligand and the receptor
@@ -81,10 +81,10 @@ def interface_rmsd(
         First coordinates
     coor_native : Coor
         Second coordinates
-    rec_chain_native : list
-        List of receptor chain
-    lig_chain_native : list
-        List of ligand chain
+    rec_chains_native : list
+        List of receptor chains
+    lig_chains_native : list
+        List of ligand chains
     cutoff : float, default=10.0
         Cutoff distance for the interface
     back_atom : list, default=['CA', 'N', 'C', 'O']
@@ -104,10 +104,10 @@ def interface_rmsd(
 
 
     lig_interface = coor_native.select_atoms(
-        f'chain {" ".join(lig_chain_native)} and within {cutoff} of chain {" ".join(rec_chain_native)}'
+        f'chain {" ".join(lig_chains_native)} and within {cutoff} of chain {" ".join(rec_chains_native)}'
     )
     rec_interface = coor_native.select_atoms(
-        f'chain {" ".join(rec_chain_native)} and within {cutoff} of chain {" ".join(lig_chain_native)}'
+        f'chain {" ".join(rec_chains_native)} and within {cutoff} of chain {" ".join(lig_chains_native)}'
     )
 
     lig_interface_residues = np.unique(lig_interface.models[0].residue)
@@ -121,7 +121,7 @@ def interface_rmsd(
     )
 
     if len(interface_residues) == 0:
-        logger.warning("No interface residues found")
+        logger.info("No interface residues found")
         return [None] * len(coor.models)
     
     # print(f"lig_interface_resids= {lig_interface_residues} rec_interface_resids= {rec_interface_residues}")
@@ -144,10 +144,10 @@ def interface_rmsd(
 def native_contact(
     coor,
     native_coor,
-    rec_chain,
-    lig_chain,
-    native_rec_chain,
-    native_lig_chain,
+    rec_chains,
+    lig_chains,
+    native_rec_chains,
+    native_lig_chains,
     cutoff=5.0,
 ):
     """Compute the native contact score between a model and a native structure.
@@ -176,14 +176,14 @@ def native_contact(
         Model coordinates
     native_coor : Coor
         Native coordinates
-    rec_chain : list
-        List of receptor chain
-    lig_chain : list
-        List of ligand chain
-    native_rec_chain : list
-        List of native receptor chain
-    native_lig_chain : list
-        List of native ligand chain
+    rec_chains : list
+        List of receptor chains
+    lig_chains : list
+        List of ligand chains
+    native_rec_chains : list
+        List of native receptor chains
+    native_lig_chains : list
+        List of native ligand chains
     cutoff : float, default=5.0
         Cutoff distance for the native contact
 
@@ -194,58 +194,55 @@ def native_contact(
     """
 
     native_rec_lig_interface = native_coor.select_atoms(
-        f'(chain {" ".join(native_rec_chain)} and within {cutoff} of chain {" ".join(native_lig_chain)}) or'
-        f'(chain {" ".join(native_lig_chain)} and within {cutoff} of chain {" ".join(native_rec_chain)})'
+        f'(chain {" ".join(native_rec_chains)} and within {cutoff} of chain {" ".join(native_lig_chains)}) or'
+        f'(chain {" ".join(native_lig_chains)} and within {cutoff} of chain {" ".join(native_rec_chains)})'
     )
     native_rec_interface = native_rec_lig_interface.select_atoms(
-        f'chain {" ".join(native_rec_chain)} and within {cutoff} of chain {" ".join(native_lig_chain)}'
+        f'chain {" ".join(native_rec_chains)} and within {cutoff} of chain {" ".join(native_lig_chains)}'
     )
 
     native_contact_list = []
-    native_rec_resid = native_rec_interface.models[0].resid
+    native_rec_residue = native_rec_interface.models[0].residue
 
-    # print("native_rec_resid", native_rec_resid)
 
-    for residue in np.unique(native_rec_resid):
+    for residue in np.unique(native_rec_residue):
         res_lig = native_rec_lig_interface.select_atoms(
-            f'chain {" ".join(native_lig_chain)} and within {cutoff} of (resid {residue} and chain {" ".join(native_rec_chain)})'
+            f'chain {" ".join(native_lig_chains)} and within {cutoff} of residue {residue}'
         )
         native_contact_list += [
-            [residue, lig_res] for lig_res in np.unique(res_lig.models[0].resid)
+            [residue, lig_residue] for lig_residue in np.unique(res_lig.models[0].residue)
         ]
-
-    # print("native_contact_list", native_contact_list)
 
     fnat_list = []
     fnonnat_list = []
     for model in coor.models:
         rec_lig_interface = model.select_atoms(
-            f'(chain {" ".join(rec_chain)} and within {cutoff} of chain {" ".join(lig_chain)}) or '
-            f'(chain {" ".join(lig_chain)} and within {cutoff} of chain {" ".join(rec_chain)})'
+            f'(chain {" ".join(rec_chains)} and within {cutoff} of chain {" ".join(lig_chains)}) or '
+            f'(chain {" ".join(lig_chains)} and within {cutoff} of chain {" ".join(rec_chains)})'
         )
         rec_interface = rec_lig_interface.select_atoms(
-            f'(chain {" ".join(rec_chain)} and within {cutoff} of chain {" ".join(lig_chain)})'
+            f'(chain {" ".join(rec_chains)} and within {cutoff} of chain {" ".join(lig_chains)})'
         )
 
-        model_rec_resid = np.unique(rec_interface.resid)
+        model_rec_residue = np.unique(rec_interface.residue)
 
         native_contact_num = 0
         non_native_contact_num = 0
         model_contact_list = []
 
-        # print("model_rec_resid", model_rec_resid)
-        for residue in model_rec_resid:
-            res_lig = rec_lig_interface.select_atoms(
-                f'chain {" ".join(lig_chain)} and within {cutoff} of (resid {residue} and chain {" ".join(rec_chain)})'
+        for residue in model_rec_residue:
+            residue_lig = rec_lig_interface.select_atoms(
+                f'chain {" ".join(lig_chains)} and within {cutoff} of residue {residue}'
             )
-            # print("res_lig", res_lig.resid)
-            for lig_res in np.unique(res_lig.resid):
-                if [residue, lig_res] in native_contact_list:
+            
+            for lig_residue in np.unique(residue_lig.residue):
+                # print([residue, lig_residue])
+                if [residue, lig_residue] in native_contact_list:
                     native_contact_num += 1
                 else:
                     non_native_contact_num += 1
 
-                model_contact_list.append([residue, lig_res])
+                model_contact_list.append([residue, lig_residue])
 
         if native_contact_num > 0:
             fnat = native_contact_num / len(native_contact_list)
@@ -272,10 +269,10 @@ def native_contact(
 def dockQ(
     coor,
     native_coor,
-    rec_chain=None,
-    lig_chain=None,
-    native_rec_chain=None,
-    native_lig_chain=None,
+    rec_chains=None,
+    lig_chains=None,
+    native_rec_chains=None,
+    native_lig_chains=None,
     back_atom=["CA", "N", "C", "O"],
 ):
     """The dockQ function computes the docking quality score between a model
@@ -317,14 +314,14 @@ def dockQ(
         Model coordinates
     native_coor : Coor
         Native coordinates
-    rec_chain : list, default=None
-        List of receptor chain
-    lig_chain : list, default=None
-        List of ligand chain
-    native_rec_chain : list, default=None
-        List of native receptor chain
-    native_lig_chain : list, default=None
-        List of native ligand chain
+    rec_chains : list, default=None
+        List of receptor chains
+    lig_chains : list, default=None
+        List of ligand chains
+    native_rec_chains : list, default=None
+        List of native receptor chains
+    native_lig_chains : list, default=None
+        List of native ligand chains
     back_atom : list, default=['CA', 'N', 'C', 'O']
         List of backbone atoms
 
@@ -339,32 +336,32 @@ def dockQ(
     model_seq = coor.get_aa_seq()
     native_seq = native_coor.get_aa_seq()
 
-    if lig_chain is None:
-        lig_chain = [
+    if lig_chains is None:
+        lig_chains = [
             min(model_seq.items(), key=lambda x: len(x[1].replace("-", "")))[0]
         ]
-    logger.info(f'Model ligand chain : {" ".join(lig_chain)}')
-    if rec_chain is None:
-        rec_chain = [chain for chain in model_seq if chain not in lig_chain]
-    logger.info(f'Model receptor chain : {" ".join(rec_chain)}')
+    logger.info(f'Model ligand chains : {" ".join(lig_chains)}')
+    if rec_chains is None:
+        rec_chains = [chain for chain in model_seq if chain not in lig_chains]
+    logger.info(f'Model receptor chains : {" ".join(rec_chains)}')
 
-    if native_lig_chain is None:
-        native_lig_chain = [
+    if native_lig_chains is None:
+        native_lig_chains = [
             min(native_seq.items(), key=lambda x: len(x[1].replace("-", "")))[0]
         ]
-    logger.info(f'Native ligand chain : {" ".join(native_lig_chain)}')
-    if native_rec_chain is None:
-        native_rec_chain = [
-            chain for chain in native_seq if chain not in native_lig_chain
+    logger.info(f'Native ligand chains : {" ".join(native_lig_chains)}')
+    if native_rec_chains is None:
+        native_rec_chains = [
+            chain for chain in native_seq if chain not in native_lig_chains
         ]
-    logger.info(f'Native receptor chain : {" ".join(native_rec_chain)}')
+    logger.info(f'Native receptor chains : {" ".join(native_rec_chains)}')
 
     # Remove hydrogens and non protein atoms as well as altloc
     clean_coor = coor.select_atoms(
-        f"protein and not altloc B C D and chain {' '.join(rec_chain + lig_chain)}"
+        f"protein and not altloc B C D and chain {' '.join(rec_chains + lig_chains)}"
     )
     clean_native_coor = native_coor.select_atoms(
-        f"protein and not altloc B C D and chain {' '.join(native_rec_chain + native_lig_chain)}"
+        f"protein and not altloc B C D and chain {' '.join(native_rec_chains + native_lig_chains)}"
     )
 
     # print("1:", clean_native_coor.models[0].resid[:10])
@@ -375,9 +372,8 @@ def dockQ(
     # print("2:", clean_native_coor.models[0].resid[:10])
 
     # Put lig chain at the end of the dict:
-    clean_coor.change_order("chain", rec_chain + lig_chain)
-    clean_native_coor.change_order("chain", native_rec_chain + native_lig_chain)
-    # print("3:", clean_native_coor.models[0].resid[:10])
+    clean_coor.change_order("chain", rec_chains + lig_chains)
+    clean_native_coor.change_order("chain", native_rec_chains + native_lig_chains)
 
     # Align model on native structure using model back atoms:
     rmsd_prot_list, [
@@ -386,8 +382,8 @@ def dockQ(
     ] = alignement.align_seq_based(
         clean_coor,
         clean_native_coor,
-        chain_1=rec_chain,
-        chain_2=native_rec_chain,
+        chain_1=rec_chains,
+        chain_2=native_rec_chains,
         back_names=back_atom,
     )
     logger.info(f"Receptor RMSD: {rmsd_prot_list[0]:.3f} A")
@@ -403,8 +399,8 @@ def dockQ(
     lrmsd_list, [align_lig_index, align_lig_native_index] = alignement.rmsd_seq_based(
         clean_coor,
         clean_native_coor,
-        chain_1=lig_chain,
-        chain_2=native_lig_chain,
+        chain_1=lig_chains,
+        chain_2=native_lig_chains,
         back_names=back_atom,
     )
     logger.info(f"Ligand   RMSD: {lrmsd_list[0]:.3f} A")
@@ -419,16 +415,12 @@ def dockQ(
 
     coor_residue = clean_coor.models[0].residue[align_rec_index + align_lig_index]
 
-    native_resid = clean_native_coor.models[0].resid[
-        align_rec_native_index + align_lig_native_index
-    ]
     native_residue = clean_native_coor.models[0].residue[
         align_rec_native_index + align_lig_native_index
     ]
 
     coor_residue_unique = np.unique(coor_residue)
     native_residue_unique = np.unique(native_residue)
-    native_resid_unique = np.unique(native_resid)
 
     assert len(coor_residue_unique) == len(native_residue_unique)
 
@@ -450,20 +442,20 @@ def dockQ(
     irmsd_list = interface_rmsd(
         interface_coor,
         interface_native_coor,
-        native_rec_chain,
-        native_lig_chain,
+        native_rec_chains,
+        native_lig_chains,
         cutoff=10.0,
         back_atom=back_atom,
     )
     logger.info(f"Interface   RMSD: {irmsd_list[0]} A")
 
     fnat_list, fnonnat_list = native_contact(
-        clean_coor,
-        clean_native_coor,
-        rec_chain,
-        lig_chain,
-        native_rec_chain,
-        native_lig_chain,
+        interface_coor,#clean_coor,
+        interface_native_coor,#clean_native_coor,
+        rec_chains,
+        lig_chains,
+        native_rec_chains,
+        native_lig_chains,
         cutoff=5.0,
     )
     logger.info(f"Fnat: {fnat_list[0]:.3f}      Fnonnat: {fnonnat_list[0]:.3f}")
@@ -495,8 +487,8 @@ def dockQ(
 
 def compute_pdockQ(
     coor,
-    rec_chain=None,
-    lig_chain=None,
+    rec_chains=None,
+    lig_chains=None,
     cutoff=8.0,
     L=0.724,
     x0=152.611,
@@ -530,10 +522,10 @@ def compute_pdockQ(
     ----------
     coor : Coor
         object containing the coordinates of the model
-    rec_chain : list
-        list of receptor chain
-    lig_chain : list
-        list of ligand chain
+    rec_chains : list
+        list of receptor chains
+    lig_chains : list
+        list of ligand chains
     cutoff : float
         cutoff for native contacts, default is 8.0 A
     L : float
@@ -569,24 +561,24 @@ def compute_pdockQ(
 
     model_seq = coor.get_aa_seq()
 
-    if lig_chain is None:
-        lig_chain = [
+    if lig_chains is None:
+        lig_chains = [
             min(model_seq.items(), key=lambda x: len(x[1].replace("-", "")))[0]
         ]
-    logger.info(f'Model ligand chain : {" ".join(lig_chain)}')
-    if rec_chain is None:
-        rec_chain = [chain for chain in model_seq if chain not in lig_chain]
-    logger.info(f'Model receptor chain : {" ".join(rec_chain)}')
+    logger.info(f'Model ligand chain : {" ".join(lig_chains)}')
+    if rec_chains is None:
+        rec_chains = [chain for chain in model_seq if chain not in lig_chains]
+    logger.info(f'Model receptor chain : {" ".join(rec_chains)}')
 
     pdockq_list = []
 
     for model in coor_CA_CB.models:
         rec_in_contact = model.select_atoms(
-            f"chain {' '.join(rec_chain)} and within {cutoff} of chain {' '.join(lig_chain)}"
+            f"chain {' '.join(rec_chains)} and within {cutoff} of chain {' '.join(lig_chains)}"
         )
 
         lig_in_contact = model.select_atoms(
-            f"chain {' '.join(lig_chain)} and within {cutoff} of chain {' '.join(rec_chain)}"
+            f"chain {' '.join(lig_chains)} and within {cutoff} of chain {' '.join(rec_chains)}"
         )
 
         dist_mat = distance_matrix(rec_in_contact.xyz, lig_in_contact.xyz)
@@ -786,7 +778,7 @@ def compute_pdockQ2(
 
             if chain_sel.len == 0 or inter_chain_sel.len == 0:
                 pdockq2_list[i].append(0.0)
-                logger.warning("No interface residues found for pdockq2 calculation, 0 value return.")
+                logger.info("No interface residues found for pdockq2 calculation, 0 value return.")
                 continue
 
             dist_mat = distance_matrix(chain_sel.xyz, inter_chain_sel.xyz)

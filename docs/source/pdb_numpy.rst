@@ -62,24 +62,3 @@ Format module
    :maxdepth: 4
 
    pdb_numpy.format
-
-Data module
--------------
-
-.. toctree::
-   :maxdepth: 4
-
-   pdb_numpy.data
-
-Test module
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   pdb_numpy.tests
-
-
-
-
-

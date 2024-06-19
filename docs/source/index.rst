@@ -19,15 +19,14 @@ powerful ``numpy`` library to provide efficient and easy-to-use tools for
 reading, manipulating, and analyzing coordinates files.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: Table of Contents:
 
    readme
    installation
    basic_example
    Github project <https://github.com/samuelmurail/pdb_numpy>
-   modules
-   
+   pdb_numpy
 
 Indices and tables
 ==================

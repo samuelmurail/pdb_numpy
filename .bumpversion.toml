@@ -15,3 +15,9 @@ allow_dirty = false
 commit = true
 message = "Bump version: {current_version} → {new_version}"
 commit_args = ""
+
+[[tool.bumpversion.files]]
+filename = "src/pdb_numpy/__init__.py"
+
+[[tool.bumpversion.files]]
+filename = "docs/source/conf.py"

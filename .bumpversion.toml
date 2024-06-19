@@ -24,3 +24,6 @@ filename = "docs/source/conf.py"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
+
+[[tool.bumpversion.files]]
+filename = "setup.py"

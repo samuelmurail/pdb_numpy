@@ -11,6 +11,10 @@
     :target: https://codecov.io/gh/samuelmurail/pdb_numpy
     :alt: Code coverage
 
+.. image:: https://img.shields.io/pypi/v/pdb-numpy
+    :target: https://pypi.org/project/pdb-numpy/
+    :alt: PyPI - Version
+
 About PDB-numpy
 ===============
 

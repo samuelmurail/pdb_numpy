@@ -9,7 +9,7 @@
 project = 'pdb_numpy'
 copyright = '2023, Samuel Murail'
 author = 'Samuel Murail'
-release = '0.0.9'
+release = '0.0.8'
 
 # If extensions (or modules to document with autodoc) are in another
 # directory, add these directories to sys.path here. If the directory is

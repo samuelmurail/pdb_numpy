@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools", "cython"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pdb-numpy"
+version = "0.0.6"
+dynamic = ["readme", "dependencies"]
+description = "Pdb_Numpy is a python library allowing simple operations on pdb coor files."
+license = {file = "LICENSE"}
+requires-python = ">=3.6"
+authors = [
+    { name = "Samuel Murail", email = "samuel.murail@u-paris.fr" },
+]
+keywords = [
+    "Coor",
+    "Model",
+    "Numpy",
+    "PDB",
+    "Python",
+    "pdb_numpy",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Software Development",
+]
+
+[project.scripts]
+pdb_numpy = "pdb_numpy.__main__:main"
+
+[project.urls]
+Homepage = "https://pdb-numpy.readthedocs.io/en/latest/"
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.rst"]}
+dependencies = {file = ["requirements.txt"]}

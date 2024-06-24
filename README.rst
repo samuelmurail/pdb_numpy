@@ -15,6 +15,11 @@
     :target: https://pypi.org/project/pdb-numpy/
     :alt: PyPI - Version
 
+.. image:: https://static.pepy.tech/badge/pdb-numpy
+    :target: https://pepy.tech/project/pdb-numpy
+    :alt: Downloads
+
+
 About PDB-numpy
 ===============
 

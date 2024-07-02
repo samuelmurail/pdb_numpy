@@ -475,13 +475,24 @@ def test_pdockq2(tmp_path):
     assert pytest.approx(pdockq2[1][0], 0.001) == 0.7197821257444665
 
 
-def test_pdockq2_af3_dna_Zn(tmp_path):
+def test_pdockq_pdockq2_af3_dna_Zn(tmp_path):
     """
 
     Expected pDockQ = ?
     """
 
     model_coor = Coor(CIF_AF3_1)
+    model_seq = model_coor.get_aa_na_seq()
+    assert model_seq['F'] == 'GGGGGCATGCAGATCCCACAGGCGCG'
+    assert model_seq['G'] == 'CCGCGCCTGTGGGATCTGCATGCCCC'
+
+    coor_CA_CB = model_coor.select_atoms("(protein and (name CB or (resname GLY and name CA))) or (dna and name P)")
+    assert coor_CA_CB.len == 352
+
+    pdockq = analysis.compute_pdockQ(model_coor)
+    precision = 0.00001
+    assert pdockq[0] == pytest.approx(0.5549346987598703, precision)
+
     with open(JSON_AF3_1) as f:
         local_json = json.load(f)
     

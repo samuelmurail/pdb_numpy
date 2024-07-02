@@ -557,17 +557,21 @@ def compute_pdockQ(
         https://www.nature.com/articles/s41467-022-33729-4
     """
 
-    coor_CA_CB = coor.select_atoms("name CB or (resname GLY and name CA)")
+    # coor_CA_CB = coor.select_atoms("name CB or (resname GLY and name CA)")
+    coor_CA_CB = coor.select_atoms("(protein and (name CB or (resname GLY and name CA))) or (dna and name P)")
 
-    model_seq = coor.get_aa_seq()
+    model_seq = coor.get_aa_na_seq()
 
     if lig_chains is None:
         lig_chains = [
             min(model_seq.items(), key=lambda x: len(x[1].replace("-", "")))[0]
         ]
+    assert len(lig_chains) >= 1, "At least one ligand chain is allowed"
     logger.info(f'Model ligand chain : {" ".join(lig_chains)}')
+
     if rec_chains is None:
         rec_chains = [chain for chain in model_seq if chain not in lig_chains]
+    assert len(rec_chains) >= 1, "At least one receptor chain is allowed"
     logger.info(f'Model receptor chain : {" ".join(rec_chains)}')
 
     pdockq_list = []
@@ -673,7 +677,8 @@ def compute_pdockQ_sel(
         https://www.nature.com/articles/s41467-022-33729-4
     """
 
-    coor_CA_CB = coor.select_atoms("name CB or (resname GLY and name CA)")
+    #models_CA = coor.select_atoms("name CB or (resname GLY and name CA)")
+    coor_CA_CB = coor.select_atoms("(protein and (name CB or (resname GLY and name CA))) or (dna and name P)")
 
     pdockq_list = []
 

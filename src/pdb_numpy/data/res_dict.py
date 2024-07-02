@@ -69,3 +69,5 @@ NA_DICT = {
     "DC": "C",
     "DG": "G",
 }
+
+AA_NA_DICT = {**AA_DICT, **NA_DICT}

@@ -6,7 +6,7 @@ import os
 import copy
 import numpy as np
 
-from .data.res_dict import AA_DICT
+from .data.res_dict import AA_DICT, AA_NA_DICT
 from . import geom
 from .format import mmcif, pdb, pqr, gro
 from .geom import distance_matrix
@@ -543,6 +543,89 @@ class Coor:
                     if gap_in_seq:
                         seq_dict[chain] += "-" * (resid - aa_num_dict[chain] - 1)
                 seq_dict[chain] += AA_DICT[res_name]
+                aa_num_dict[chain] = resid
+            else:
+                logger.warning(f"Residue {res_name} in chain {chain} not recognized")
+
+        return seq_dict
+
+
+    def get_aa_na_seq(self, gap_in_seq=True, frame=0):
+        """Get the amino acid sequence from a `Coor` object.
+        This function takes a Coor object, selects the CA/P atoms using the
+        `select_atoms()` method with the argument name CA/P, and returns a
+        dictionary with the amino acid sequence of each chain in the protein,
+        where the key is the chain identifier and the value is the sequence.
+
+        The function first creates empty dictionaries `seq_dict` and
+        `aa_num_dict`. These will be used to store the sequence and the number
+        of the last amino acid in each chain, respectively. Then, it loops
+        through each CA atom in the selected atoms and retrieves the chain
+        identifier, residue name, and residue number. If the chain identifier
+        is not in `seq_dict`, the function initializes an empty string for the
+        sequence of that chain and stores the residue number in `aa_num_dict`.
+        Then, if the residue name is recognized as a standard amino acid in
+        `AA_DICT`, the function adds the corresponding one-letter code to the
+        sequence string for the corresponding chain in `seq_dict`, and updates
+        the last amino acid number in aa_num_dict. If the residue name is not
+        recognized, the function logs a warning message. If the residue number
+        is not consecutive to the previous one and `gap_in_seq` is set to True,
+        the function adds gaps to the sequence.
+
+        Finally, the function returns `seq_dict`, the dictionary with the amino
+        acid sequences of each chain in the protein.
+
+        Parameters
+        ----------
+        self : Coor
+            Coor object
+        gap_in_seq : bool, optional
+            if True, add gaps in the sequence, by default True
+        frame : int
+            Frame number for the selection, default is 0
+
+        Returns
+        -------
+        dict
+            Dictionary with chain as key and sequence as value.
+
+        Examples
+        --------
+        >>> prot_coor = Coor('1y0m.pdb')
+        >>> prot_coor.get_aa_seq()
+        {'A': 'TFKSAVKALFDYKAQREDELTFTKSAIIQNVEKQDGGWWRGDYGGKKQLWFPSNYVEEMIN'}
+
+        .. warning::
+            If atom chains are not arranged sequentially (A,A,A,B,B,A,A,A ...),
+            the first atom seq will be overwritten by the last one.
+
+        """
+
+        # Get CA atoms
+        CA_sel = self.select_atoms("(protein and name CA) or (dna and name P)", frame=frame)
+
+        seq_dict = {}
+        aa_num_dict = {}
+
+        for chain, res_name, resid in zip(
+            CA_sel.models[frame].atom_dict["alterloc_chain_insertres"][:, 1],
+            CA_sel.models[frame].atom_dict["name_resname_elem"][:, 1],
+            CA_sel.models[frame].atom_dict["num_resid_uniqresid"][:, 1],
+        ):
+            if chain not in seq_dict:
+                seq_dict[chain] = ""
+                aa_num_dict[chain] = resid
+
+            if res_name in AA_NA_DICT:
+                if resid != aa_num_dict[chain] + 1 and len(seq_dict[chain]) != 0:
+                    logger.info(
+                        f"Residue {chain}:{res_name}:{resid} is "
+                        f"not consecutive, there might be missing "
+                        f"residues"
+                    )
+                    if gap_in_seq:
+                        seq_dict[chain] += "-" * (resid - aa_num_dict[chain] - 1)
+                seq_dict[chain] += AA_NA_DICT[res_name]
                 aa_num_dict[chain] = resid
             else:
                 logger.warning(f"Residue {res_name} in chain {chain} not recognized")

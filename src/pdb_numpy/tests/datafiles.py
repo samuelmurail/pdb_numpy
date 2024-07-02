@@ -78,3 +78,14 @@ JSON_1RXZ_Colabfold_5 = os.path.join(
     TEST_FILE_PATH,
     "1rxz_11587_scores_rank_005_alphafold2_multimer_v3_model_3_seed_000.json",
 )
+
+
+CIF_AF3_1 = os.path.join(
+    TEST_FILE_PATH,
+    "examplefold_pdb_7rce_model_0.cif",
+)
+JSON_AF3_1 = os.path.join(
+    TEST_FILE_PATH,
+    "examplefold_pdb_7rce_full_data_0.json",
+)
+

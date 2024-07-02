@@ -758,7 +758,7 @@ def compute_pdockQ2(
         https://academic.oup.com/bioinformatics/article/39/7/btad424/7219714
     """
 
-    models_CA = coor.select_atoms("name CA")
+    models_CA = coor.select_atoms("(protein and name CA) or (dna and name P) or ions")
     models_chains = np.unique(models_CA.chain)
 
     assert pae_array.shape == (models_CA.len, models_CA.len), "PAE array shape mismatch with CA atoms number"

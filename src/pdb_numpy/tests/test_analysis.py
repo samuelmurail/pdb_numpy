@@ -24,6 +24,8 @@ from .datafiles import (
     JSON_1RXZ_Colabfold_3,
     JSON_1RXZ_Colabfold_4,
     JSON_1RXZ_Colabfold_5,
+    CIF_AF3_1,
+    JSON_AF3_1,
 )
 import pdb_numpy
 from pdb_numpy import Coor
@@ -471,3 +473,31 @@ def test_pdockq2(tmp_path):
     print(pdockq2)
     assert pytest.approx(pdockq2[0][0], 0.001) == 0.7464011302124822
     assert pytest.approx(pdockq2[1][0], 0.001) == 0.7197821257444665
+
+
+def test_pdockq2_af3_dna_Zn(tmp_path):
+    """
+
+    Expected pDockQ = ?
+    """
+
+    model_coor = Coor(CIF_AF3_1)
+    with open(JSON_AF3_1) as f:
+        local_json = json.load(f)
+    
+    pae_array = np.array(local_json["pae"])
+    pdockq2 = analysis.compute_pdockQ2(model_coor, pae_array)
+    print(pdockq2)
+
+    excepted_pdockq2 = [0.6555815761674847, 0.8665250085710876, 0.8411148661897868, 0.8594211235832547, 0.8556977425924502, 0.42695499436251394, 0.6302578472193113]
+    flat_pdockq2 = [item for sublist in pdockq2 for item in sublist]
+    print(flat_pdockq2, excepted_pdockq2)
+
+    precision = 0.001
+    assert np.all(
+        [
+            excepted_pdockq2[i] == pytest.approx(flat_pdockq2[i], precision)
+            for i in range(len(flat_pdockq2))
+        ]
+    )
+    

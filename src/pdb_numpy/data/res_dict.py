@@ -62,3 +62,10 @@ AA_DICT_D = {
 }
 # Fusion of the two former dictionaries
 AA_DICT = {**AA_DICT_L, **AA_DICT_D}
+
+NA_DICT = {
+    "DA": "A",
+    "DT": "T",
+    "DC": "C",
+    "DG": "G",
+}

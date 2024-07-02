@@ -6,7 +6,7 @@ import os
 import copy
 import numpy as np
 
-from .data.aa_dict import AA_DICT
+from .data.res_dict import AA_DICT
 from . import geom
 from .format import mmcif, pdb, pqr, gro
 from .geom import distance_matrix

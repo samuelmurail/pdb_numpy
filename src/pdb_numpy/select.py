@@ -4,7 +4,7 @@
 import logging
 import numpy as np
 
-from .data.aa_dict import AA_DICT
+from .data.res_dict import AA_DICT, NA_DICT
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -25,8 +25,10 @@ KEYWORDS = [
 
 NICKNAMES = {
     "protein": f"resname {' '.join(AA_DICT.keys())}",
+    "dna": f"resname {' '.join(NA_DICT.keys())}",
     "backbone": f"resname {' '.join(AA_DICT.keys())} and name N CA C O",
     "noh": "not name H*",
+    "ions": "resname NA CL CA MG ZN MN FE CU CO NI CD K",
 }
 
 

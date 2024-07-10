@@ -86,6 +86,12 @@ cdef short int convert_aa(str aa):
         return 18
     if aa == 'V':
         return 19
+    if aa == 'B':
+        return 22
+    if aa == 'Z':
+        return 22
+    if aa == 'X':
+        return 22
 
     print(f"Warning convert_aa() of '{aa}' not recognize, returning -1.")
     return -1

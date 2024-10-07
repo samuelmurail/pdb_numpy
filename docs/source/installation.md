@@ -1,8 +1,8 @@
 # Installation Quick Start
 
-## Throupght Pypi
+## Through Pypi
 
-PDB-numpy can install easily throught Pypi:
+PDB-numpy can install easily through Pypi:
 
 ```
 pip install pdb_numpy
@@ -40,7 +40,7 @@ $ python setup.py install
 
 ## Test Installation
 
-To test the installation, simply use pytest:
+To test the installation, simply use `pytest`:
 
 ```bash
 $ pytest

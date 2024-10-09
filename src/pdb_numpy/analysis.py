@@ -730,11 +730,11 @@ def compute_pdockQ2(
     with:
 
     .. math::
-        X_i = \langle \frac{1}{1+(\frac{PAE_{int}}{d_0})^2} \rangle - \langle pLDDT \rangle_{int}
+        X_i = \langle \frac{1}{1+(\frac{PAE_{int}}{d_0})^2} \rangle * \langle pLDDT \rangle_{int}
 
-    :math:`L = 0.724` is the maximum value of the sigmoid,
-    :math:`k = 0.052` is the slope of the sigmoid, :math:`x_{0} = 152.611`
-    is the midpoint of the sigmoid, and :math:`b = 0.018` is the y-intercept
+    :math:`L = 1.31` is the maximum value of the sigmoid,
+    :math:`k = 0.075` is the slope of the sigmoid, :math:`x_{0} = 84.733`
+    is the midpoint of the sigmoid, and :math:`b = 0.005` is the y-intercept
     of the sigmoid.
 
     Implementation was inspired from https://gitlab.com/ElofssonLab/afm-benchmark/-/blob/main/src/pdockq2.py

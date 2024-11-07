@@ -100,7 +100,7 @@ cdef int convert_low(char c):
     elif c >= 97 and c <=122: #'a':97 'z':122
         #print(chr(c), c - 87)
         return c - 87 # -97 'a' + 10
-    raise ValueError("invalid number literal.")
+    raise ValueError("invalid number literal in convert_low().")
 
 cdef int convert_Cap(char c):
     if c >= 48 and c <=57: #'0':48 '9':57
@@ -108,7 +108,7 @@ cdef int convert_Cap(char c):
     elif c >= 65 and c <=90: #'A':65 'Z':90
         #print(chr(c), c - 87)
         return c - 55 # -65 'A' + 10
-    raise ValueError("invalid number literal.")
+    raise ValueError("invalid number literal in convert_Cap().")
     
 
 cdef int decode_pure_Low(char * s):
@@ -152,7 +152,31 @@ cdef bint isLowLetter(char c):
         return True
     else:
         return False
-        
+
+
+cdef int convert_Hexa_Cap(char c):
+    if c == 32: #'0':48
+        return 0
+    if c >= 48 and c <=57: #'0':48 '9':57
+        return c - 48
+    elif c >= 65 and c <=90: #'A':65 'Z':90
+        #print(chr(c), c - 87)
+        return c - 55 # -65 'A' + 10
+    raise ValueError("invalid number literal in convert_Hexa_Cap().")
+    
+cdef int decode_basic_Hexa_Cap(char * s):
+    """ Decodes the string s using value associations for each character
+    """
+    cdef:
+        int result = 0, n = 16
+        char c
+    
+    for c in s:
+        result *= n
+        result += convert_Hexa_Cap(c)
+    return result
+
+
 def hy36decode(int width, str s):
     """ Decodes base-10/upper-case base-36/lower-case base-36 hybrid.
     """
@@ -170,6 +194,11 @@ def hy36decode(int width, str s):
             try:
                 return int(s)
             except ValueError:
+                try:
+                    # Special case for pure hexadecimal cases with openmm PDBFILE
+                    return decode_basic_Hexa_Cap(number_str)
+                except ValueError:
+                    pass
                 pass
             if s == " " * width:
                 return 0
@@ -191,7 +220,7 @@ def hy36decode(int width, str s):
                 )
             except KeyError:
                 pass
-    raise ValueError("invalid number literal.")
+    raise ValueError("invalid number literal in hy36decode().")
 
 digits_upper = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 digits_lower = "0123456789abcdefghijklmnopqrstuvwxyz"

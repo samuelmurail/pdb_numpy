@@ -134,14 +134,20 @@ def test_encode_pure():
                 assert str(e) == "value out of range."
             else:
                 raise RuntimeError("Exception expected.")
-    #
+
+    # Remove "40A0" and "410B0" from expected ValueError
+    # Some correction introduced to support openmm pdb file format
+    # made the previous values valid.
+
     for width, ss in [
-        (4, ["", "    0", " abc", "abc-", "A=BC", "40a0", "40A0"]),
-        (5, ["", "     0", " abcd", "ABCD-", "a=bcd", "410b0", "410B0"]),
+        (4, ["", "    0", " abc", "abc-", "A=BC", "40a0"]),
+        (5, ["", "     0", " abcd", "ABCD-", "a=bcd", "410b0"]),
     ]:
         for s in ss:
+            print(s, ':')
             try:
-                encode.hy36decode(width, s=s)
+                tmp = encode.hy36decode(width, s=s)
+                print('tmp', tmp)
             except (ValueError, RuntimeError) as e:
                 assert str(e) == "invalid number literal."
             else:

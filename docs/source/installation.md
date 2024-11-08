@@ -62,3 +62,11 @@ src/pdb_numpy/tests/test_select.py .....             [100%]
 
 =================== 34 passed in 11.99s ===================
 ```
+
+If you made some modifications of the cython code, you should recompile it with:
+
+```bash
+$ python setup.py build_ext --inplace
+```
+
+and then run the tests again.

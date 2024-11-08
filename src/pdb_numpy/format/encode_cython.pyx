@@ -100,7 +100,7 @@ cdef int convert_low(char c):
     elif c >= 97 and c <=122: #'a':97 'z':122
         #print(chr(c), c - 87)
         return c - 87 # -97 'a' + 10
-    raise ValueError("invalid number literal in convert_low().")
+    raise ValueError("invalid number literal.")
 
 cdef int convert_Cap(char c):
     if c >= 48 and c <=57: #'0':48 '9':57
@@ -108,7 +108,7 @@ cdef int convert_Cap(char c):
     elif c >= 65 and c <=90: #'A':65 'Z':90
         #print(chr(c), c - 87)
         return c - 55 # -65 'A' + 10
-    raise ValueError("invalid number literal in convert_Cap().")
+    raise ValueError("invalid number literal.")
     
 
 cdef int decode_pure_Low(char * s):
@@ -220,7 +220,7 @@ def hy36decode(int width, str s):
                 )
             except KeyError:
                 pass
-    raise ValueError("invalid number literal in hy36decode().")
+    raise ValueError("invalid number literal.")
 
 digits_upper = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 digits_lower = "0123456789abcdefghijklmnopqrstuvwxyz"

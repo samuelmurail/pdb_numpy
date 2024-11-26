@@ -355,6 +355,7 @@ def get_pdb_string(pdb_coor):
     for model_index, model in enumerate(pdb_coor.models):
         str_out += f"MODEL    {model_index:4d}\n"
         old_chain = ""
+        out_chain = ""
 
         # Replace mmcif `.` altloc by `''` and `?` insertres by `''`
         alterloc = ['' if altloc == '.' else altloc for altloc in model.atom_dict["alterloc_chain_insertres"][:, 0]]

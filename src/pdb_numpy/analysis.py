@@ -721,6 +721,7 @@ def compute_pdockQ2(
     k=7.47157696e-02,
     b=5.01886443e-03,
     d0=10.0,
+    sel="(protein and name CA) or (dna and name P) or ions or resname LIG",
 ):
     r"""Compute the pdockQ2 score as define in [1]_.
 
@@ -749,6 +750,19 @@ def compute_pdockQ2(
         list of ligand chain
     cutoff : float
         cutoff for native contacts, default is 8.0 A
+    L : float
+        maximum value of the sigmoid, default is ~1.31
+    x0 : float
+        midpoint of the sigmoid, default is ~84.733
+    k : float
+        slope of the sigmoid, default is ~0.075
+    b : float
+        y-intercept of the sigmoid, default is ~0.005
+    d0 : float
+        default is 10.0
+    sel : str
+        selection string for atoms to consider for the calculation
+    
 
     Returns
     -------
@@ -763,7 +777,7 @@ def compute_pdockQ2(
         https://academic.oup.com/bioinformatics/article/39/7/btad424/7219714
     """
 
-    models_CA = coor.select_atoms("(protein and name CA) or (dna and name P) or ions")
+    models_CA = coor.select_atoms(sel)
     models_chains = np.unique(models_CA.chain)
 
     assert pae_array.shape == (models_CA.len, models_CA.len), "PAE array shape mismatch with CA atoms number"

@@ -500,11 +500,15 @@ def test_pdockq_pdockq2_af3_dna_Zn(tmp_path):
     pdockq2 = analysis.compute_pdockQ2(model_coor, pae_array)
     print(pdockq2)
 
-    excepted_pdockq2 = [0.6555815761674847, 0.8665250085710876, 0.8411148661897868, 0.8594211235832547, 0.8556977425924502, 0.42695499436251394, 0.6302578472193113]
+    #excepted_pdockq2 = [0.6555815761674847, 0.8665250085710876, 0.8411148661897868, 0.8594211235832547, 0.8556977425924502, 0.42695499436251394, 0.6302578472193113]
+    excepted_pdockq2 = [0.7678198239288452, 0.851990948503354, 0.870994214308231, 0.32054126842650865, 0.11245971933969727, 0.8576807386127723, 0.8630643373836583]
     flat_pdockq2 = [item for sublist in pdockq2 for item in sublist]
     print(flat_pdockq2, excepted_pdockq2)
 
     precision = 0.001
+
+    
+
     assert np.all(
         [
             excepted_pdockq2[i] == pytest.approx(flat_pdockq2[i], precision)

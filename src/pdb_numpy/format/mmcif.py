@@ -107,19 +107,26 @@ def parse(mmcif_lines):
     resid_array = np.array(data_mmCIF["_atom_site"]["value"][col_index]).astype(
         np.int32
     )
+
+    col_index = data_mmCIF["_atom_site"]["col_names"].index("auth_asym_id")
+    chain_array = np.array(data_mmCIF["_atom_site"]["value"][col_index])
+
     uniq_resid_list = []
     uniq_resid = 0
     prev_resid = resid_array[0]
     prev_model = model_array[0]
-    for resid, model in zip(resid_array, model_array):
+    prev_chain = chain_array[0]
+    for resid, model, chain in zip(resid_array, model_array, chain_array):
         if model != prev_model:
             uniq_resid = 0
             prev_resid = resid
             prev_model = model
-        if resid != prev_resid:
+            prev_chain = chain
+        if resid != prev_resid or chain != prev_chain:
             uniq_resid += 1
             uniq_resid_list.append(uniq_resid)
             prev_resid = resid
+            prev_chain = chain
         else:
             uniq_resid_list.append(uniq_resid)
 

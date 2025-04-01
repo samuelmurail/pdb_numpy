@@ -288,101 +288,103 @@ def parse_transformation(data_mmCIF):
 
     # Extract transformation list:
     # Here with only one transformation
-    if "asym_id_list" in data_mmCIF["_pdbx_struct_assembly_gen"]:
-        trans_num = 1
-        chain_list = [
-            chain.strip()
-            for chain in data_mmCIF["_pdbx_struct_assembly_gen"]["asym_id_list"].split(
-                ","
-            )
-        ]
 
-        transformation_dict[1] = {"chains": chain_list, "matrix": []}
+    if "_pdbx_struct_assembly_gen" in data_mmCIF:
+        if "asym_id_list" in data_mmCIF["_pdbx_struct_assembly_gen"]:
+            trans_num = 1
+            chain_list = [
+                chain.strip()
+                for chain in data_mmCIF["_pdbx_struct_assembly_gen"]["asym_id_list"].split(
+                    ","
+                )
+            ]
 
-        if "value" in data_mmCIF["_pdbx_struct_oper_list"]:
-            for i in range(len(data_mmCIF["_pdbx_struct_oper_list"]["value"][0])):
+            transformation_dict[1] = {"chains": chain_list, "matrix": []}
+
+            if "value" in data_mmCIF["_pdbx_struct_oper_list"]:
+                for i in range(len(data_mmCIF["_pdbx_struct_oper_list"]["value"][0])):
+                    for matrix_index in matrix_indexes:
+                        local_matrix = []
+                        for index in matrix_index:
+                            local_index = data_mmCIF["_pdbx_struct_oper_list"][
+                                "col_names"
+                            ].index(index)
+                            local_matrix.append(
+                                float(
+                                    data_mmCIF["_pdbx_struct_oper_list"]["value"][
+                                        local_index
+                                    ][i]
+                                )
+                            )
+                        transformation_dict[1]["matrix"].append(local_matrix)
+            else:
                 for matrix_index in matrix_indexes:
                     local_matrix = []
                     for index in matrix_index:
-                        local_index = data_mmCIF["_pdbx_struct_oper_list"][
-                            "col_names"
-                        ].index(index)
                         local_matrix.append(
-                            float(
-                                data_mmCIF["_pdbx_struct_oper_list"]["value"][
-                                    local_index
-                                ][i]
-                            )
+                            float(data_mmCIF["_pdbx_struct_oper_list"][index])
                         )
                     transformation_dict[1]["matrix"].append(local_matrix)
+
+        # Here with multiple transformation
         else:
-            for matrix_index in matrix_indexes:
-                local_matrix = []
-                for index in matrix_index:
-                    local_matrix.append(
-                        float(data_mmCIF["_pdbx_struct_oper_list"][index])
-                    )
-                transformation_dict[1]["matrix"].append(local_matrix)
+            trans_num = len(data_mmCIF["_pdbx_struct_assembly"]["value"][0])
+            assert trans_num == len(data_mmCIF["_pdbx_struct_assembly_gen"]["value"][0])
 
-    # Here with multiple transformation
-    else:
-        trans_num = len(data_mmCIF["_pdbx_struct_assembly"]["value"][0])
-        assert trans_num == len(data_mmCIF["_pdbx_struct_assembly_gen"]["value"][0])
+            chain_index = data_mmCIF["_pdbx_struct_assembly_gen"]["col_names"].index(
+                "asym_id_list"
+            )
+            local_matrix_index = data_mmCIF["_pdbx_struct_assembly_gen"]["col_names"].index(
+                "oper_expression"
+            )
 
-        chain_index = data_mmCIF["_pdbx_struct_assembly_gen"]["col_names"].index(
-            "asym_id_list"
-        )
-        local_matrix_index = data_mmCIF["_pdbx_struct_assembly_gen"]["col_names"].index(
-            "oper_expression"
-        )
+            for i in range(trans_num):
+                # Extract chain list and matrix indexes
+                chain_list = [
+                    chain.strip()
+                    for chain in data_mmCIF["_pdbx_struct_assembly_gen"]["value"][
+                        chain_index
+                    ][i].split(",")
+                ]
+                matrix_index_list = [
+                    chain.strip()
+                    for chain in data_mmCIF["_pdbx_struct_assembly_gen"]["value"][
+                        local_matrix_index
+                    ][i].split(",")
+                ]
+                transformation_dict[i + 1] = {"chains": chain_list, "matrix": []}
 
-        for i in range(trans_num):
-            # Extract chain list and matrix indexes
-            chain_list = [
-                chain.strip()
-                for chain in data_mmCIF["_pdbx_struct_assembly_gen"]["value"][
-                    chain_index
-                ][i].split(",")
-            ]
-            matrix_index_list = [
-                chain.strip()
-                for chain in data_mmCIF["_pdbx_struct_assembly_gen"]["value"][
-                    local_matrix_index
-                ][i].split(",")
-            ]
-            transformation_dict[i + 1] = {"chains": chain_list, "matrix": []}
+                # Extract matrix value
+                # print(data_mmCIF["_pdbx_struct_oper_list"])
+                if "value" in data_mmCIF["_pdbx_struct_oper_list"]:
+                    for j in range(len(data_mmCIF["_pdbx_struct_oper_list"]["value"][0])):
+                        matrix_id = data_mmCIF["_pdbx_struct_oper_list"]["value"][0][j]
 
-            # Extract matrix value
-            # print(data_mmCIF["_pdbx_struct_oper_list"])
-            if "value" in data_mmCIF["_pdbx_struct_oper_list"]:
-                for j in range(len(data_mmCIF["_pdbx_struct_oper_list"]["value"][0])):
-                    matrix_id = data_mmCIF["_pdbx_struct_oper_list"]["value"][0][j]
-
+                        if matrix_id in matrix_index_list:
+                            for matrix_index in matrix_indexes:
+                                local_matrix = []
+                                for index in matrix_index:
+                                    local_index = data_mmCIF["_pdbx_struct_oper_list"][
+                                        "col_names"
+                                    ].index(index)
+                                    local_matrix.append(
+                                        float(
+                                            data_mmCIF["_pdbx_struct_oper_list"]["value"][
+                                                local_index
+                                            ][j]
+                                        )
+                                    )
+                                transformation_dict[i + 1]["matrix"].append(local_matrix)
+                else:
+                    matrix_id = data_mmCIF["_pdbx_struct_oper_list"]["id"]
                     if matrix_id in matrix_index_list:
                         for matrix_index in matrix_indexes:
                             local_matrix = []
                             for index in matrix_index:
-                                local_index = data_mmCIF["_pdbx_struct_oper_list"][
-                                    "col_names"
-                                ].index(index)
                                 local_matrix.append(
-                                    float(
-                                        data_mmCIF["_pdbx_struct_oper_list"]["value"][
-                                            local_index
-                                        ][j]
-                                    )
+                                    float(data_mmCIF["_pdbx_struct_oper_list"][index])
                                 )
                             transformation_dict[i + 1]["matrix"].append(local_matrix)
-            else:
-                matrix_id = data_mmCIF["_pdbx_struct_oper_list"]["id"]
-                if matrix_id in matrix_index_list:
-                    for matrix_index in matrix_indexes:
-                        local_matrix = []
-                        for index in matrix_index:
-                            local_matrix.append(
-                                float(data_mmCIF["_pdbx_struct_oper_list"][index])
-                            )
-                        transformation_dict[i + 1]["matrix"].append(local_matrix)
 
     return transformation_dict
 

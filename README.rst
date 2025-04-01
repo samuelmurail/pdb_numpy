@@ -76,6 +76,13 @@ Alternatively, you can install ``pdb_numpy`` from source:
     cd pdb_numpy
     python setup.py install
 
+
+Or you can install last version from the github repo:
+
+.. code-block:: bash
+
+    pip install git+https://github.com/samuelmurail/pdb_numpy.git@main
+
 Dependencies
 ------------
 
@@ -95,9 +102,10 @@ to contribute code, please fork the repository and submit a pull request.
 
 To build locally the extension module, you can run the following command:
 
-```bash
-python setup.py build_ext --inplace
-```
+.. code-block:: bash
+
+    python setup.py build_ext --inplace
+
 
 Author
 --------------

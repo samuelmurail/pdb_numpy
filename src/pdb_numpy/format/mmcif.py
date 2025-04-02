@@ -152,7 +152,7 @@ def parse(mmcif_lines):
     alterloc_array = np.array(data_mmCIF["_atom_site"]["value"][col_index], dtype="|U2")
     alterloc_array[alterloc_array == b"."] = ""
     col_index = data_mmCIF["_atom_site"]["col_names"].index("label_asym_id")
-    chain_array = np.array(data_mmCIF["_atom_site"]["value"][col_index], dtype="|U2")
+    chain_array = np.array(data_mmCIF["_atom_site"]["value"][col_index], dtype="|U3")
     col_index = data_mmCIF["_atom_site"]["col_names"].index("pdbx_PDB_ins_code")
     insertres_array = np.array(
         data_mmCIF["_atom_site"]["value"][col_index], dtype="|U2"
@@ -201,7 +201,7 @@ def parse(mmcif_lines):
             "occ_beta": occ_beta_array[model_index],
         }
 
-        if len(mmcif_coor.models) > 1 and local_model.len != mmcif_coor.models[-1].len:
+        if len(mmcif_coor.models) >= 1 and local_model.len != mmcif_coor.models[-1].len:
             logger.warning(
                 f"The atom number is not the same in the model {len(mmcif_coor.models)-1} and the model {len(mmcif_coor.models)}."
             )

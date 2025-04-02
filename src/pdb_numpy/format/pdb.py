@@ -86,7 +86,7 @@ def parse(pdb_lines, pqr_format=False):
                     "occ_beta": np.array(occ_beta_list, dtype="float32"),
                 }
                 if (
-                    len(pdb_coor.models) > 1
+                    len(pdb_coor.models) >= 1
                     and local_model.len != pdb_coor.models[-1].len
                 ):
                     logger.warning(
@@ -162,7 +162,7 @@ def parse(pdb_lines, pqr_format=False):
             "xyz": np.array(xyz_list, dtype="float32"),
             "occ_beta": np.array(occ_beta_list, dtype="float32"),
         }
-        if len(pdb_coor.models) > 1 and local_model.len != pdb_coor.models[-1].len:
+        if len(pdb_coor.models) >= 1 and local_model.len != pdb_coor.models[-1].len:
             logger.warning(
                 f"The atom number is not the same in the model {len(pdb_coor.models)-1} and the model {len(pdb_coor.models)}."
                 "\nSkip this model."
@@ -310,13 +310,14 @@ def convert_chain_2_letter(chain: str) -> str:
     str
         chain ID in one letter long
     """
+    # print(f"convert_chain_2_letter() chain: {chain}")
     count = 0
     base = 65
     for i, letter in enumerate(chain):
         if i > 0:
             base = 64
         count += 26**i * (ord(letter) - base)
-    if count < len(CHAIN_LIST):
+    if 0 < count < len(CHAIN_LIST):
         return CHAIN_LIST[count]
     else:
         return "0"

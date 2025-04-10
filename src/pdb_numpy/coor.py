@@ -5,6 +5,8 @@ import logging
 import os
 import copy
 import numpy as np
+from urllib.error import HTTPError
+
 
 from .data.res_dict import AA_DICT, AA_NA_DICT
 from . import geom
@@ -171,7 +173,12 @@ class Coor:
             self.transformation = pdb_coor.transformation
             self.symmetry = pdb_coor.symmetry
         elif pdb_id is not None:
-            pdb_coor = pdb.fetch(pdb_ID=pdb_id)
+            try:
+                pdb_coor = pdb.fetch(pdb_ID=pdb_id)
+            except HTTPError:
+                logger.warning(f'PDB ID {pdb_id} not found in `.pdb` format, fetching the mmCIF format.')
+                pdb_coor = mmcif.fetch(pdb_ID=pdb_id)
+
             self.models = pdb_coor.models
             self.crystal_pack = pdb_coor.crystal_pack
             self.transformation = pdb_coor.transformation

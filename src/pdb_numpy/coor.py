@@ -526,7 +526,7 @@ class Coor:
         """
 
         # Get CA atoms
-        CA_sel = self.select_atoms("name CA", frame=frame)
+        CA_sel = self.select_atoms("name CA and not altloc B C D E F", frame=frame)
 
         seq_dict = {}
         aa_num_dict = {}
@@ -609,7 +609,7 @@ class Coor:
         """
 
         # Get CA atoms
-        CA_sel = self.select_atoms("(protein and name CA) or (dna and name P)", frame=frame)
+        CA_sel = self.select_atoms("((protein and name CA) or (dna and name P)) and not altloc B C D E F", frame=frame)
 
         seq_dict = {}
         aa_num_dict = {}
@@ -687,10 +687,10 @@ class Coor:
         """
 
         # Get CA atoms
-        CA_index = self.get_index_select("name CA and not altloc B C D", frame=frame)
+        CA_index = self.get_index_select("name CA and not altloc B C D E F", frame=frame)
         CA_sel = self.select_atoms("name CA", frame=frame)
 
-        N_C_CB_sel = self.select_atoms("name N C CB and not altloc B C D", frame=frame)
+        N_C_CB_sel = self.select_atoms("name N C CB and not altloc B C D E F", frame=frame)
 
         seq_dict = {}
         aa_num_dict = {}

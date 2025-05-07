@@ -194,8 +194,8 @@ def align_seq(str seq_1, str seq_2, short int gap_cost=-11, short int gap_extens
                 prev_line[j + 1] = True
 
     # Identify the maximum score
-    cdef short int min_seq = min(len_1, len_2), min_i, min_j
-    cdef int max_score = matrix[0, 0] #= np.max(matrix[min_seq:, min_seq:])
+    cdef short int min_seq = min(len_1, len_2), min_i=min_seq, min_j=min_seq
+    cdef int max_score = matrix[min_seq, min_seq] #= np.max(matrix[min_seq:, min_seq:])
     cdef int show_num = 10
 
     for i in range(min_seq, len_1 + 1):
@@ -257,7 +257,8 @@ def align_seq(str seq_1, str seq_2, short int gap_cost=-11, short int gap_extens
     elif j != 0:
         align_1 = j * "-" + align_1
 
-    assert len(align_1) == len(align_2)
+
+    assert len(align_1) == len(align_2), "Error in alignment length"
     return align_1, align_2
 
 

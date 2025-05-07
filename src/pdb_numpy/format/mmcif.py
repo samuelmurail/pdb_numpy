@@ -837,7 +837,10 @@ def get_mmcif_string(coor):
                         if elem.find(";")
                     ]
                     # Compute the max length of the word with no column
-                    max_len = len(max(list_no_column, key=len))
+                    if len(list_no_column) == 0:
+                        max_len = 0
+                    else:
+                        max_len = len(max([""] + list_no_column, key=len))
                     raw_width.append(max_len)
                 # Compute the max length of the line as function of the max length of the word
                 tot_width = 0

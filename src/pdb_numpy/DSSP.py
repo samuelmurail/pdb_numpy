@@ -375,7 +375,10 @@ def compute_DSSP(coor):
             "Incomplete backbone atoms, removing residues with incomplete backbone atoms"
         )
         coor = select.remove_incomplete_backbone_residues(coor)
-
+        CA_sel = coor.select_atoms("protein and name CA and not altloc B C D E")
+        unique_residues = np.unique(CA_sel.uniq_resid)
+        chain_array = CA_sel.chain
+        n_res = len(unique_residues)
 
     max_dist = 0
 

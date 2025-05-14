@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import numpy as np
-from . import geom
+from . import geom, select
 import logging
 
 # Logging
@@ -114,6 +114,10 @@ def get_NH_xyz(model):
     C_array = model.select_atoms("protein and name C and not altloc B C D E").xyz
     CA_array = model.select_atoms("protein and name CA and not altloc B C D E").xyz
     N_array = model.select_atoms("protein and name N and not altloc B C D E").xyz
+
+    assert len(C_array) == len(unique_residues)
+    assert len(CA_array) == len(unique_residues)
+    assert len(N_array) == len(unique_residues)
 
     resname_array = model.select_atoms(
         "protein and name CA and not altloc B C D E"
@@ -264,6 +268,7 @@ def compute_Hbond_matrix(model):
     O_array = model.select_atoms("protein and name O and not altloc B C D E").xyz
     N_array = model.select_atoms("protein and name N and not altloc B C D E").xyz
     C_array = model.select_atoms("protein and name C and not altloc B C D E").xyz
+
     H_array = get_NH_xyz(model)
 
     assert len(O_array) == n_res
@@ -354,6 +359,23 @@ def compute_DSSP(coor):
     unique_residues = np.unique(CA_sel.uniq_resid)
     chain_array = CA_sel.chain
     n_res = len(unique_residues)
+
+    O_array = coor.select_atoms(
+        "protein and name O and not altloc B C D E"
+    ).xyz
+    N_array = coor.select_atoms(
+        "protein and name N and not altloc B C D E"
+    ).xyz
+    C_array = coor.select_atoms(
+        "protein and name C and not altloc B C D E"
+    ).xyz
+
+    if (len(O_array) != n_res or len(N_array) != n_res or len(C_array) != n_res):
+        logger.warning(
+            "Incomplete backbone atoms, removing residues with incomplete backbone atoms"
+        )
+        coor = select.remove_incomplete_backbone_residues(coor)
+
 
     max_dist = 0
 

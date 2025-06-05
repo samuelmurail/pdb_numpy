@@ -368,6 +368,8 @@ def get_pdb_string(pdb_coor):
         mylen = np.vectorize(len)
         if max(mylen(model.atom_dict["name_resname_elem"][:, 1])) <= 3:
             resname = np.char.add(model.atom_dict["name_resname_elem"][:, 1], " ")
+        else:
+            resname = model.atom_dict["name_resname_elem"][:, 1]
 
         for i in range(model.len):
             # Atom name should start at column 14, with the type of atom ex:

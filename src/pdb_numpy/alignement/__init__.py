@@ -427,6 +427,146 @@ def print_align_seq(seq_1, seq_2, line_len=80):
     return
 
 
+# def get_common_atoms(
+#     coor_1, coor_2, chain_1=["A"], chain_2=["A"], back_names=["C", "N", "O", "CA"]
+# ):
+#     """Get atom selection in common for two atom_dict based on sequence
+#     alignement.
+
+#     Parameters
+#     ----------
+#     coor_1 : Coor
+#         First coordinate
+#     coor_2 : Coor
+#         Second coordinate
+#     chain_1 : list, optional
+#         List of chain to consider in the first coordinate, by default ["A"]
+#     chain_2 : list, optional
+#         List of chain to consider in the second coordinate, by default ["A"]
+#     back_names : list, optional
+#         List of backbone atom names, by default ["C", "N", "O", "CA"]
+
+#     Returns
+#     -------
+#     sel_index_1 : list
+#         List of index of the first coordinate
+#     sel_index_2 : list
+#         List of index of the second coordinate
+#     """
+
+
+#     def get_uniq_chain_order(array):
+#         uniq_chains = []
+#         for chain in array:
+#             if chain not in uniq_chains:
+#                 uniq_chains.append(chain)
+#         return uniq_chains
+    
+
+#     def check_same_chain_order(coor, chain_list):
+        
+#         coor_chain_order = get_uniq_chain_order(coor.chain)        
+#         index = 0
+#         founded = 0
+        
+#         for chain in chain_list:
+#             if chain not in coor_chain_order:
+#                 print(f"Chain {chain} not found in the first Coor object. Available chains: {coor_chain_order}")
+#             else:
+#                 for i in range(index, len(coor_chain_order)):
+#                     if chain == coor_chain_order[i]:
+#                         founded += 1
+#                         index = i
+#                         break
+        
+#         if founded != len(chain_1):
+#             return False
+#         else:
+#             return True
+
+#     if isinstance(chain_1, str):
+#         chain_1 = [chain_1]
+#     if isinstance(chain_2, str):
+#         chain_2 = [chain_2]
+    
+#     # check if chain_1 and chain_2 are in the same order as in the Coor object
+        
+
+#     coor_1_back = coor_1.select_atoms(
+#         f"chain {' '.join(chain_1)} and protein and name {' '.join(back_names)} and not altloc B C D E F"
+#     )
+#     coor_2_back = coor_2.select_atoms(
+#         f"chain {' '.join(chain_2)} and protein and name {' '.join(back_names)} and not altloc B C D E F"
+#     )
+
+#     sel_1_seq = coor_1_back.get_aa_seq()
+#     sel_2_seq = coor_2_back.get_aa_seq()
+
+#     # Order of the chains in the Coor object should change the order of the chains in the selection
+#     # To have a correct alignement
+#     if len(chain_1) <= 1 or check_same_chain_order(coor_1, chain_1):
+#         sel_index_1 = coor_1.get_index_select(
+#             f"chain {' '.join(chain_1)} and protein and name {' '.join(back_names)} and not altloc B C D E F"
+#         )
+#     else:
+#         sel_index_1 = []
+#         for chain in chain_1:
+#             sel_index_1 += coor_1.get_index_select(
+#                 f"chain {chain} and protein and name {' '.join(back_names)} and not altloc B C D E F"
+#             )
+#     if len(chain_2) <= 1 or check_same_chain_order(coor_2, chain_2):
+#         sel_index_2 = coor_2.get_index_select(
+#             f"chain {' '.join(chain_2)} and protein and name {' '.join(back_names)} and not altloc B C D E F"
+#         )
+#     else:
+#         sel_index_2 = []
+#         for chain in chain_2:
+#             sel_index_2 += coor_2.get_index_select(
+#                 f"chain {chain} and protein and name {' '.join(back_names)} and not altloc B C D E F"
+#             )
+
+#     seq_1 = ""
+#     for chain in chain_1:
+#         seq_1 += sel_1_seq[chain].replace("-", "")
+#     seq_2 = ""
+#     for chain in chain_2:
+#         seq_2 += sel_2_seq[chain].replace("-", "")
+
+#     assert len(sel_index_1) == len(seq_1) * len(
+#         back_names
+#     ), "Incomplete backbone atoms for first Coor object, you might consider using the remove_incomplete_residues method before."
+#     assert len(sel_index_2) == len(seq_2) * len(
+#         back_names
+#     ), "Incomplete backbone atoms for second Coor object, you might consider using the remove_incomplete_residues method before."
+
+#     align_seq_1, align_seq_2 = align_seq_cython(seq_1, seq_2)
+#     # print_align_seq(align_seq_1, align_seq_2)
+
+#     align_sel_1 = []
+#     align_sel_2 = []
+#     index_sel_1 = 0
+#     index_sel_2 = 0
+#     back_num = len(back_names)
+
+#     for i in range(len(align_seq_1)):
+#         # print(i, index_sel_1, index_sel_2)
+#         if align_seq_1[i] != "-" and align_seq_2[i] != "-":
+#             align_sel_1 += list(sel_index_1[index_sel_1 : index_sel_1 + back_num])
+#             align_sel_2 += list(sel_index_2[index_sel_2 : index_sel_2 + back_num])
+#             index_sel_1 += back_num
+#             index_sel_2 += back_num
+#         elif align_seq_1[i] != "-":
+#             index_sel_1 += back_num
+#         else:
+#             index_sel_2 += back_num
+
+#     assert len(align_sel_1) == len(
+#         align_sel_2
+#     ), "Two selection don't have the same atom number"
+#     return align_sel_1, align_sel_2
+
+
+
 def get_common_atoms(
     coor_1, coor_2, chain_1=["A"], chain_2=["A"], back_names=["C", "N", "O", "CA"]
 ):

@@ -355,8 +355,8 @@ def get_pdb_string(pdb_coor):
 
     for model_index, model in enumerate(pdb_coor.models):
         str_out += f"MODEL    {model_index:4d}\n"
-        old_chain = ""
         out_chain = ""
+        atom_num_gap = 0
 
         # Replace mmcif `.` altloc by `''` and `?` insertres by `''`
         alterloc = ['' if altloc == '.' else altloc for altloc in model.atom_dict["alterloc_chain_insertres"][:, 0]]
@@ -364,6 +364,12 @@ def get_pdb_string(pdb_coor):
         chain_list = ['' if chain == '?' else chain for chain in model.atom_dict["alterloc_chain_insertres"][:, 1]]
         elem_symbol = ['' if elem == '?' else elem for elem in model.atom_dict["name_resname_elem"][:, 2]]
 
+        old_chain = chain_list[0]
+        if len(old_chain) > 1:
+            out_chain = convert_chain_2_letter(old_chain)
+        else:
+            out_chain = old_chain
+        
         # If resname in 3 letters or less, we add a space at the end
         mylen = np.vectorize(len)
         if max(mylen(model.atom_dict["name_resname_elem"][:, 1])) <= 3:
@@ -379,22 +385,25 @@ def get_pdb_string(pdb_coor):
             name = model.atom_dict["name_resname_elem"][i, 0].astype(np.str_)
             if len(name) <= 3 and name[0] in ["C", "H", "O", "N", "S", "P"]:
                 name = " " + name
-            # To use resid > 9999, we need to convert the resid in hexadecimal format 
-            resid = model.atom_dict["num_resid_uniqresid"][i, 1]
-            if resid > 9999:
-                resid = encode.hy36encode(4, resid)
-            else:
-                resid = str(resid)
             
             #chain = model.atom_dict["alterloc_chain_insertres"][i, 1].astype(np.str_)
 
+                
             if chain_list[i] != old_chain:
+                str_out += f"TER   {encode.hy36encode(5, i + 1 + atom_num_gap):5s}      {resname[i-1]:>4s}{out_chain:1s}{resid:>4s}\n"
+                atom_num_gap += 1
                 old_chain = chain_list[i]
                 if len(old_chain) > 1:
                     out_chain = convert_chain_2_letter(old_chain)
                 else:
                     out_chain = old_chain
 
+            # To use resid > 9999, we need to convert the resid in hexadecimal format 
+            resid = model.atom_dict["num_resid_uniqresid"][i, 1]
+            if resid > 9999:
+                resid = encode.hy36encode(4, resid)
+            else:
+                resid = str(resid)
 
             # Note : Here we use 4 letter residue name.
             str_out += (
@@ -402,7 +411,7 @@ def get_pdb_string(pdb_coor):
                 "   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}"
                 "          {:>2s}\n".format(
                     FIELD_DICT[model.atom_dict["field"][i]],
-                    encode.hy36encode(5, i + 1),
+                    encode.hy36encode(5, i + 1 + atom_num_gap),
                     name,
                     alterloc[i],
                     resname[i],
@@ -417,6 +426,7 @@ def get_pdb_string(pdb_coor):
                     elem_symbol[i],
                 )
             )
+        str_out += f"TER   {encode.hy36encode(5, i + 1 + atom_num_gap):5s}      {resname[i-1]:>4s}{out_chain:1s}{resid:>4s}\n"
         str_out += "ENDMDL\n"
     str_out += "END\n"
     return str_out

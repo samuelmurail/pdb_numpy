@@ -438,8 +438,13 @@ class Coor:
         new_coor.transformation = self.transformation
         new_coor.data_mmCIF = self.data_mmCIF
         
+        # Renumber the atom indexes starting from 1
+        for model in new_coor.models:
+            model.num = np.arange(1, model.len + 1)
+        
         new_coor.conect = {}
-        index_dict = {old_idx: new_idx for new_idx, old_idx in enumerate(indexes)}
+        # print(self.num[indexes])
+        index_dict = {old_idx: new_idx + 1 for new_idx, old_idx in enumerate(self.num[indexes])}
         for key in self.conect:
             if key in index_dict:
                 new_key = index_dict[key]

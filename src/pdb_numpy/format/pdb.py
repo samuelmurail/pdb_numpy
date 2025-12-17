@@ -57,6 +57,8 @@ def parse(pdb_lines, pqr_format=False):
     xyz_list = []  # real (8.3)
     occ_beta_list = []  # real (6.2)
 
+    conection_list = {}
+
     transformation = ""
     symmetry = ""
 
@@ -70,6 +72,12 @@ def parse(pdb_lines, pqr_format=False):
         elif line.startswith("MODEL"):
             # print('Read Model {}'.format(model_num))
             model_num += 1
+        elif line.startswith("CONECT"):
+            index_list = [int(index) for index in line.split()[1:]]
+            if index_list[0] not in conection_list:
+                conection_list[index_list[0]] = []
+            for index in index_list[1:]:
+                conection_list[index_list[0]].append(index)
         elif line.startswith("ENDMDL") or line.startswith("END"):
             if len(field_list) > 0:
                 local_model = Model()
@@ -174,6 +182,8 @@ def parse(pdb_lines, pqr_format=False):
         pdb_coor.transformation = parse_transformation(transformation)
     if symmetry != "":
         pdb_coor.symmetry = parse_symmetry(symmetry)
+
+    pdb_coor.conect = conection_list
 
     return pdb_coor
 
@@ -428,6 +438,15 @@ def get_pdb_string(pdb_coor):
             )
         str_out += f"TER   {encode.hy36encode(5, i + 1 + atom_num_gap):5s}      {resname[i-1]:>4s}{out_chain:1s}{resid:>4s}\n"
         str_out += "ENDMDL\n"
+    if len(pdb_coor.conect) > 0:
+        for atom_index in sorted(pdb_coor.conect.keys()):
+            connected_atoms = pdb_coor.conect[atom_index]
+            # PDB format allows up to 4 bonded atom serial numbers per CONECT line.
+            for i in range(0, len(connected_atoms), 4):
+                line = "CONECT" + f"{encode.hy36encode(5, atom_index):>5s}"
+                for connected_atom in connected_atoms[i : i + 4]:
+                    line += f"{encode.hy36encode(5, connected_atom):>5s}"
+                str_out += line + "\n"
     str_out += "END\n"
     return str_out
 

@@ -37,6 +37,14 @@ class Coor:
         Crystal Packing as a string
     active_model : int
         Index of the active model
+    conect : dict
+        Dictionary of atom connections
+    data_mmCIF : dict
+        Dictionary of mmCIF data
+    symmetry : str
+        Symmetry information
+    transformation : str
+        Transformation information
 
     Methods
     -------
@@ -163,6 +171,7 @@ class Coor:
         self.symmetry = ""
         self.transformation = ""
         self.data_mmCIF = {}
+        self.conect = {}
 
         if coor_in is not None:
             self.read(coor_in)
@@ -227,6 +236,7 @@ class Coor:
             self.crystal_pack = pdb_coor.crystal_pack
             self.transformation = pdb_coor.transformation
             self.symmetry = pdb_coor.symmetry
+            self.conect = pdb_coor.conect
         elif str(file_in).endswith(".cif"):
             mmcif_coor = mmcif.parse(mmcif_lines=lines)
             self.data_mmCIF = mmcif_coor.data_mmCIF
@@ -427,6 +437,17 @@ class Coor:
         new_coor.symmetry = self.symmetry
         new_coor.transformation = self.transformation
         new_coor.data_mmCIF = self.data_mmCIF
+        
+        new_coor.conect = {}
+        index_dict = {old_idx: new_idx for new_idx, old_idx in enumerate(indexes)}
+        for key in self.conect:
+            if key in index_dict:
+                new_key = index_dict[key]
+                new_values = [
+                    index_dict[val] for val in self.conect[key] if val in index_dict
+                ]
+                if len(new_values) > 0:
+                    new_coor.conect[new_key] = new_values
 
         return new_coor
 

@@ -11,7 +11,7 @@ from pdb_numpy.format import encode_cython as encode
 def test_encode_pure():
     for value in range(1000):
         s = encode.encode_pure(digits=encode.digits_upper, value=value)
-        d = encode.decode_pure_Cap(s=s.encode('utf-8'))
+        d = encode.decode_pure_Cap(s=s.encode("utf-8"))
         assert d == value
 
     def recycle4(value, encoded):
@@ -144,10 +144,10 @@ def test_encode_pure():
         (5, ["", "     0", " abcd", "ABCD-", "a=bcd", "410b0"]),
     ]:
         for s in ss:
-            print(s, ':')
+            print(s, ":")
             try:
                 tmp = encode.hy36decode(width, s=s)
-                print('tmp', tmp)
+                print("tmp", tmp)
             except (ValueError, RuntimeError) as e:
                 assert str(e) == "invalid number literal."
             else:

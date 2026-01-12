@@ -46,6 +46,7 @@ MMCIF_ATOM_SITE = (
     "_atom_site.pdbx_PDB_model_num \n"
 )
 
+
 def remove_double_quote(string):
     """Remove double quote from a string
 
@@ -64,6 +65,7 @@ def remove_double_quote(string):
     if string[0] == '"':
         string = string[1:-1]
     return string
+
 
 def parse(mmcif_lines):
     """Parse the mmcif lines and return atom information as a dictionary
@@ -139,7 +141,13 @@ def parse(mmcif_lines):
     # "name_resname"
     col_index = data_mmCIF["_atom_site"]["col_names"].index("label_atom_id")
     # dtype set to U5 to avoid truncation of long atom names like "O5\'"
-    name_array = np.array([remove_double_quote(name) for name in data_mmCIF["_atom_site"]["value"][col_index]], dtype="|U4")
+    name_array = np.array(
+        [
+            remove_double_quote(name)
+            for name in data_mmCIF["_atom_site"]["value"][col_index]
+        ],
+        dtype="|U4",
+    )
     col_index = data_mmCIF["_atom_site"]["col_names"].index("label_comp_id")
     resname_array = np.array(data_mmCIF["_atom_site"]["value"][col_index], dtype="|U4")
     col_index = data_mmCIF["_atom_site"]["col_names"].index("type_symbol")
@@ -294,9 +302,9 @@ def parse_transformation(data_mmCIF):
             trans_num = 1
             chain_list = [
                 chain.strip()
-                for chain in data_mmCIF["_pdbx_struct_assembly_gen"]["asym_id_list"].split(
-                    ","
-                )
+                for chain in data_mmCIF["_pdbx_struct_assembly_gen"][
+                    "asym_id_list"
+                ].split(",")
             ]
 
             transformation_dict[1] = {"chains": chain_list, "matrix": []}
@@ -334,9 +342,9 @@ def parse_transformation(data_mmCIF):
             chain_index = data_mmCIF["_pdbx_struct_assembly_gen"]["col_names"].index(
                 "asym_id_list"
             )
-            local_matrix_index = data_mmCIF["_pdbx_struct_assembly_gen"]["col_names"].index(
-                "oper_expression"
-            )
+            local_matrix_index = data_mmCIF["_pdbx_struct_assembly_gen"][
+                "col_names"
+            ].index("oper_expression")
 
             for i in range(trans_num):
                 # Extract chain list and matrix indexes
@@ -357,7 +365,9 @@ def parse_transformation(data_mmCIF):
                 # Extract matrix value
                 # print(data_mmCIF["_pdbx_struct_oper_list"])
                 if "value" in data_mmCIF["_pdbx_struct_oper_list"]:
-                    for j in range(len(data_mmCIF["_pdbx_struct_oper_list"]["value"][0])):
+                    for j in range(
+                        len(data_mmCIF["_pdbx_struct_oper_list"]["value"][0])
+                    ):
                         matrix_id = data_mmCIF["_pdbx_struct_oper_list"]["value"][0][j]
 
                         if matrix_id in matrix_index_list:
@@ -369,12 +379,14 @@ def parse_transformation(data_mmCIF):
                                     ].index(index)
                                     local_matrix.append(
                                         float(
-                                            data_mmCIF["_pdbx_struct_oper_list"]["value"][
-                                                local_index
-                                            ][j]
+                                            data_mmCIF["_pdbx_struct_oper_list"][
+                                                "value"
+                                            ][local_index][j]
                                         )
                                     )
-                                transformation_dict[i + 1]["matrix"].append(local_matrix)
+                                transformation_dict[i + 1]["matrix"].append(
+                                    local_matrix
+                                )
                 else:
                     matrix_id = data_mmCIF["_pdbx_struct_oper_list"]["id"]
                     if matrix_id in matrix_index_list:
@@ -511,7 +523,7 @@ def _parse_raw_mmcif_lines(mmcif_lines):
             col_names = []
 
         elif line.startswith("_"):
-            #token = shlex.split(line, posix=False)
+            # token = shlex.split(line, posix=False)
             token = split_cython.string_split(line[:-1])
             category, attribute = token[0].split(".")
 
@@ -554,16 +566,16 @@ def _parse_raw_mmcif_lines(mmcif_lines):
             mutli_line += line
 
         elif tabular:
-            #token = shlex.split(line, posix=False)
+            # token = shlex.split(line, posix=False)
             token = split_cython.string_split(line[:-1])
 
-            #new_token = line.split()
-            #if set(token) != set(new_token):
+            # new_token = line.split()
+            # if set(token) != set(new_token):
             #    print(line)
             #    print("shlex:", token)
             #    print("new  :", new_token)
             token_complete = True
-            #print(final_token, len(final_token), token, len(token), len(data_mmCIF[category]['col_names']))
+            # print(final_token, len(final_token), token, len(token), len(data_mmCIF[category]['col_names']))
 
             # TO FIX !!
             if len(token) != len(data_mmCIF[category]["col_names"]):
@@ -584,7 +596,7 @@ def _parse_raw_mmcif_lines(mmcif_lines):
                     data_mmCIF[category]["value"][i].append(token[i])
                 final_token = []
         else:
-            #token = shlex.split(line, posix=False)
+            # token = shlex.split(line, posix=False)
             token = split_cython.string_split(line[:-1])
 
             if category not in data_mmCIF:

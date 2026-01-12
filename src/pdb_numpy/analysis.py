@@ -67,7 +67,12 @@ def rmsd(coor_1, coor_2, selection="name CA", index_list=None, frame_ref=0):
 
 
 def interface_rmsd(
-    coor, coor_native, rec_chains_native, lig_chains_native, cutoff=10.0, back_atom=["CA", "N", "C", "O"]
+    coor,
+    coor_native,
+    rec_chains_native,
+    lig_chains_native,
+    cutoff=10.0,
+    back_atom=["CA", "N", "C", "O"],
 ):
     """Compute the interface RMSD between two models.
     The interface is defined as the distance between the ligand and the receptor
@@ -102,7 +107,6 @@ def interface_rmsd(
 
     """
 
-
     lig_interface = coor_native.select_atoms(
         f'chain {" ".join(lig_chains_native)} and within {cutoff} of chain {" ".join(rec_chains_native)}'
     )
@@ -123,7 +127,7 @@ def interface_rmsd(
     if len(interface_residues) == 0:
         logger.info("No interface residues found")
         return [None] * len(coor.models)
-    
+
     # print(f"lig_interface_resids= {lig_interface_residues} rec_interface_resids= {rec_interface_residues}")
     index = coor.get_index_select(
         f'residue {" ".join([str(i) for i in interface_residues])} and name {" ".join(back_atom)}'
@@ -134,10 +138,12 @@ def interface_rmsd(
 
     # print(f"index= {index} index_native= {index_native}")
     # print(f"index= {len(index)} index_native= {len(index_native)}")
-    assert len(index) == len(index_native), "The number of atoms in the interface is not the same in the two models"
+    assert len(index) == len(
+        index_native
+    ), "The number of atoms in the interface is not the same in the two models"
 
     alignement.coor_align(coor, coor_native, index, index_native, frame_ref=0)
-    
+
     return rmsd(coor, coor_native, index_list=[index, index_native])
 
 
@@ -204,13 +210,13 @@ def native_contact(
     native_contact_list = []
     native_rec_residue = native_rec_interface.models[0].residue
 
-
     for residue in np.unique(native_rec_residue):
         res_lig = native_rec_lig_interface.select_atoms(
             f'chain {" ".join(native_lig_chains)} and within {cutoff} of residue {residue}'
         )
         native_contact_list += [
-            [residue, lig_residue] for lig_residue in np.unique(res_lig.models[0].residue)
+            [residue, lig_residue]
+            for lig_residue in np.unique(res_lig.models[0].residue)
         ]
 
     fnat_list = []
@@ -234,7 +240,7 @@ def native_contact(
             residue_lig = rec_lig_interface.select_atoms(
                 f'chain {" ".join(lig_chains)} and within {cutoff} of residue {residue}'
             )
-            
+
             for lig_residue in np.unique(residue_lig.residue):
                 # print([residue, lig_residue])
                 if [residue, lig_residue] in native_contact_list:
@@ -431,7 +437,7 @@ def dockQ(
         f'residue {" ".join([str(i) for i in native_residue_unique])}'
     )
 
-    #for model in interface_coor.models:
+    # for model in interface_coor.models:
     #    model.resid[:] = -1
     #    for res, nat_res in zip(coor_residue_unique, native_resid_unique):
     #        model.resid[model.residue == res] = nat_res
@@ -450,8 +456,8 @@ def dockQ(
     logger.info(f"Interface   RMSD: {irmsd_list[0]} A")
 
     fnat_list, fnonnat_list = native_contact(
-        interface_coor,#clean_coor,
-        interface_native_coor,#clean_native_coor,
+        interface_coor,  # clean_coor,
+        interface_native_coor,  # clean_native_coor,
         rec_chains,
         lig_chains,
         native_rec_chains,
@@ -558,7 +564,9 @@ def compute_pdockQ(
     """
 
     # coor_CA_CB = coor.select_atoms("name CB or (resname GLY and name CA)")
-    coor_CA_CB = coor.select_atoms("(protein and (name CB or (resname GLY and name CA))) or (dna and name P)")
+    coor_CA_CB = coor.select_atoms(
+        "(protein and (name CB or (resname GLY and name CA))) or (dna and name P)"
+    )
 
     model_seq = coor.get_aa_na_seq()
 
@@ -677,8 +685,10 @@ def compute_pdockQ_sel(
         https://www.nature.com/articles/s41467-022-33729-4
     """
 
-    #models_CA = coor.select_atoms("name CB or (resname GLY and name CA)")
-    coor_CA_CB = coor.select_atoms("(protein and (name CB or (resname GLY and name CA))) or (dna and name P)")
+    # models_CA = coor.select_atoms("name CB or (resname GLY and name CA)")
+    coor_CA_CB = coor.select_atoms(
+        "(protein and (name CB or (resname GLY and name CA))) or (dna and name P)"
+    )
 
     pdockq_list = []
 
@@ -762,7 +772,7 @@ def compute_pdockQ2(
         default is 10.0
     sel : str
         selection string for atoms to consider for the calculation
-    
+
 
     Returns
     -------
@@ -780,7 +790,10 @@ def compute_pdockQ2(
     models_CA = coor.select_atoms(sel)
     models_chains = np.unique(models_CA.chain)
 
-    assert pae_array.shape == (models_CA.len, models_CA.len), "PAE array shape mismatch with CA atoms number"
+    assert pae_array.shape == (
+        models_CA.len,
+        models_CA.len,
+    ), "PAE array shape mismatch with CA atoms number"
 
     pdockq2_list = []
     for chain in models_chains:
@@ -797,7 +810,9 @@ def compute_pdockQ2(
 
             if chain_sel.len == 0 or inter_chain_sel.len == 0:
                 pdockq2_list[i].append(0.0)
-                logger.info("No interface residues found for pdockq2 calculation, 0 value return.")
+                logger.info(
+                    "No interface residues found for pdockq2 calculation, 0 value return."
+                )
                 continue
 
             dist_mat = distance_matrix(chain_sel.xyz, inter_chain_sel.xyz)
@@ -832,7 +847,7 @@ def compute_piTM(
 
     .. math::
         d_0(I) = \begin{cases} 1.25 \sqrt[3]{I -15} -1.8\text{,} & \text{if } I \geq 22 \\ 0.02 I \text{,} & \text{if } I < 22  \end{cases}
-    
+
 
     Implementation was inspired from `predicted_tm_score_v1()` in https://github.com/FreshAirTonight/af2complex/blob/main/src/alphafold/common/confidence.py
 
@@ -852,7 +867,7 @@ def compute_piTM(
 
     References
     ----------
-    .. [2] Mu Gao, Davi Nakajima An, Jerry M. Parks & Jeffrey Skolnick. 
+    .. [2] Mu Gao, Davi Nakajima An, Jerry M. Parks & Jeffrey Skolnick.
         AF2Complex predicts direct physical interactions in multimeric proteins with deep learning
         *Nature Communications*. volume 13, Article number: 1744 (2022).
         https://www.nature.com/articles/s41467-022-29394-2
@@ -864,7 +879,10 @@ def compute_piTM(
 
     # print(models_chains, pae_array.shape, models_CA.len)
 
-    assert pae_array.shape == (models_CA.len, models_CA.len), "PAE array shape mismatch with CA atoms number"
+    assert pae_array.shape == (
+        models_CA.len,
+        models_CA.len,
+    ), "PAE array shape mismatch with CA atoms number"
 
     piTM_list = []
 
@@ -873,7 +891,6 @@ def compute_piTM(
         piTM_Score_list.append([])
 
     for model in models_CA.models:
-
         # Compute I and d0
         interface_index = []
         for i, chain in enumerate(models_chains):
@@ -889,21 +906,20 @@ def compute_piTM(
             for i in range(len(models_chains)):
                 piTM_Score_list[i].append(0)
             continue
-        d0 = 1.25 * (I -15 ) ** (1 / 3) - 1.8 if I >= 22 else 0.02 * I
+        d0 = 1.25 * (I - 15) ** (1 / 3) - 1.8 if I >= 22 else 0.02 * I
 
         # Add 0 in case there is no interface residues
         piTM_local = [0]
         for i in interface_index:
-            #print(pae_array[:10, :10])
+            # print(pae_array[:10, :10])
             local_score = 0
             for j in interface_index:
-                if i!= j:
+                if i != j:
                     local_score += 1 / (1 + (pae_array[i, j] / d0) ** 2)
             piTM_local.append(local_score)
-        piTM_list.append(max(piTM_local)/I)
+        piTM_list.append(max(piTM_local) / I)
 
         for i, chain in enumerate(models_chains):
-
             chain_sel_ndx = model.get_index_select(
                 f"(chain {chain} and within {cutoff} of not chain {chain})"
             )
@@ -918,7 +934,7 @@ def compute_piTM(
                     local_score += 1 / (1 + (pae_array[k, j].mean() / d0) ** 2)
                 chain_score.append(local_score)
 
-            piTM_Score_list[i].append(max(chain_score)/I)
-            #piTM_Score_list[i].append(max(chain_score)/len(chain_sel_ndx))
+            piTM_Score_list[i].append(max(chain_score) / I)
+            # piTM_Score_list[i].append(max(chain_score)/len(chain_sel_ndx))
 
     return piTM_list, piTM_Score_list

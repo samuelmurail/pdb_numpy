@@ -16,7 +16,7 @@ def get_nglview(
     licorice=False,
     unitcell=False,
     color="chainid",
-    **kwargs
+    **kwargs,
 ):
     """Return a `nglview` object to be view in
     a jupyter notebook.
@@ -79,7 +79,7 @@ def get_py3dmolview(
     licorice=False,
     unitcell=False,
     color="chainid",
-    **kwargs
+    **kwargs,
 ):
     """Return a `py3dmol` object to be view in
     a jupyter notebook.

@@ -125,7 +125,9 @@ def test_read_gro_write_mmcif(tmp_path, caplog):
         == np.array([-11.43, 14.76, -14.63], dtype=np.float32)
     ).all()
     assert test_gro.crystal_pack == "   0.10000   0.10000   0.10000\n"
-    assert test_cif.crystal_pack == "CRYST1    1.000    1.000    1.000  90.00  90.00  90.00 P 1         1\n"
+    assert (
+        test_cif.crystal_pack
+        == "CRYST1    1.000    1.000    1.000  90.00  90.00  90.00 P 1         1\n"
+    )
 
     np.testing.assert_allclose(test_cif.xyz, test_gro.xyz, atol=1e-2)
-

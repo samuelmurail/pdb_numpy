@@ -69,7 +69,7 @@ def test_seq_align(capsys):
 
     align_seq_1, align_seq_2 = alignement.align_seq(seq_1, seq_2)
     alignement.print_align_seq(align_seq_1, align_seq_2, line_len=80)
-    #captured = caplog.records
+    # captured = caplog.records
     captured = capsys.readouterr().out.split("\n")[:-1]
 
     print("captured", captured)
@@ -173,7 +173,7 @@ def test_seq_align_cython_X(capsys):
     assert captured[-1] == "Similarity seq2: 45.61%"
 
 
-#def test_seq_align_C(capsys):
+# def test_seq_align_C(capsys):
 #    """Test seq_align function."""
 #
 #    pdb_numpy.logger.setLevel(level=logging.INFO)

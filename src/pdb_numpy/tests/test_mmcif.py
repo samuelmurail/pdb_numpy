@@ -73,8 +73,14 @@ def test_read_mmcif_write_pdb(tmp_path, caplog):
 
     # Alterloc and insertres can differ, as in PDB file
     # . and ? are replaced by '' in PDB file
-    test.models[0].atom_dict["alterloc_chain_insertres"][:, 0] = ['' if altloc == '.' else altloc for altloc in test.models[0].atom_dict["alterloc_chain_insertres"][:, 0]]
-    test.models[0].atom_dict["alterloc_chain_insertres"][:, 2] = ['' if altloc == '?' else altloc for altloc in test.models[0].atom_dict["alterloc_chain_insertres"][:, 2]]
+    test.models[0].atom_dict["alterloc_chain_insertres"][:, 0] = [
+        "" if altloc == "." else altloc
+        for altloc in test.models[0].atom_dict["alterloc_chain_insertres"][:, 0]
+    ]
+    test.models[0].atom_dict["alterloc_chain_insertres"][:, 2] = [
+        "" if altloc == "?" else altloc
+        for altloc in test.models[0].atom_dict["alterloc_chain_insertres"][:, 2]
+    ]
 
     for key in test.models[0].atom_dict:
         # Atom index can differ
@@ -147,12 +153,16 @@ def test_read_mmcif_write_pdb_models(tmp_path):
     assert test_2.model_num == 20
 
     for model, model_2 in zip(test.models, test_2.models):
-
         # Alterloc and insertres can differ, as in PDB file
         # . and ? are replaced by '' in PDB file
-        model.atom_dict["alterloc_chain_insertres"][:, 0] = ['' if altloc == '.' else altloc for altloc in model.atom_dict["alterloc_chain_insertres"][:, 0]]
-        model.atom_dict["alterloc_chain_insertres"][:, 2] = ['' if altloc == '?' else altloc for altloc in model.atom_dict["alterloc_chain_insertres"][:, 2]]
-
+        model.atom_dict["alterloc_chain_insertres"][:, 0] = [
+            "" if altloc == "." else altloc
+            for altloc in model.atom_dict["alterloc_chain_insertres"][:, 0]
+        ]
+        model.atom_dict["alterloc_chain_insertres"][:, 2] = [
+            "" if altloc == "?" else altloc
+            for altloc in model.atom_dict["alterloc_chain_insertres"][:, 2]
+        ]
 
         for key in model.atom_dict:
             # Atom index can differ

@@ -28,6 +28,7 @@ KEYWORD_DICT = {
     "z": ["xyz", 2],
 }
 
+
 class Model:
     """Model class for pdb_numpy
 
@@ -418,7 +419,7 @@ class Model:
         Coor
             a new Coor object with the selected atoms
         """
-        
+
         new_model = Model()
         new_model.atom_dict = {}
         for key in self.atom_dict:

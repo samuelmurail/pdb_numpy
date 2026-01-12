@@ -26,7 +26,8 @@ KEYWORDS = [
 NICKNAMES = {
     "protein": f"resname {' '.join(AA_DICT.keys())}",
     "dna": f"resname {' '.join(NA_DICT.keys())}",
-    "backbone": f"resname {' '.join(AA_DICT.keys())} and name N CA C O",
+    # Becarefull of the spaces around the parentheses, they are needed for parsing
+    "backbone": f"( resname {' '.join(AA_DICT.keys())} and name N CA C O )",
     "noh": "not name H*",
     "ions": "resname NA CL CA MG ZN MN FE CU CO NI CD K",
 }

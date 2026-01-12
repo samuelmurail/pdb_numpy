@@ -88,4 +88,3 @@ JSON_AF3_1 = os.path.join(
     TEST_FILE_PATH,
     "examplefold_pdb_7rce_full_data_0.json",
 )
-

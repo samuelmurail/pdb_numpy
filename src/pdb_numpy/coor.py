@@ -185,7 +185,9 @@ class Coor:
             try:
                 pdb_coor = pdb.fetch(pdb_ID=pdb_id)
             except HTTPError:
-                logger.warning(f'PDB ID {pdb_id} not found in `.pdb` format, fetching the mmCIF format.')
+                logger.warning(
+                    f"PDB ID {pdb_id} not found in `.pdb` format, fetching the mmCIF format."
+                )
                 pdb_coor = mmcif.fetch(pdb_ID=pdb_id)
 
             self.models = pdb_coor.models
@@ -349,7 +351,7 @@ class Coor:
                     f"Field {field_uniq} not found in order list, will be added at the end"
                 )
                 order_list.append(field_uniq)
-        
+
         if isinstance(order_list[0], str):
             order_list = np.array(order_list, dtype="U")
 
@@ -400,7 +402,7 @@ class Coor:
                 if model.atom_dict["num_resid_uniqresid"][i, 2] != last_residue:
                     residue += 1
                     last_residue = model.atom_dict["num_resid_uniqresid"][i, 2]
-                #model.atom_dict["num_resid_uniqresid"][i, 1] = residue
+                # model.atom_dict["num_resid_uniqresid"][i, 1] = residue
                 model.atom_dict["num_resid_uniqresid"][i, 2] = residue
 
         return
@@ -425,8 +427,8 @@ class Coor:
             a new Coor object with the selected atoms
         """
 
-        #new_coor = copy.deepcopy(self)
-        #for i in range(len(new_coor.models)):
+        # new_coor = copy.deepcopy(self)
+        # for i in range(len(new_coor.models)):
         #    new_coor.models[i] = new_coor.models[i].select_index(indexes)
 
         new_coor = Coor()
@@ -437,14 +439,16 @@ class Coor:
         new_coor.symmetry = self.symmetry
         new_coor.transformation = self.transformation
         new_coor.data_mmCIF = self.data_mmCIF
-        
+
         # Renumber the atom indexes starting from 1
         for model in new_coor.models:
             model.num = np.arange(1, model.len + 1)
-        
+
         new_coor.conect = {}
         # print(self.num[indexes])
-        index_dict = {old_idx: new_idx + 1 for new_idx, old_idx in enumerate(self.num[indexes])}
+        index_dict = {
+            old_idx: new_idx + 1 for new_idx, old_idx in enumerate(self.num[indexes])
+        }
         for key in self.conect:
             if key in index_dict:
                 new_key = index_dict[key]
@@ -582,7 +586,6 @@ class Coor:
 
         return seq_dict
 
-
     def get_aa_na_seq(self, gap_in_seq=True, frame=0):
         """Get the amino acid sequence from a `Coor` object.
         This function takes a Coor object, selects the CA/P atoms using the
@@ -635,7 +638,10 @@ class Coor:
         """
 
         # Get CA atoms
-        CA_sel = self.select_atoms("((protein and name CA) or (dna and name P)) and not altloc B C D E F", frame=frame)
+        CA_sel = self.select_atoms(
+            "((protein and name CA) or (dna and name P)) and not altloc B C D E F",
+            frame=frame,
+        )
 
         seq_dict = {}
         aa_num_dict = {}
@@ -713,10 +719,14 @@ class Coor:
         """
 
         # Get CA atoms
-        CA_index = self.get_index_select("name CA and not altloc B C D E F", frame=frame)
+        CA_index = self.get_index_select(
+            "name CA and not altloc B C D E F", frame=frame
+        )
         CA_sel = self.select_atoms("name CA", frame=frame)
 
-        N_C_CB_sel = self.select_atoms("name N C CB and not altloc B C D E F", frame=frame)
+        N_C_CB_sel = self.select_atoms(
+            "name N C CB and not altloc B C D E F", frame=frame
+        )
 
         seq_dict = {}
         aa_num_dict = {}
@@ -726,9 +736,9 @@ class Coor:
             CA_sel.models[frame].atom_dict["alterloc_chain_insertres"][:, 1],
             CA_sel.models[frame].atom_dict["name_resname_elem"][:, 1],
             CA_sel.models[frame].atom_dict["num_resid_uniqresid"][:, 1],
-            CA_sel.models[frame].atom_dict["num_resid_uniqresid"][:, 2]
+            CA_sel.models[frame].atom_dict["num_resid_uniqresid"][:, 2],
         ):
-            """"
+            """ "
             for i in CA_index:
             chain = (
                 self.models[frame]

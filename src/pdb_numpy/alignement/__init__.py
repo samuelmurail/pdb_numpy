@@ -17,7 +17,7 @@ from ..data.blosum import BLOSUM62
 logger = logging.getLogger(__name__)
 
 
-#def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
+# def align_seq_C(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
 #    """Align two amino acid sequences using the Waterman - Smith Algorithm.
 #
 #    Parameters
@@ -107,7 +107,6 @@ logger = logging.getLogger(__name__)
 
 
 def align_seq_cython(seq_1, seq_2, gap_cost=-11, gap_extension=-1):
-
     return align_cython.align_seq(seq_1, seq_2, gap_cost, gap_extension)
 
 
@@ -461,14 +460,14 @@ def print_align_seq(seq_1, seq_2, line_len=80):
 #             if chain not in uniq_chains:
 #                 uniq_chains.append(chain)
 #         return uniq_chains
-    
+
 
 #     def check_same_chain_order(coor, chain_list):
-        
-#         coor_chain_order = get_uniq_chain_order(coor.chain)        
+
+#         coor_chain_order = get_uniq_chain_order(coor.chain)
 #         index = 0
 #         founded = 0
-        
+
 #         for chain in chain_list:
 #             if chain not in coor_chain_order:
 #                 print(f"Chain {chain} not found in the first Coor object. Available chains: {coor_chain_order}")
@@ -478,7 +477,7 @@ def print_align_seq(seq_1, seq_2, line_len=80):
 #                         founded += 1
 #                         index = i
 #                         break
-        
+
 #         if founded != len(chain_1):
 #             return False
 #         else:
@@ -488,9 +487,9 @@ def print_align_seq(seq_1, seq_2, line_len=80):
 #         chain_1 = [chain_1]
 #     if isinstance(chain_2, str):
 #         chain_2 = [chain_2]
-    
+
 #     # check if chain_1 and chain_2 are in the same order as in the Coor object
-        
+
 
 #     coor_1_back = coor_1.select_atoms(
 #         f"chain {' '.join(chain_1)} and protein and name {' '.join(back_names)} and not altloc B C D E F"
@@ -564,7 +563,6 @@ def print_align_seq(seq_1, seq_2, line_len=80):
 #         align_sel_2
 #     ), "Two selection don't have the same atom number"
 #     return align_sel_1, align_sel_2
-
 
 
 def get_common_atoms(
@@ -672,7 +670,6 @@ def coor_align(coor_1, coor_2, index_1, index_2, frame_ref=0):
     -------
     None
     """
-
 
     assert len(index_1) != 0, "No atom selected in the first structure"
     assert len(index_1) == len(index_2), "Two structure don't have the same atom number"

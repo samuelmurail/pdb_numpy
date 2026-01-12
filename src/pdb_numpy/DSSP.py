@@ -360,17 +360,11 @@ def compute_DSSP(coor):
     chain_array = CA_sel.chain
     n_res = len(unique_residues)
 
-    O_array = coor.select_atoms(
-        "protein and name O and not altloc B C D E"
-    ).xyz
-    N_array = coor.select_atoms(
-        "protein and name N and not altloc B C D E"
-    ).xyz
-    C_array = coor.select_atoms(
-        "protein and name C and not altloc B C D E"
-    ).xyz
+    O_array = coor.select_atoms("protein and name O and not altloc B C D E").xyz
+    N_array = coor.select_atoms("protein and name N and not altloc B C D E").xyz
+    C_array = coor.select_atoms("protein and name C and not altloc B C D E").xyz
 
-    if (len(O_array) != n_res or len(N_array) != n_res or len(C_array) != n_res):
+    if len(O_array) != n_res or len(N_array) != n_res or len(C_array) != n_res:
         logger.warning(
             "Incomplete backbone atoms, removing residues with incomplete backbone atoms"
         )

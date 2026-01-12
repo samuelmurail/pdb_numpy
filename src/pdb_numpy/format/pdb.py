@@ -57,6 +57,8 @@ def parse(pdb_lines, pqr_format=False):
     xyz_list = []  # real (8.3)
     occ_beta_list = []  # real (6.2)
 
+    conection_list = {}
+
     transformation = ""
     symmetry = ""
 
@@ -70,6 +72,13 @@ def parse(pdb_lines, pqr_format=False):
         elif line.startswith("MODEL"):
             # print('Read Model {}'.format(model_num))
             model_num += 1
+        elif line.startswith("CONECT"):
+            # We use an index starting at 0, as pdb files start at 1
+            index_list = [encode.hy36decode(5, f"{int(index):5d}") for index in line.split()[1:]]
+            if index_list[0] not in conection_list:
+                conection_list[index_list[0]] = []
+            for index in index_list[1:]:
+                conection_list[index_list[0]].append(index)
         elif line.startswith("ENDMDL") or line.startswith("END"):
             if len(field_list) > 0:
                 local_model = Model()
@@ -174,6 +183,8 @@ def parse(pdb_lines, pqr_format=False):
         pdb_coor.transformation = parse_transformation(transformation)
     if symmetry != "":
         pdb_coor.symmetry = parse_symmetry(symmetry)
+
+    pdb_coor.conect = conection_list
 
     return pdb_coor
 
@@ -356,7 +367,7 @@ def get_pdb_string(pdb_coor):
     for model_index, model in enumerate(pdb_coor.models):
         str_out += f"MODEL    {model_index + 1:4d}\n"
         out_chain = ""
-        atom_num_gap = 0
+        # atom_num_gap = 0
 
         # Replace mmcif `.` altloc by `''` and `?` insertres by `''`
         alterloc = ['' if altloc == '.' else altloc for altloc in model.atom_dict["alterloc_chain_insertres"][:, 0]]
@@ -382,6 +393,7 @@ def get_pdb_string(pdb_coor):
             #   - with atom type 'C': ' CH3'
             # for 2 letters atom type, it should start at column 13 ex:
             #   - with atom type 'FE': 'FE1'
+            num = model.atom_dict["num_resid_uniqresid"][i, 0]
             name = model.atom_dict["name_resname_elem"][i, 0].astype(np.str_)
             if len(name) <= 3 and name[0] in ["C", "H", "O", "N", "S", "P"]:
                 name = " " + name
@@ -390,8 +402,9 @@ def get_pdb_string(pdb_coor):
 
                 
             if chain_list[i] != old_chain:
-                str_out += f"TER   {encode.hy36encode(5, i + 1 + atom_num_gap):5s}      {resname[i-1]:>4s}{out_chain:1s}{resid:>4s}\n"
-                atom_num_gap += 1
+                # str_out += f"TER   {encode.hy36encode(5, i + 1 + atom_num_gap):5s}      {resname[i-1]:>4s}{out_chain:1s}{resid:>4s}\n"
+                str_out += f"TER   {encode.hy36encode(5, num-1):5s}      {resname[i-1]:>4s}{out_chain:1s}{resid:>4s}\n"
+                # atom_num_gap += 1
                 old_chain = chain_list[i]
                 if len(old_chain) > 1:
                     out_chain = convert_chain_2_letter(old_chain)
@@ -411,7 +424,8 @@ def get_pdb_string(pdb_coor):
                 "   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}"
                 "          {:>2s}\n".format(
                     FIELD_DICT[model.atom_dict["field"][i]],
-                    encode.hy36encode(5, i + 1 + atom_num_gap),
+                    # encode.hy36encode(5, i + 1 + atom_num_gap),
+                    encode.hy36encode(5, num),
                     name,
                     alterloc[i],
                     resname[i],
@@ -426,8 +440,18 @@ def get_pdb_string(pdb_coor):
                     elem_symbol[i],
                 )
             )
-        str_out += f"TER   {encode.hy36encode(5, i + 1 + atom_num_gap):5s}      {resname[i-1]:>4s}{out_chain:1s}{resid:>4s}\n"
+        # str_out += f"TER   {encode.hy36encode(5, i + 1 + atom_num_gap):5s}      {resname[i-1]:>4s}{out_chain:1s}{resid:>4s}\n"
+        str_out += f"TER   {encode.hy36encode(5, num):5s}      {resname[i-1]:>4s}{out_chain:1s}{resid:>4s}\n"
         str_out += "ENDMDL\n"
+    if len(pdb_coor.conect) > 0:
+        for atom_index in sorted(pdb_coor.conect.keys()):
+            connected_atoms = pdb_coor.conect[atom_index]
+            # PDB format allows up to 4 bonded atom serial numbers per CONECT line.
+            for i in range(0, len(connected_atoms), 4):
+                line = "CONECT" + f"{encode.hy36encode(5, atom_index):>5s}"
+                for connected_atom in connected_atoms[i : i + 4]:
+                    line += f"{encode.hy36encode(5, connected_atom):>5s}"
+                str_out += line + "\n"
     str_out += "END\n"
     return str_out
 

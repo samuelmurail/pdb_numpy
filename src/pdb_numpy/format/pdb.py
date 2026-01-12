@@ -354,7 +354,7 @@ def get_pdb_string(pdb_coor):
         str_out += geom.cryst_convert_mmCIF(pdb_coor.data_mmCIF, format_out="pdb")
 
     for model_index, model in enumerate(pdb_coor.models):
-        str_out += f"MODEL    {model_index:4d}\n"
+        str_out += f"MODEL    {model_index + 1:4d}\n"
         out_chain = ""
         atom_num_gap = 0
 

@@ -225,3 +225,22 @@ def test_mmcif_symmetry_assembly(tmp_path):
 
     test = test.remove_overlap_chain()
     assert test.len == 348
+
+
+def test_parse_crystal_pack_unknown_z_pdb():
+    data_mmCIF = {
+        "_cell": {
+            "length_a": "1.000",
+            "length_b": "1.000",
+            "length_c": "1.000",
+            "angle_alpha": "90.00",
+            "angle_beta": "90.00",
+            "angle_gamma": "90.00",
+            "Z_PDB": "?",
+        },
+        "_symmetry": {"space_group_name_H-M": "'P 1'"},
+    }
+
+    crystal_pack = mmcif.parse_crystal_pack(data_mmCIF)
+
+    assert crystal_pack == "CRYST1    1.000    1.000    1.000  90.00  90.00  90.00 P 1         1\n"

@@ -252,10 +252,14 @@ def parse_crystal_pack(data_mmCIF):
     alpha = float(data_mmCIF["_cell"]["angle_alpha"])
     beta = float(data_mmCIF["_cell"]["angle_beta"])
     gamma = float(data_mmCIF["_cell"]["angle_gamma"])
+    z = 1
     if "Z_PDB" in data_mmCIF["_cell"]:
-        z = int(data_mmCIF["_cell"]["Z_PDB"])
-    else:
-        z = 1
+        z_value = data_mmCIF["_cell"]["Z_PDB"]
+        if z_value not in ("?", ".", None):
+            try:
+                z = int(float(z_value))
+            except (TypeError, ValueError):
+                z = 1
 
     if "_symmetry" in data_mmCIF:
         sGroup = data_mmCIF["_symmetry"]["space_group_name_H-M"].replace("'", "")

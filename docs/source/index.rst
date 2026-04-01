@@ -6,6 +6,12 @@
 Welcome to PDB-numpy's documentation!
 =====================================
 
+.. warning::
+
+   ``pdb_numpy`` is deprecated and no longer actively maintained. Please migrate to
+   `pdb_cpp <https://github.com/samuelmurail/pdb_cpp>`_, the successor library which
+   provides improved performance and additional features.
+
 .. image:: https://raw.githubusercontent.com/samuelmurail/pdb_numpy/master/docs/source/logo.jpeg
   :width: 300
   :align: center

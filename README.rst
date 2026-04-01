@@ -23,6 +23,11 @@
 About PDB-numpy
 ===============
 
+.. warning::
+
+   ``pdb_numpy`` is deprecated. Users are strongly encouraged to switch to
+   `pdb_cpp <https://github.com/samuelmurail/pdb_cpp>`_ for ongoing support and updates.
+
 .. image:: https://raw.githubusercontent.com/samuelmurail/pdb_numpy/master/docs/source/logo.jpeg
   :width: 200
   :align: center

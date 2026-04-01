@@ -15,6 +15,16 @@ __maintainer__ = "Samuel Murail"
 __email__ = "samuel.murail@u-paris.fr"
 __status__ = "Beta"
 
+# Deprecation warning
+import warnings
+warnings.warn(
+    "pdb_numpy is deprecated and will be removed in a future release. "
+    "Please use pdb_cpp instead: https://github.com/samuelmurail/pdb_cpp",
+
+    DeprecationWarning,
+    stacklevel=2,
+)
+
 # Logging
 logger = logging.getLogger(__name__)
 
